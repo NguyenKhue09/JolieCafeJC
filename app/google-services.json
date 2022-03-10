@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "819161778616",
+    "project_id": "joliecafejp",
+    "storage_bucket": "joliecafejp.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:819161778616:android:56de248a3d88d462b7a74d",
+        "android_client_info": {
+          "package_name": "com.khue.joliecafejp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "819161778616-rf5l3n0eun1v4vr34p6hqqo2kh1sbrk5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.khue.joliecafejp",
+            "certificate_hash": "f03c53e05b1e8a1000d2c9318eefa740b8ea4dc8"
+          }
+        },
+        {
+          "client_id": "819161778616-o1p3eai92m7ir256h6uvgteo09acd0oe.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDVcixKFza9pjuI8HBAG8ige-MGAt0e2zY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "819161778616-o1p3eai92m7ir256h6uvgteo09acd0oe.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

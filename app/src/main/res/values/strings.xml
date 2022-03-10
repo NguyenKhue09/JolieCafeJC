@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">JolieCafeJP</string>
+    <string name="facebook_app_id">531721864945920</string>
+    <string name="fb_login_protocol_scheme">fb531721864945920</string>
+</resources>
