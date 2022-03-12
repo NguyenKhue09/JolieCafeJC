@@ -50,6 +50,9 @@ android {
 
 dependencies {
 
+    // Icons
+    implementation "androidx.compose.material:material-icons-extended:$compose_version"
+
     // compose runtime
     implementation("androidx.compose.runtime:runtime:1.2.0-alpha05")
     implementation("androidx.compose.runtime:runtime-livedata:1.2.0-alpha05")
