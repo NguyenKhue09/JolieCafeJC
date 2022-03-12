@@ -8,6 +8,7 @@ import com.khue.joliecafejp.screens.CartScreen
 import com.khue.joliecafejp.screens.FavoriteScreen
 import com.khue.joliecafejp.screens.HomeScreen
 import com.khue.joliecafejp.screens.ProfileScreen
+import com.khue.joliecafejp.screens.components.BottomBarScreen
 
 @Composable
 fun BottomNavGraph(navController: NavHostController) {

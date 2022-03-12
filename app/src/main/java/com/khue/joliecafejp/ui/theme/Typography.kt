@@ -12,3 +12,7 @@ val ralewayMedium = Font(R.font.raleway_medium)
 val ralewayVariableFontWght = Font(R.font.raleway_variable_font_wght)
 
 val montserratFontFamily = FontFamily(montserratRegular)
+val festiveFontFamily = FontFamily(festiveRegular)
+val ralewayItalic = FontFamily(ralewayItalicVariableFontWght)
+val raleway = FontFamily(ralewayVariableFontWght)
+

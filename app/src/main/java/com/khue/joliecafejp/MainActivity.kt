@@ -18,6 +18,7 @@ import androidx.core.view.WindowCompat
 import com.khue.joliecafejp.ui.theme.JolieCafeJPTheme
 import com.facebook.FacebookSdk
 import com.facebook.appevents.AppEventsLogger
+import com.khue.joliecafejp.screens.LoginScreen
 import com.khue.joliecafejp.ui.theme.greyPrimary
 import com.khue.joliecafejp.ui.theme.montserratFontFamily
 
@@ -27,7 +28,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             JolieCafeJPTheme {
-                MainScreen()
+                //MainScreen()
+                LoginScreen()
             }
         }
     }

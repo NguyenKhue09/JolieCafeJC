@@ -1,10 +1,8 @@
-package com.khue.joliecafejp
+package com.khue.joliecafejp.screens.components
 
 
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.ui.graphics.vector.ImageVector
+import com.khue.joliecafejp.R
 
 sealed class BottomBarScreen(
     val route: String,

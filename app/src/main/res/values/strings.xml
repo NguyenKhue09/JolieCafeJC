@@ -3,4 +3,11 @@
     <string name="facebook_app_id">531721864945920</string>
     <string name="fb_login_protocol_scheme">fb531721864945920</string>
     <string name="title_activity_home">HomeActivity</string>
+    <string name="app_title">Jolie Cafe</string>
+    <string name="login_title">SIGN IN</string>
+    <string name="user_name_title">Username</string>
+    <string name="password_title">Password</string>
+    <string name="forgot_password_title">Forgot Password?</string>
+    <string name="sign_in_content">SIGN IN</string>
+    <string name="or">--- OR ---</string>
 </resources>
