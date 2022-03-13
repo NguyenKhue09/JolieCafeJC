@@ -2,11 +2,17 @@ package com.khue.joliecafejp.screens
 
 import android.widget.ImageButton
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.ScrollableState
 import androidx.compose.foundation.gestures.scrollable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -15,14 +21,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.ParagraphStyle
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.khue.joliecafejp.R
@@ -31,8 +36,11 @@ import com.khue.joliecafejp.ui.theme.*
 @Composable
 fun LoginScreen() {
 
-    val userNameTextState = remember { mutableStateOf(TextFieldValue()) }
-    val passwordTextState = remember { mutableStateOf(TextFieldValue()) }
+    // https://stackoverflow.com/questions/69107068/facebook-login-with-jetpack-compose
+
+    val userNameTextState = remember { mutableStateOf(TextFieldValue("")) }
+    val passwordTextState = remember { mutableStateOf(TextFieldValue("")) }
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Bottom,
@@ -82,8 +90,14 @@ fun LoginScreen() {
                 cursorColor = MaterialTheme.colors.textColor,
                 textColor = MaterialTheme.colors.textColor,
             ),
-            maxLines = 1
+            maxLines = 1,
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Text,
+                imeAction = ImeAction.Next
+            )
         )
+
 
         Text(
             modifier = Modifier
@@ -95,6 +109,7 @@ fun LoginScreen() {
             fontSize = 16.sp,
             textAlign = TextAlign.Left,
         )
+
         TextField(
             modifier = Modifier
                 .fillMaxWidth()
@@ -110,7 +125,12 @@ fun LoginScreen() {
                 cursorColor = MaterialTheme.colors.textColor,
                 textColor = MaterialTheme.colors.textColor,
             ),
-            maxLines = 1
+            maxLines = 1,
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Password,
+                imeAction = ImeAction.Next
+            )
         )
 
         Text(
@@ -124,9 +144,10 @@ fun LoginScreen() {
             textAlign = TextAlign.Left,
         )
 
+
         Button(
             modifier = Modifier.padding(top = 32.dp),
-            onClick = {  },
+            onClick = { },
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = MaterialTheme.colors.greyPrimaryVariant
             )
@@ -149,47 +170,35 @@ fun LoginScreen() {
             fontSize = 16.sp,
             textAlign = TextAlign.Left,
         )
-        
+
         Row(
             modifier = Modifier.padding(top = 32.dp),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Button(
-                onClick = {  },
-                contentPadding = PaddingValues(0.dp),
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = Color.Transparent
-                ),
-                elevation = ButtonDefaults.elevation(0.dp)
-            ) {
-                Image(
-                    modifier = Modifier
-                        .height(40.dp)
-                        .width(40.dp),
-                    painter = painterResource(id = R.drawable.fb),
-                    contentDescription = "Facebook"
-                )
-            }
-            Button(
-                onClick = {  },
-                contentPadding = PaddingValues(0.dp),
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = Color.Transparent
-                ),
-                elevation = ButtonDefaults.elevation(0.dp)
-            ) {
-                Image(
-                    modifier = Modifier
-                        .height(40.dp)
-                        .width(40.dp),
-                    painter = painterResource(id = R.drawable.gg),
-                    contentDescription = "Google"
-                )
-            }
+            Image(
+                modifier = Modifier
+                    .padding(end = 8.dp)
+                    .height(36.dp)
+                    .width(36.dp)
+                    .clickable {
+
+                    },
+                painter = painterResource(id = R.drawable.fb),
+                contentDescription = "Facebook"
+            )
+            Image(
+                modifier = Modifier
+                    .height(40.dp)
+                    .width(40.dp)
+                    .clickable {
+
+                    },
+                painter = painterResource(id = R.drawable.gg),
+                contentDescription = "Google"
+            )
 
         }
-
 
         Text(
             modifier = Modifier

@@ -10,4 +10,16 @@
     <string name="forgot_password_title">Forgot Password?</string>
     <string name="sign_in_content">SIGN IN</string>
     <string name="or">--- OR ---</string>
+    <string name="sign_up_title">SIGN UP</string>
+    <string name="email_title">Email</string>
+    <string name="confirm_password_title">Confirm password</string>
+    <string name="sign_up_content">SIGN UP</string>
+    <string name="username_placeholder">Enter your username</string>
+    <string name="email_placeholder">Enter your email</string>
+    <string name="password_placeholder">Enter your password</string>
+    <string name="hide_password">Hide password</string>
+    <string name="show_password">Show password</string>
+    <string name="confirm_password_placeholder">Enter your confirm password</string>
+    <string name="already_signed_up">Already signed up?</string>
+    <string name="sign_in_here">\u0020Sign in here</string>
 </resources>

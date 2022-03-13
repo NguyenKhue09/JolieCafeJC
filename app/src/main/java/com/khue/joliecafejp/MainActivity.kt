@@ -19,6 +19,7 @@ import com.khue.joliecafejp.ui.theme.JolieCafeJPTheme
 import com.facebook.FacebookSdk
 import com.facebook.appevents.AppEventsLogger
 import com.khue.joliecafejp.screens.LoginScreen
+import com.khue.joliecafejp.screens.SignUpScreen
 import com.khue.joliecafejp.ui.theme.greyPrimary
 import com.khue.joliecafejp.ui.theme.montserratFontFamily
 
@@ -29,7 +30,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             JolieCafeJPTheme {
                 //MainScreen()
-                LoginScreen()
+                //LoginScreen()
+                SignUpScreen()
             }
         }
     }
