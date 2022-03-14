@@ -1,18 +1,10 @@
-package com.khue.joliecafejp.screens
+package com.khue.joliecafejp.presentation.screens.login
 
-import android.widget.ImageButton
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.ScrollableState
-import androidx.compose.foundation.gestures.scrollable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -22,7 +14,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.*
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -30,11 +21,16 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import com.khue.joliecafejp.R
 import com.khue.joliecafejp.ui.theme.*
 
 @Composable
-fun LoginScreen() {
+fun LoginScreen(
+    navController: NavHostController,
+    loginViewModel: LoginViewModel = hiltViewModel()
+) {
 
     // https://stackoverflow.com/questions/69107068/facebook-login-with-jetpack-compose
 
@@ -187,16 +183,10 @@ fun LoginScreen() {
                 painter = painterResource(id = R.drawable.fb),
                 contentDescription = "Facebook"
             )
-            Image(
-                modifier = Modifier
-                    .height(40.dp)
-                    .width(40.dp)
-                    .clickable {
 
-                    },
-                painter = painterResource(id = R.drawable.gg),
-                contentDescription = "Google"
-            )
+            GoogleSignInButton {
+
+            }
 
         }
 
@@ -225,4 +215,21 @@ fun LoginScreen() {
             }
         )
     }
+}
+
+@Composable
+fun GoogleSignInButton(
+    onClicked: () -> Unit
+) {
+
+    IconButton(
+        modifier = Modifier
+            .height(40.dp)
+            .width(40.dp),
+        content = {
+            Icon(painter = painterResource(id = R.drawable.ic_google_icon),
+                contentDescription = "Google")
+        },
+        onClick = onClicked
+    )
 }

@@ -1,4 +1,4 @@
-package com.khue.joliecafejp.screens
+package com.khue.joliecafejp.presentation.screens.sign_up
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -25,11 +25,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import com.khue.joliecafejp.R
+import com.khue.joliecafejp.presentation.common.FaceOrGoogleLogin
+import com.khue.joliecafejp.presentation.common.TextCustom
+import com.khue.joliecafejp.presentation.common.TextFieldCustom
 import com.khue.joliecafejp.ui.theme.*
 
 @Composable
-fun SignUpScreen() {
+fun SignUpScreen(navController: NavHostController) {
 
     val scrollState = rememberScrollState()
 
@@ -213,90 +217,3 @@ fun SignUpScreen() {
 }
 
 
-@Composable
-fun TextCustom(content: String, modifier: Modifier, color: Color) {
-
-    Text(
-        modifier = modifier,
-        text = content,
-        fontFamily = raleway,
-        color = color,
-        fontSize = 16.sp,
-        textAlign = TextAlign.Left,
-    )
-}
-
-@Composable
-fun TextFieldCustom(
-    modifier: Modifier,
-    textFieldValue: MutableState<TextFieldValue>,
-    keyBoardType: KeyboardType,
-    trailingIcon: @Composable() (() -> Unit)?,
-    placeHolder: String,
-    visualTransformation: VisualTransformation,
-) {
-    TextField(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(start = 20.dp, end = 20.dp),
-        value = textFieldValue.value,
-        onValueChange = {
-            textFieldValue.value = it
-        },
-        colors = TextFieldDefaults.textFieldColors(
-            backgroundColor = Color.Transparent,
-            focusedIndicatorColor = MaterialTheme.colors.titleTextColor,
-            cursorColor = MaterialTheme.colors.textColor,
-            textColor = MaterialTheme.colors.textColor,
-        ),
-        maxLines = 1,
-        singleLine = true,
-        keyboardOptions = KeyboardOptions(
-            keyboardType = keyBoardType,
-            imeAction = ImeAction.Next
-        ),
-        trailingIcon = trailingIcon,
-        placeholder = {
-            Text(
-                text = placeHolder,
-                fontFamily = raleway,
-                color = MaterialTheme.colors.textColor,
-                fontSize = 13.sp,
-                textAlign = TextAlign.Left,
-            )
-        },
-        visualTransformation = visualTransformation
-    )
-}
-
-@Composable
-fun FaceOrGoogleLogin() {
-    Row(
-        modifier = Modifier.padding(top = 32.dp),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Image(
-            modifier = Modifier
-                .padding(end = 8.dp)
-                .height(36.dp)
-                .width(36.dp)
-                .clickable {
-
-                },
-            painter = painterResource(id = R.drawable.fb),
-            contentDescription = "Facebook"
-        )
-        Image(
-            modifier = Modifier
-                .height(40.dp)
-                .width(40.dp)
-                .clickable {
-
-                },
-            painter = painterResource(id = R.drawable.gg),
-            contentDescription = "Google"
-        )
-
-    }
-}

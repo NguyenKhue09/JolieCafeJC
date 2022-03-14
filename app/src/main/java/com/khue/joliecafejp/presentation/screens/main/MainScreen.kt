@@ -1,4 +1,4 @@
-package com.khue.joliecafejp
+package com.khue.joliecafejp.presentation.screens.main
 
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.height
@@ -16,7 +16,8 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.khue.joliecafejp.screens.components.BottomBarScreen
+import com.khue.joliecafejp.navigation.nav_screen.BottomBarScreen
+import com.khue.joliecafejp.navigation.nav_graph.SetupNavGraph
 import com.khue.joliecafejp.ui.theme.bottomNavCornerRadius
 import com.khue.joliecafejp.ui.theme.greyOpacity60Primary
 import com.khue.joliecafejp.ui.theme.greyPrimaryVariant
@@ -28,9 +29,9 @@ fun MainScreen() {
     val navController = rememberNavController()
 
     Scaffold(
-        bottomBar = { BottomBar(navController = navController)}
+        bottomBar = { BottomBar(navController = navController) }
     ) {
-        BottomNavGraph(navController = navController)
+        SetupNavGraph(navController = navController)
     }
 }
 

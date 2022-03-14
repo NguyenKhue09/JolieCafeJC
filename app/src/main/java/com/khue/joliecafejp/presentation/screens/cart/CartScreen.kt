@@ -1,4 +1,4 @@
-package com.khue.joliecafejp.screens
+package com.khue.joliecafejp.presentation.screens.cart
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -12,9 +12,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import com.khue.joliecafejp.ui.theme.greyPrimary
 
-
 @Composable
-fun HomeScreen() {
+fun CartScreen() {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -22,7 +21,7 @@ fun HomeScreen() {
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = "Home",
+            text = "Cart",
             fontSize = MaterialTheme.typography.h3.fontSize,
             fontWeight = FontWeight.Bold,
             color = Color.White

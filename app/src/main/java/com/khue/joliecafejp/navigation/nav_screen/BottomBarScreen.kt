@@ -1,6 +1,4 @@
-package com.khue.joliecafejp.screens.components
-
-
+package com.khue.joliecafejp.navigation.nav_screen
 
 import com.khue.joliecafejp.R
 

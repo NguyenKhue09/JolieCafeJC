@@ -1,4 +1,4 @@
-package com.khue.joliecafejp.screens
+package com.khue.joliecafejp.presentation.screens.favorite
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -13,7 +13,7 @@ import androidx.compose.ui.text.font.FontWeight
 import com.khue.joliecafejp.ui.theme.greyPrimary
 
 @Composable
-fun CartScreen() {
+fun FavoriteScreen() {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -21,7 +21,7 @@ fun CartScreen() {
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = "Cart",
+            text = "Favorite",
             fontSize = MaterialTheme.typography.h3.fontSize,
             fontWeight = FontWeight.Bold,
             color = Color.White
