@@ -1,16 +1,18 @@
 package com.khue.joliecafejp.presentation.screens.login
 
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.*
@@ -23,14 +25,69 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import com.google.android.gms.common.api.ApiException
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
 import com.khue.joliecafejp.R
+import com.khue.joliecafejp.firebase.firebase_authentication.google_signin.AuthResultContract
+import com.khue.joliecafejp.navigation.nav_graph.AUTHENTICATION_ROUTE
+import com.khue.joliecafejp.presentation.common.GoogleSignInButton
+import com.khue.joliecafejp.presentation.screens.main.MainScreen
 import com.khue.joliecafejp.ui.theme.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 
 @Composable
 fun LoginScreen(
     navController: NavHostController,
     loginViewModel: LoginViewModel = hiltViewModel()
 ) {
+    var mAuth: FirebaseAuth = FirebaseAuth.getInstance()
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    var text by remember {
+        mutableStateOf<String?>(null)
+    }
+
+
+    val signInRequestCode = 1
+    val authResultLauncher = 
+        rememberLauncherForActivityResult(contract = AuthResultContract()) { task ->
+
+            try {
+                val account = task?.getResult(ApiException::class.java)
+                if (account == null) {
+                    text = "Google sign in failed"
+                    Toast.makeText(context, text, Toast.LENGTH_LONG).show()
+                } else {
+                    val credentials = GoogleAuthProvider.getCredential(account.idToken, null)
+
+                    coroutineScope.launch {
+                        try {
+                            mAuth.signInWithCredential(credentials).await()
+                            withContext(Dispatchers.Main) {
+                                Toast.makeText(context, "Successfully", Toast.LENGTH_LONG).show()
+                            }
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                            withContext(Dispatchers.Main) {
+                                Toast.makeText(context, e.message, Toast.LENGTH_LONG).show()
+                            }
+                        }
+                        loginViewModel.signIn(email = account.email!!, displayName = account.displayName!!)
+                        withContext(Dispatchers.Main) {
+                            Toast.makeText(context, account.displayName, Toast.LENGTH_LONG).show()
+                        }
+                    }
+                }
+            } catch (e: ApiException) {
+                text = "Google sign in failed"
+                Toast.makeText(context, text, Toast.LENGTH_LONG).show()
+                println(e.message)
+            }
+        }
 
     // https://stackoverflow.com/questions/69107068/facebook-login-with-jetpack-compose
 
@@ -40,7 +97,7 @@ fun LoginScreen(
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Bottom,
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize().background(MaterialTheme.colors.greyPrimary),
     ) {
         Text(
             text = stringResource(R.string.app_title),
@@ -185,7 +242,7 @@ fun LoginScreen(
             )
 
             GoogleSignInButton {
-
+                authResultLauncher.launch(signInRequestCode)
             }
 
         }
@@ -217,19 +274,3 @@ fun LoginScreen(
     }
 }
 
-@Composable
-fun GoogleSignInButton(
-    onClicked: () -> Unit
-) {
-
-    IconButton(
-        modifier = Modifier
-            .height(40.dp)
-            .width(40.dp),
-        content = {
-            Icon(painter = painterResource(id = R.drawable.ic_google_icon),
-                contentDescription = "Google")
-        },
-        onClick = onClicked
-    )
-}

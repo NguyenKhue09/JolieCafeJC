@@ -1,10 +1,8 @@
 package com.khue.joliecafejp.presentation.screens.sign_up
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
+import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -15,7 +13,7 @@ import androidx.compose.runtime.saveable.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -25,18 +23,24 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
+import com.facebook.CallbackManager
+import com.facebook.FacebookSdk.setAdvertiserIDCollectionEnabled
+import com.facebook.FacebookSdk.setAutoLogAppEventsEnabled
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import com.khue.joliecafejp.R
+import com.khue.joliecafejp.firebase.firebase_authentication.face_book_signin.FirebaseFacebookLogin
 import com.khue.joliecafejp.presentation.common.FaceOrGoogleLogin
 import com.khue.joliecafejp.presentation.common.TextCustom
 import com.khue.joliecafejp.presentation.common.TextFieldCustom
 import com.khue.joliecafejp.ui.theme.*
 
 @Composable
-fun SignUpScreen(navController: NavHostController) {
+fun SignUpScreen() {
 
     val scrollState = rememberScrollState()
-
+    val context = LocalContext.current
     val userNameTextState = remember { mutableStateOf(TextFieldValue("")) }
     val passwordTextState = remember { mutableStateOf(TextFieldValue("")) }
     val emailTextState = remember { mutableStateOf(TextFieldValue("")) }
@@ -44,6 +48,13 @@ fun SignUpScreen(navController: NavHostController) {
 
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
     var confirmPasswordVisible by rememberSaveable { mutableStateOf(false) }
+
+    // setup facebook login
+    setAutoLogAppEventsEnabled(true)
+    setAdvertiserIDCollectionEnabled(true)
+    val facebookLogin = FirebaseFacebookLogin()
+    val callbackManager: CallbackManager = CallbackManager.Factory.create()
+    val auth: FirebaseAuth = Firebase.auth
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -187,7 +198,9 @@ fun SignUpScreen(navController: NavHostController) {
             color = MaterialTheme.colors.textColor,
         )
 
-        FaceOrGoogleLogin()
+        FaceOrGoogleLogin() {
+            facebookLogin.facebookLogin(context, callbackManager, auth)
+        }
 
         Text(
             modifier = Modifier

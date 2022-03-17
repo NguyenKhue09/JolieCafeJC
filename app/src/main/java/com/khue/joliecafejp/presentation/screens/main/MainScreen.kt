@@ -4,20 +4,22 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.khue.joliecafejp.navigation.nav_graph.AUTHENTICATION_ROUTE
 import com.khue.joliecafejp.navigation.nav_screen.BottomBarScreen
 import com.khue.joliecafejp.navigation.nav_graph.SetupNavGraph
+import com.khue.joliecafejp.presentation.screens.login.LoginViewModel
 import com.khue.joliecafejp.ui.theme.bottomNavCornerRadius
 import com.khue.joliecafejp.ui.theme.greyOpacity60Primary
 import com.khue.joliecafejp.ui.theme.greyPrimaryVariant
@@ -25,7 +27,9 @@ import com.khue.joliecafejp.ui.theme.textColor
 
 
 @Composable
-fun MainScreen() {
+fun MainScreen(
+    loginViewModel: LoginViewModel = hiltViewModel()
+) {
     val navController = rememberNavController()
 
     Scaffold(
