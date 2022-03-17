@@ -11,7 +11,7 @@ import androidx.compose.ui.unit.dp
 import com.khue.joliecafejp.R
 
 @Composable
-fun FaceOrGoogleLogin(faceAction: () -> Unit) {
+fun FaceOrGoogleLogin(faceAction: () -> Unit, googleAction: () -> Unit) {
     Row(
         modifier = Modifier.padding(top = 32.dp),
         horizontalArrangement = Arrangement.Center,
@@ -21,7 +21,7 @@ fun FaceOrGoogleLogin(faceAction: () -> Unit) {
             faceAction()
         }
         GoogleSignInButton {
-
+            googleAction()
         }
 
     }

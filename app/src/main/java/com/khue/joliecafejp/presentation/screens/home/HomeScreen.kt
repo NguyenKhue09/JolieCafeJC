@@ -28,11 +28,11 @@ fun HomeScreen(
         loginViewModel.user
     }.collectAsState()
 
-    LaunchedEffect(user){
-        user.let {
-            navController.navigate(AUTHENTICATION_ROUTE)
-        }
-    }
+//    LaunchedEffect(user){
+//        user.let {
+//            navController.navigate(AUTHENTICATION_ROUTE)
+//        }
+//    }
 
     Box(
         modifier = Modifier

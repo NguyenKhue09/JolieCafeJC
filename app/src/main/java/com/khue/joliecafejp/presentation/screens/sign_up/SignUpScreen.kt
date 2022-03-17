@@ -1,5 +1,7 @@
 package com.khue.joliecafejp.presentation.screens.sign_up
 
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -23,21 +25,34 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import com.facebook.CallbackManager
 import com.facebook.FacebookSdk.setAdvertiserIDCollectionEnabled
 import com.facebook.FacebookSdk.setAutoLogAppEventsEnabled
+import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.khue.joliecafejp.R
 import com.khue.joliecafejp.firebase.firebase_authentication.face_book_signin.FirebaseFacebookLogin
+import com.khue.joliecafejp.firebase.firebase_authentication.google_signin.AuthResultContract
 import com.khue.joliecafejp.presentation.common.FaceOrGoogleLogin
 import com.khue.joliecafejp.presentation.common.TextCustom
 import com.khue.joliecafejp.presentation.common.TextFieldCustom
+import com.khue.joliecafejp.presentation.screens.login.LoginViewModel
 import com.khue.joliecafejp.ui.theme.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 
 @Composable
-fun SignUpScreen() {
+fun SignUpScreen(
+    navController: NavHostController,
+    loginViewModel: LoginViewModel = hiltViewModel()
+) {
 
     val scrollState = rememberScrollState()
     val context = LocalContext.current
@@ -55,6 +70,52 @@ fun SignUpScreen() {
     val facebookLogin = FirebaseFacebookLogin()
     val callbackManager: CallbackManager = CallbackManager.Factory.create()
     val auth: FirebaseAuth = Firebase.auth
+
+    // setup google login
+    val coroutineScope = rememberCoroutineScope()
+    var text by remember {
+        mutableStateOf<String?>(null)
+    }
+
+    val signInRequestCode = 1
+    val authResultLauncher =
+        rememberLauncherForActivityResult(contract = AuthResultContract()) { task ->
+
+            try {
+                val account = task?.getResult(ApiException::class.java)
+                if (account == null) {
+                    text = "Google sign in failed"
+                    Toast.makeText(context, text, Toast.LENGTH_LONG).show()
+                } else {
+                    val credentials = GoogleAuthProvider.getCredential(account.idToken, null)
+
+                    coroutineScope.launch {
+                        try {
+                            auth.signInWithCredential(credentials).await()
+                            withContext(Dispatchers.Main) {
+                                Toast.makeText(context, "Successfully", Toast.LENGTH_LONG).show()
+                            }
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                            withContext(Dispatchers.Main) {
+                                Toast.makeText(context, e.message, Toast.LENGTH_LONG).show()
+                            }
+                        }
+                        loginViewModel.signIn(
+                            email = account.email!!,
+                            displayName = account.displayName!!
+                        )
+                        withContext(Dispatchers.Main) {
+                            Toast.makeText(context, account.displayName, Toast.LENGTH_LONG).show()
+                        }
+                    }
+                }
+            } catch (e: ApiException) {
+                text = "Google sign in failed"
+                Toast.makeText(context, text, Toast.LENGTH_LONG).show()
+                println(e.message)
+            }
+        }
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -198,9 +259,14 @@ fun SignUpScreen() {
             color = MaterialTheme.colors.textColor,
         )
 
-        FaceOrGoogleLogin() {
-            facebookLogin.facebookLogin(context, callbackManager, auth)
-        }
+        FaceOrGoogleLogin(
+            googleAction = {
+                authResultLauncher.launch(signInRequestCode)
+            },
+            faceAction = {
+                facebookLogin.facebookLogin(context, callbackManager, auth)
+            }
+        )
 
         Text(
             modifier = Modifier

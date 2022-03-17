@@ -25,12 +25,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import com.facebook.CallbackManager
+import com.facebook.FacebookSdk
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import com.khue.joliecafejp.R
+import com.khue.joliecafejp.firebase.firebase_authentication.face_book_signin.FirebaseFacebookLogin
 import com.khue.joliecafejp.firebase.firebase_authentication.google_signin.AuthResultContract
 import com.khue.joliecafejp.navigation.nav_graph.AUTHENTICATION_ROUTE
+import com.khue.joliecafejp.presentation.common.FaceOrGoogleLogin
 import com.khue.joliecafejp.presentation.common.GoogleSignInButton
 import com.khue.joliecafejp.presentation.screens.main.MainScreen
 import com.khue.joliecafejp.ui.theme.*
@@ -44,16 +50,22 @@ fun LoginScreen(
     navController: NavHostController,
     loginViewModel: LoginViewModel = hiltViewModel()
 ) {
-    var mAuth: FirebaseAuth = FirebaseAuth.getInstance()
+    val mAuth: FirebaseAuth = FirebaseAuth.getInstance()
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     var text by remember {
         mutableStateOf<String?>(null)
     }
 
+    // setup facebook login
+    FacebookSdk.setAutoLogAppEventsEnabled(true)
+    FacebookSdk.setAdvertiserIDCollectionEnabled(true)
+    val facebookLogin = FirebaseFacebookLogin()
+    val callbackManager: CallbackManager = CallbackManager.Factory.create()
+
 
     val signInRequestCode = 1
-    val authResultLauncher = 
+    val authResultLauncher =
         rememberLauncherForActivityResult(contract = AuthResultContract()) { task ->
 
             try {
@@ -76,7 +88,10 @@ fun LoginScreen(
                                 Toast.makeText(context, e.message, Toast.LENGTH_LONG).show()
                             }
                         }
-                        loginViewModel.signIn(email = account.email!!, displayName = account.displayName!!)
+                        loginViewModel.signIn(
+                            email = account.email!!,
+                            displayName = account.displayName!!
+                        )
                         withContext(Dispatchers.Main) {
                             Toast.makeText(context, account.displayName, Toast.LENGTH_LONG).show()
                         }
@@ -97,7 +112,9 @@ fun LoginScreen(
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Bottom,
-        modifier = Modifier.fillMaxSize().background(MaterialTheme.colors.greyPrimary),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colors.greyPrimary),
     ) {
         Text(
             text = stringResource(R.string.app_title),
@@ -224,28 +241,15 @@ fun LoginScreen(
             textAlign = TextAlign.Left,
         )
 
-        Row(
-            modifier = Modifier.padding(top = 32.dp),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Image(
-                modifier = Modifier
-                    .padding(end = 8.dp)
-                    .height(36.dp)
-                    .width(36.dp)
-                    .clickable {
 
-                    },
-                painter = painterResource(id = R.drawable.fb),
-                contentDescription = "Facebook"
-            )
-
-            GoogleSignInButton {
+        FaceOrGoogleLogin(
+            googleAction = {
                 authResultLauncher.launch(signInRequestCode)
+            },
+            faceAction = {
+                facebookLogin.facebookLogin(context, callbackManager, mAuth)
             }
-
-        }
+        )
 
         Text(
             modifier = Modifier

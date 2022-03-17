@@ -15,6 +15,7 @@ import com.google.firebase.auth.FirebaseAuth
 
 
 class FirebaseFacebookLogin {
+
     fun facebookLogin(context: Context, callbackManager: CallbackManager, auth: FirebaseAuth) {
         LoginManager.getInstance().logInWithReadPermissions(
             context as ActivityResultRegistryOwner,

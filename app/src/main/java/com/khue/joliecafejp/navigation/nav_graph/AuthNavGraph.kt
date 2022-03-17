@@ -19,12 +19,12 @@ fun NavGraphBuilder.authNavGraph(
         composable(
             route = AuthScreen.Login.route
         ) {
-            LoginScreen(navController =  navController)
+            LoginScreen(navController = navController)
         }
         composable(
             route = AuthScreen.SignUp.route
         ) {
-            SignUpScreen()
+            SignUpScreen(navController = navController)
         }
     }
 }
