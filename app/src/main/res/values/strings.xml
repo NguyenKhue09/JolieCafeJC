@@ -7,7 +7,7 @@
     <string name="login_title" translatable="false">SIGN IN</string>
     <string name="user_name_title">Username</string>
     <string name="password_title">Password</string>
-    <string name="forgot_password_title">Forgot Password?</string>
+    <string name="forgot_password">Forgot Password?</string>
     <string name="sign_in_content">SIGN IN</string>
     <string name="or">--- OR ---</string>
     <string name="sign_up_title">SIGN UP</string>
@@ -22,4 +22,11 @@
     <string name="confirm_password_placeholder">Enter your confirm password</string>
     <string name="already_signed_up">Already signed up?</string>
     <string name="sign_in_here">\u0020Sign in here</string>
+    <string name="not_signed_up_yet">Not signed up yet?</string>
+    <string name="sign_up_here">\u0020Sign up here</string>
+    <string name="error">error</string>
+    <string name="forgot_password_title">FORGOT YOUR PASSWORD?</string>
+    <string name="forgot_password_sub_title">No worries! Enter your email address and we\'ll help you reset your password.</string>
+    <string name="cancel">CANCEL</string>
+    <string name="confirm">CONFIRM</string>
 </resources>

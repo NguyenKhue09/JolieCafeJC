@@ -1,25 +1,26 @@
 package com.khue.joliecafejp.presentation.screens.login
 
+import android.util.Patterns
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.input.*
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -30,15 +31,14 @@ import com.facebook.FacebookSdk
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
 import com.khue.joliecafejp.R
 import com.khue.joliecafejp.firebase.firebase_authentication.face_book_signin.FirebaseFacebookLogin
+import com.khue.joliecafejp.firebase.firebase_authentication.gmail_password_authentication.FirebaseGmailPasswordAuth
 import com.khue.joliecafejp.firebase.firebase_authentication.google_signin.AuthResultContract
-import com.khue.joliecafejp.navigation.nav_graph.AUTHENTICATION_ROUTE
+import com.khue.joliecafejp.navigation.nav_screen.AuthScreen
 import com.khue.joliecafejp.presentation.common.FaceOrGoogleLogin
-import com.khue.joliecafejp.presentation.common.GoogleSignInButton
-import com.khue.joliecafejp.presentation.screens.main.MainScreen
+import com.khue.joliecafejp.presentation.common.TextCustom
+import com.khue.joliecafejp.presentation.common.TextFieldCustom
 import com.khue.joliecafejp.ui.theme.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -51,6 +51,7 @@ fun LoginScreen(
     loginViewModel: LoginViewModel = hiltViewModel()
 ) {
     val mAuth: FirebaseAuth = FirebaseAuth.getInstance()
+    val scrollState = rememberScrollState()
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     var text by remember {
@@ -108,12 +109,21 @@ fun LoginScreen(
 
     val userNameTextState = remember { mutableStateOf(TextFieldValue("")) }
     val passwordTextState = remember { mutableStateOf(TextFieldValue("")) }
+    var userNameError by remember {
+        mutableStateOf("")
+    }
+    var passwordError by remember {
+        mutableStateOf("")
+    }
+
+    var passwordVisible by rememberSaveable { mutableStateOf(false) }
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Bottom,
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(scrollState)
             .background(MaterialTheme.colors.greyPrimary),
     ) {
         Text(
@@ -134,80 +144,82 @@ fun LoginScreen(
             fontWeight = FontWeight.Bold
         )
 
-        Text(
+        TextCustom(
+            content = stringResource(R.string.user_name_title),
             modifier = Modifier
-                .padding(top = 32.dp, start = 20.dp)
+                .padding(top = 28.dp, start = 20.dp)
                 .align(alignment = Alignment.Start),
-            text = stringResource(R.string.user_name_title),
-            fontFamily = raleway,
-            color = MaterialTheme.colors.textColor,
-            fontSize = 16.sp,
-            textAlign = TextAlign.Left,
+            color = MaterialTheme.colors.textColor2,
         )
 
-        TextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 20.dp, end = 20.dp)
-                .align(alignment = Alignment.Start),
-            value = userNameTextState.value,
-            onValueChange = {
-                userNameTextState.value = it
+        TextFieldCustom(
+            modifier = Modifier.align(alignment = Alignment.Start),
+            textFieldValue = userNameTextState,
+            keyBoardType = KeyboardType.Text,
+            trailingIcon = {
+                if (userNameError.isNotEmpty()) Icon(
+                    Icons.Filled.Error,
+                    stringResource(R.string.error),
+                    tint = MaterialTheme.colors.error
+                )
             },
-            colors = TextFieldDefaults.textFieldColors(
-                backgroundColor = Color.Transparent,
-                focusedIndicatorColor = MaterialTheme.colors.titleTextColor,
-                cursorColor = MaterialTheme.colors.textColor,
-                textColor = MaterialTheme.colors.textColor,
-            ),
-            maxLines = 1,
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Text,
-                imeAction = ImeAction.Next
-            )
+            placeHolder = stringResource(R.string.username_placeholder),
+            visualTransformation = VisualTransformation.None,
+            error = userNameError,
         )
 
 
-        Text(
+        TextCustom(
+            content = stringResource(R.string.password_title),
             modifier = Modifier
-                .padding(top = 32.dp, start = 24.dp)
+                .padding(top = 20.dp, start = 20.dp)
                 .align(alignment = Alignment.Start),
-            text = stringResource(R.string.password_title),
-            fontFamily = raleway,
-            color = MaterialTheme.colors.textColor,
-            fontSize = 16.sp,
-            textAlign = TextAlign.Left,
+            color = MaterialTheme.colors.textColor2,
         )
 
-        TextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 20.dp, end = 20.dp)
-                .align(alignment = Alignment.Start),
-            value = passwordTextState.value,
-            onValueChange = {
-                passwordTextState.value = it
+        TextFieldCustom(
+            modifier = Modifier.align(alignment = Alignment.Start),
+            textFieldValue = passwordTextState,
+            keyBoardType = KeyboardType.Password,
+            trailingIcon = {
+                if (passwordError.isEmpty()) {
+                    val image = if (passwordVisible)
+                        Icons.Filled.Visibility
+                    else Icons.Filled.VisibilityOff
+
+                    val description =
+                        if (passwordVisible) stringResource(R.string.hide_password) else stringResource(
+                            R.string.show_password
+                        )
+
+                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                        Icon(imageVector = image, description)
+                    }
+                } else {
+                    Icon(
+                        Icons.Filled.Error,
+                        stringResource(R.string.error),
+                        tint = MaterialTheme.colors.error
+                    )
+                }
+
             },
-            colors = TextFieldDefaults.textFieldColors(
-                backgroundColor = Color.Transparent,
-                focusedIndicatorColor = MaterialTheme.colors.titleTextColor,
-                cursorColor = MaterialTheme.colors.textColor,
-                textColor = MaterialTheme.colors.textColor,
-            ),
-            maxLines = 1,
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Password,
-                imeAction = ImeAction.Next
-            )
+            placeHolder = stringResource(R.string.password_placeholder),
+            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            error = passwordError
         )
 
         Text(
             modifier = Modifier
                 .padding(top = 12.dp, start = 20.dp)
-                .align(alignment = Alignment.Start),
-            text = stringResource(R.string.forgot_password_title),
+                .align(alignment = Alignment.Start)
+                .clickable(
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() }
+                ) {
+                     navController.navigate(AuthScreen.ForgotPassword.route)
+                },
+            text = stringResource(R.string.forgot_password),
             fontFamily = raleway,
             color = MaterialTheme.colors.titleTextColor,
             fontSize = 16.sp,
@@ -217,7 +229,23 @@ fun LoginScreen(
 
         Button(
             modifier = Modifier.padding(top = 32.dp),
-            onClick = { },
+            onClick = {
+                validateUserName(userNameTextState.value.text.trim()) {
+                    userNameError = it
+                }
+                validatePassword(passwordTextState.value.text.trim()) {
+                    passwordError = it
+                }
+
+                if (userNameError.isEmpty() && passwordError.isEmpty()) {
+                    FirebaseGmailPasswordAuth().loginUser(
+                        email = userNameTextState.value.text.trim(),
+                        password = passwordTextState.value.text.trim(),
+                        context = context,
+                        navController = navController
+                    )
+                }
+            },
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = MaterialTheme.colors.greyPrimaryVariant
             )
@@ -226,6 +254,7 @@ fun LoginScreen(
                 text = stringResource(R.string.sign_in_content),
                 fontFamily = raleway,
                 color = Color.White,
+                fontWeight = FontWeight.Bold,
                 fontSize = 16.sp,
                 textAlign = TextAlign.Center,
             )
@@ -253,7 +282,13 @@ fun LoginScreen(
 
         Text(
             modifier = Modifier
-                .padding(bottom = 20.dp, top = 32.dp),
+                .padding(bottom = 20.dp, top = 32.dp)
+                .clickable(
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() }
+                ) {
+                    navController.navigate(AuthScreen.SignUp.route)
+                },
             text = buildAnnotatedString {
                 withStyle(
                     style = SpanStyle(
@@ -262,7 +297,7 @@ fun LoginScreen(
                         fontFamily = raleway,
                     )
                 ) {
-                    append("Not signed up yet?")
+                    append(stringResource(R.string.not_signed_up_yet))
                 }
                 withStyle(
                     style = SpanStyle(
@@ -271,10 +306,26 @@ fun LoginScreen(
                         fontFamily = raleway,
                     )
                 ) {
-                    append(" Sign up here")
+                    append(stringResource(R.string.sign_up_here))
                 }
             }
         )
+    }
+}
+
+fun validateUserName(userName: String, onError: (String) -> Unit) {
+    when {
+        userName.trim().isEmpty() -> onError("Username is empty")
+        !Patterns.EMAIL_ADDRESS.matcher(userName).matches() -> onError("Your username wrong format")
+        else -> onError("")
+    }
+}
+
+fun validatePassword(password: String, onError: (String) -> Unit) {
+    when {
+        password.trim().isEmpty() -> onError("Password is empty")
+        password.length < 6 -> onError("Password less then 6 character")
+        else -> onError("")
     }
 }
 

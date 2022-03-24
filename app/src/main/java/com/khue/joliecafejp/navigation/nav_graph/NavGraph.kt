@@ -14,7 +14,7 @@ fun SetupNavGraph(
 ) {
     NavHost(
         navController = navController,
-        startDestination = BOTTOM_ROUTE,
+        startDestination = AUTHENTICATION_ROUTE,
         route = ROOT_GRAPH_ROUTE
     ) {
         bottomNavGraph(navController = navController)

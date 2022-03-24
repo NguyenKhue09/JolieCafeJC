@@ -1,5 +1,6 @@
 package com.khue.joliecafejp.presentation.common
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
@@ -30,37 +31,57 @@ fun TextFieldCustom(
     trailingIcon: @Composable() (() -> Unit)?,
     placeHolder: String,
     visualTransformation: VisualTransformation,
+    error: String = "",
+    isError: Boolean = error.isNotEmpty(),
 ) {
-    TextField(
-        modifier = modifier
+    Column(
+        modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 20.dp, end = 20.dp),
-        value = textFieldValue.value,
-        onValueChange = {
-            textFieldValue.value = it
-        },
-        colors = TextFieldDefaults.textFieldColors(
-            backgroundColor = Color.Transparent,
-            focusedIndicatorColor = MaterialTheme.colors.titleTextColor,
-            cursorColor = MaterialTheme.colors.textColor,
-            textColor = MaterialTheme.colors.textColor,
-        ),
-        maxLines = 1,
-        singleLine = true,
-        keyboardOptions = KeyboardOptions(
-            keyboardType = keyBoardType,
-            imeAction = ImeAction.Next
-        ),
-        trailingIcon = trailingIcon,
-        placeholder = {
+            .padding(start = 20.dp, end = 20.dp)
+    ) {
+        TextField(
+            modifier = modifier
+                .fillMaxWidth(),
+            value = textFieldValue.value,
+            onValueChange = {
+                textFieldValue.value = it
+            },
+            isError = isError,
+            colors = TextFieldDefaults.textFieldColors(
+                backgroundColor = Color.Transparent,
+                focusedIndicatorColor = MaterialTheme.colors.titleTextColor,
+                unfocusedIndicatorColor = Color.White,
+                cursorColor = MaterialTheme.colors.textColor,
+                textColor = MaterialTheme.colors.textColor,
+            ),
+            maxLines = 1,
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(
+                keyboardType = keyBoardType,
+                imeAction = ImeAction.Next
+            ),
+            trailingIcon = trailingIcon ,
+            placeholder = {
+                Text(
+                    text = placeHolder,
+                    fontFamily = raleway,
+                    color = MaterialTheme.colors.textColor,
+                    fontSize = 13.sp,
+                    textAlign = TextAlign.Left,
+                )
+            },
+            visualTransformation = visualTransformation
+        )
+
+        if (error.isNotEmpty()) {
             Text(
-                text = placeHolder,
-                fontFamily = raleway,
-                color = MaterialTheme.colors.textColor,
-                fontSize = 13.sp,
-                textAlign = TextAlign.Left,
+                text = error,
+                color = MaterialTheme.colors.error,
+                style = MaterialTheme.typography.caption,
+                modifier = Modifier.padding(start = 16.dp, top = 0.dp)
             )
-        },
-        visualTransformation = visualTransformation
-    )
+        }
+
+    }
+
 }

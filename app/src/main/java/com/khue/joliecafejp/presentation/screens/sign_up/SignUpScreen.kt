@@ -1,13 +1,17 @@
 package com.khue.joliecafejp.presentation.screens.sign_up
 
+import android.util.Patterns
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.ActivityResultRegistryOwner
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.runtime.*
@@ -37,6 +41,7 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.khue.joliecafejp.R
 import com.khue.joliecafejp.firebase.firebase_authentication.face_book_signin.FirebaseFacebookLogin
+import com.khue.joliecafejp.firebase.firebase_authentication.gmail_password_authentication.FirebaseGmailPasswordAuth
 import com.khue.joliecafejp.firebase.firebase_authentication.google_signin.AuthResultContract
 import com.khue.joliecafejp.presentation.common.FaceOrGoogleLogin
 import com.khue.joliecafejp.presentation.common.TextCustom
@@ -117,12 +122,26 @@ fun SignUpScreen(
             }
         }
 
+    var userNameError by remember {
+        mutableStateOf("")
+    }
+    var emailError by remember {
+        mutableStateOf("")
+    }
+    var passwordError by remember {
+        mutableStateOf("")
+    }
+    var confirmPasswordError by remember {
+        mutableStateOf("")
+    }
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Bottom,
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(scrollState)
+            .background(MaterialTheme.colors.greyPrimary)
     ) {
         Text(
             text = stringResource(R.string.app_title),
@@ -154,9 +173,18 @@ fun SignUpScreen(
             modifier = Modifier.align(alignment = Alignment.Start),
             textFieldValue = userNameTextState,
             keyBoardType = KeyboardType.Text,
-            trailingIcon = null,
+            trailingIcon = {
+                if (userNameError.isNotEmpty()) {
+                    Icon(
+                        Icons.Filled.Error,
+                        stringResource(R.string.error),
+                        tint = MaterialTheme.colors.error
+                    )
+                }
+            },
             placeHolder = stringResource(R.string.username_placeholder),
-            visualTransformation = VisualTransformation.None
+            visualTransformation = VisualTransformation.None,
+            error = userNameError
         )
 
         TextCustom(
@@ -171,9 +199,18 @@ fun SignUpScreen(
             modifier = Modifier.align(alignment = Alignment.Start),
             textFieldValue = emailTextState,
             keyBoardType = KeyboardType.Email,
-            trailingIcon = null,
+            trailingIcon = {
+                if (emailError.isNotEmpty()) {
+                    Icon(
+                        Icons.Filled.Error,
+                        stringResource(R.string.error),
+                        tint = MaterialTheme.colors.error
+                    )
+                }
+            },
             placeHolder = stringResource(R.string.email_placeholder),
-            visualTransformation = VisualTransformation.None
+            visualTransformation = VisualTransformation.None,
+            error = emailError
         )
 
         TextCustom(
@@ -189,21 +226,30 @@ fun SignUpScreen(
             textFieldValue = passwordTextState,
             keyBoardType = KeyboardType.Password,
             trailingIcon = {
-                val image = if (passwordVisible)
-                    Icons.Filled.Visibility
-                else Icons.Filled.VisibilityOff
+                if (passwordError.isEmpty()) {
+                    val image = if (passwordVisible)
+                        Icons.Filled.Visibility
+                    else Icons.Filled.VisibilityOff
 
-                val description =
-                    if (passwordVisible) stringResource(R.string.hide_password) else stringResource(
-                        R.string.show_password
+                    val description =
+                        if (passwordVisible) stringResource(R.string.hide_password) else stringResource(
+                            R.string.show_password
+                        )
+
+                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                        Icon(imageVector = image, description)
+                    }
+                } else {
+                    Icon(
+                        Icons.Filled.Error,
+                        stringResource(R.string.error),
+                        tint = MaterialTheme.colors.error
                     )
-
-                IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                    Icon(imageVector = image, description)
                 }
             },
             placeHolder = stringResource(R.string.password_placeholder),
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            error = passwordError
         )
 
         TextCustom(
@@ -219,26 +265,61 @@ fun SignUpScreen(
             textFieldValue = confirmPasswordTextState,
             keyBoardType = KeyboardType.Password,
             trailingIcon = {
-                val image = if (confirmPasswordVisible)
-                    Icons.Filled.Visibility
-                else Icons.Filled.VisibilityOff
+                if (confirmPasswordError.isEmpty()) {
+                    val image = if (confirmPasswordVisible)
+                        Icons.Filled.Visibility
+                    else Icons.Filled.VisibilityOff
 
-                val description =
-                    if (confirmPasswordVisible) stringResource(R.string.hide_password) else stringResource(
-                        R.string.show_password
+                    val description =
+                        if (confirmPasswordVisible) stringResource(R.string.hide_password) else stringResource(
+                            R.string.show_password
+                        )
+
+                    IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
+                        Icon(imageVector = image, description)
+                    }
+                } else {
+                    Icon(
+                        Icons.Filled.Error,
+                        stringResource(R.string.error),
+                        tint = MaterialTheme.colors.error
                     )
-
-                IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
-                    Icon(imageVector = image, description)
                 }
             },
             placeHolder = stringResource(R.string.confirm_password_placeholder),
             visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            error = confirmPasswordError
         )
 
         Button(
             modifier = Modifier.padding(top = 32.dp),
-            onClick = { },
+            onClick = {
+                validateUserName(username = userNameTextState.value.text.trim()) {
+                    userNameError = it
+                }
+                validateEmail(email = emailTextState.value.text.trim()) {
+                    emailError = it
+                }
+                validatePassword(password = passwordTextState.value.text.trim()) {
+                    passwordError = it
+                }
+                validateConfirmPassword(
+                    password = passwordTextState.value.text.trim(),
+                    confirmPassword = confirmPasswordTextState.value.text.trim()
+                ) {
+                    confirmPasswordError = it
+                }
+                if (userNameError.isEmpty() && emailError.isEmpty()
+                    && passwordError.isEmpty() && confirmPasswordError.isEmpty()
+                ) {
+                    FirebaseGmailPasswordAuth().registerUser(
+                        email = emailTextState.value.text.trim(),
+                        password = passwordTextState.value.text.trim(),
+                        context = context,
+                        navController = navController
+                    )
+                }
+            },
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = MaterialTheme.colors.greyPrimaryVariant
             )
@@ -247,6 +328,7 @@ fun SignUpScreen(
                 text = stringResource(R.string.sign_up_content),
                 fontFamily = raleway,
                 color = Color.White,
+                fontWeight = FontWeight.Bold,
                 fontSize = 16.sp,
                 textAlign = TextAlign.Center,
             )
@@ -270,7 +352,13 @@ fun SignUpScreen(
 
         Text(
             modifier = Modifier
-                .padding(bottom = 20.dp, top = 32.dp),
+                .padding(bottom = 20.dp, top = 32.dp)
+                .clickable(
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() }
+                ) {
+                    navController.popBackStack()
+                },
             text = buildAnnotatedString {
                 withStyle(
                     style = SpanStyle(
@@ -292,6 +380,38 @@ fun SignUpScreen(
                 }
             }
         )
+    }
+}
+
+fun validateUserName(username: String, onError: (String) -> Unit) {
+    when {
+        username.trim().isEmpty() -> onError("Username is empty")
+        else -> onError("")
+    }
+}
+
+fun validateEmail(email: String, onError: (String) -> Unit) {
+    when {
+        email.trim().isEmpty() -> onError("Email is empty")
+        !Patterns.EMAIL_ADDRESS.matcher(email).matches() -> onError("Your email wrong format")
+        else -> onError("")
+    }
+}
+
+fun validatePassword(password: String, onError: (String) -> Unit) {
+    when {
+        password.trim().isEmpty() -> onError("Password is empty")
+        password.length < 6 -> onError("Password less then 6 character")
+        else -> onError("")
+    }
+}
+
+fun validateConfirmPassword(password: String, confirmPassword: String, onError: (String) -> Unit) {
+    when {
+        confirmPassword.trim().isEmpty() -> onError("Confirm password is empty")
+        confirmPassword.length < 6 -> onError("Confirm password less then 6 character")
+        password != confirmPassword -> onError("Your confirm password not match your password")
+        else -> onError("")
     }
 }
 

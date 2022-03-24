@@ -13,4 +13,8 @@ sealed class AuthScreen(
         route = "signup",
         title = "Sign Up",
     )
+    object ForgotPassword: AuthScreen(
+        title = "Forgot Password",
+        route = "forgotPassword"
+    )
 }
