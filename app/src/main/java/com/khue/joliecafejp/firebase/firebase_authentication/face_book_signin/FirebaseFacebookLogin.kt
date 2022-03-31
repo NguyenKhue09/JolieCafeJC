@@ -12,11 +12,12 @@ import com.facebook.login.LoginManager
 import com.facebook.login.LoginResult
 import com.google.firebase.auth.FacebookAuthProvider
 import com.google.firebase.auth.FirebaseAuth
+import com.khue.joliecafejp.presentation.screens.login.LoginViewModel
 
 
 class FirebaseFacebookLogin {
 
-    fun facebookLogin(context: Context, callbackManager: CallbackManager, auth: FirebaseAuth) {
+    fun facebookLogin(context: Context, callbackManager: CallbackManager, auth: FirebaseAuth, loginViewModel: LoginViewModel) {
         LoginManager.getInstance().logInWithReadPermissions(
             context as ActivityResultRegistryOwner,
             callbackManager = callbackManager,
@@ -28,7 +29,7 @@ class FirebaseFacebookLogin {
             FacebookCallback<LoginResult> {
             override fun onSuccess(result: LoginResult) {
                 println("facebook:onSuccess:$result")
-                handleFacebookAccessToken(result.accessToken, context, auth)
+                handleFacebookAccessToken(result.accessToken, context, auth, loginViewModel)
             }
 
             override fun onCancel() {
@@ -41,7 +42,7 @@ class FirebaseFacebookLogin {
         })
     }
 
-    private fun handleFacebookAccessToken(token: AccessToken, context: Context, auth: FirebaseAuth) {
+    private fun handleFacebookAccessToken(token: AccessToken, context: Context, auth: FirebaseAuth, loginViewModel: LoginViewModel) {
         println("handleFacebookAccessToken:$token")
 
         val credential = FacebookAuthProvider.getCredential(token.token)
@@ -51,6 +52,10 @@ class FirebaseFacebookLogin {
                     // Sign in success, update UI with the signed-in user's information
                     println("signInWithCredential:success")
                     val user = auth.currentUser
+                    loginViewModel.signIn(
+                        email = auth.currentUser?.email!!,
+                        displayName = auth.currentUser?.displayName!!
+                    )
                     println(user?.displayName)
                     Toast.makeText(
                         context, "Welcome back ${user?.displayName}",

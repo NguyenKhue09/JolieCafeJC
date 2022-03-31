@@ -14,7 +14,7 @@ private val grey_secondary = Color(0xFFCBC1B5)
 private val text_color = Color(0xFFE4E4E4)
 private val text_color_2 = Color(0xFFE7A15C)
 private val dark_text_color = Color(0xFF707070)
-private val grey_opacity60_primary = Color(0x60756860)
+private val grey_opacity60_primary = Color(0xFF746860)
 private val title_text_color = Color(0xFFE7A15C)
 
 val Colors.greyPrimary

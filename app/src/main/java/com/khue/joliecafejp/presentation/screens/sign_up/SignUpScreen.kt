@@ -346,7 +346,7 @@ fun SignUpScreen(
                 authResultLauncher.launch(signInRequestCode)
             },
             faceAction = {
-                facebookLogin.facebookLogin(context, callbackManager, auth)
+                facebookLogin.facebookLogin(context, callbackManager, auth, loginViewModel)
             }
         )
 

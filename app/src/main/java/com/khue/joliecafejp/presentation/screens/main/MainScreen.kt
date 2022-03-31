@@ -1,5 +1,8 @@
 package com.khue.joliecafejp.presentation.screens.main
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -16,9 +19,9 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.khue.joliecafejp.navigation.nav_graph.AUTHENTICATION_ROUTE
 import com.khue.joliecafejp.navigation.nav_screen.BottomBarScreen
 import com.khue.joliecafejp.navigation.nav_graph.SetupNavGraph
+import com.khue.joliecafejp.navigation.nav_screen.AuthScreen
 import com.khue.joliecafejp.presentation.screens.login.LoginViewModel
 import com.khue.joliecafejp.ui.theme.bottomNavCornerRadius
 import com.khue.joliecafejp.ui.theme.greyOpacity60Primary
@@ -31,11 +34,12 @@ fun MainScreen(
     loginViewModel: LoginViewModel = hiltViewModel()
 ) {
     val navController = rememberNavController()
-
     Scaffold(
-        bottomBar = { BottomBar(navController = navController) }
+        bottomBar = {
+                BottomBar(navController = navController)
+        }
     ) {
-        SetupNavGraph(navController = navController)
+        SetupNavGraph(navController = navController, loginViewModel)
     }
 }
 
@@ -51,23 +55,32 @@ fun BottomBar(navController: NavHostController) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
 
-    BottomNavigation(
-        backgroundColor = MaterialTheme.colors.greyOpacity60Primary,
-        modifier = Modifier.graphicsLayer {
-            shape = RoundedCornerShape(
-                topStart = bottomNavCornerRadius,
-                topEnd = bottomNavCornerRadius
-            )
-            clip = true
-        }.height(58.dp),
-        elevation = 0.dp
+    AnimatedVisibility(
+        visible = navBackStackEntry?.destination?.route != AuthScreen.Login.route
+                && navBackStackEntry?.destination?.route != AuthScreen.SignUp.route,
+        enter = slideInVertically(initialOffsetY = { it }),
+        exit = slideOutVertically(targetOffsetY = { it }),
     ) {
-        screens.forEach { screen ->
-            AddItem(
-                screen = screen,
-                currentDestination = currentDestination,
-                navController = navController
-            )
+        BottomNavigation(
+            backgroundColor = MaterialTheme.colors.greyOpacity60Primary,
+            modifier = Modifier
+                .graphicsLayer {
+                    shape = RoundedCornerShape(
+                        topStart = bottomNavCornerRadius,
+                        topEnd = bottomNavCornerRadius
+                    )
+                    clip = true
+                }
+                .height(58.dp),
+            elevation = 0.dp
+        ) {
+            screens.forEach { screen ->
+                AddItem(
+                    screen = screen,
+                    currentDestination = currentDestination,
+                    navController = navController
+                )
+            }
         }
     }
 }

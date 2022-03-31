@@ -7,11 +7,13 @@ import androidx.navigation.compose.navigation
 import com.khue.joliecafejp.navigation.nav_screen.AuthScreen
 import com.khue.joliecafejp.presentation.screens.forgot_password.ForgotPassword
 import com.khue.joliecafejp.presentation.screens.login.LoginScreen
+import com.khue.joliecafejp.presentation.screens.login.LoginViewModel
 import com.khue.joliecafejp.presentation.screens.sign_up.SignUpScreen
 
 
 fun NavGraphBuilder.authNavGraph(
-    navController: NavHostController
+    navController: NavHostController,
+    loginViewModel: LoginViewModel,
 ) {
     navigation(
         startDestination = AuthScreen.Login.route,
@@ -20,7 +22,7 @@ fun NavGraphBuilder.authNavGraph(
         composable(
             route = AuthScreen.Login.route
         ) {
-            LoginScreen(navController = navController)
+            LoginScreen(navController = navController, loginViewModel)
         }
         composable(
             route = AuthScreen.SignUp.route

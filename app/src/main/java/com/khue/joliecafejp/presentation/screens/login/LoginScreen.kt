@@ -35,6 +35,8 @@ import com.khue.joliecafejp.R
 import com.khue.joliecafejp.firebase.firebase_authentication.face_book_signin.FirebaseFacebookLogin
 import com.khue.joliecafejp.firebase.firebase_authentication.gmail_password_authentication.FirebaseGmailPasswordAuth
 import com.khue.joliecafejp.firebase.firebase_authentication.google_signin.AuthResultContract
+import com.khue.joliecafejp.navigation.nav_graph.AUTHENTICATION_ROUTE
+import com.khue.joliecafejp.navigation.nav_graph.BOTTOM_ROUTE
 import com.khue.joliecafejp.navigation.nav_screen.AuthScreen
 import com.khue.joliecafejp.presentation.common.FaceOrGoogleLogin
 import com.khue.joliecafejp.presentation.common.TextCustom
@@ -48,12 +50,21 @@ import kotlinx.coroutines.withContext
 @Composable
 fun LoginScreen(
     navController: NavHostController,
-    loginViewModel: LoginViewModel = hiltViewModel()
+    loginViewModel: LoginViewModel
 ) {
+
+    val user by loginViewModel.user.collectAsState()
+
+    LaunchedEffect(user) {
+        println("Login $user")
+        if (user != null) {
+            navController.navigate(BOTTOM_ROUTE)
+        }
+    }
+
     val mAuth: FirebaseAuth = FirebaseAuth.getInstance()
     val scrollState = rememberScrollState()
     val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
     var text by remember {
         mutableStateOf<String?>(null)
     }
@@ -76,25 +87,15 @@ fun LoginScreen(
                     Toast.makeText(context, text, Toast.LENGTH_LONG).show()
                 } else {
                     val credentials = GoogleAuthProvider.getCredential(account.idToken, null)
-
-                    coroutineScope.launch {
-                        try {
-                            mAuth.signInWithCredential(credentials).await()
-                            withContext(Dispatchers.Main) {
-                                Toast.makeText(context, "Successfully", Toast.LENGTH_LONG).show()
-                            }
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                            withContext(Dispatchers.Main) {
-                                Toast.makeText(context, e.message, Toast.LENGTH_LONG).show()
-                            }
-                        }
-                        loginViewModel.signIn(
-                            email = account.email!!,
-                            displayName = account.displayName!!
-                        )
-                        withContext(Dispatchers.Main) {
-                            Toast.makeText(context, account.displayName, Toast.LENGTH_LONG).show()
+                    mAuth.signInWithCredential(credentials).addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            Toast.makeText(context, "Welcome back ${account.displayName}", Toast.LENGTH_LONG).show()
+                            loginViewModel.signIn(
+                                email = account.email!!,
+                                displayName = account.displayName!!
+                            )
+                        } else {
+                            Toast.makeText(context, "Google sign in failed", Toast.LENGTH_LONG).show()
                         }
                     }
                 }
@@ -217,7 +218,7 @@ fun LoginScreen(
                     indication = null,
                     interactionSource = remember { MutableInteractionSource() }
                 ) {
-                     navController.navigate(AuthScreen.ForgotPassword.route)
+                    navController.navigate(AuthScreen.ForgotPassword.route)
                 },
             text = stringResource(R.string.forgot_password),
             fontFamily = raleway,
@@ -276,7 +277,7 @@ fun LoginScreen(
                 authResultLauncher.launch(signInRequestCode)
             },
             faceAction = {
-                facebookLogin.facebookLogin(context, callbackManager, mAuth)
+                facebookLogin.facebookLogin(context, callbackManager, mAuth, loginViewModel)
             }
         )
 
