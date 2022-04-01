@@ -22,6 +22,7 @@ import androidx.navigation.compose.rememberNavController
 import com.khue.joliecafejp.navigation.nav_screen.BottomBarScreen
 import com.khue.joliecafejp.navigation.nav_graph.SetupNavGraph
 import com.khue.joliecafejp.navigation.nav_screen.AuthScreen
+import com.khue.joliecafejp.navigation.nav_screen.ProfileSubScreen
 import com.khue.joliecafejp.presentation.screens.login.LoginViewModel
 import com.khue.joliecafejp.ui.theme.bottomNavCornerRadius
 import com.khue.joliecafejp.ui.theme.greyOpacity60Primary
@@ -54,10 +55,22 @@ fun BottomBar(navController: NavHostController) {
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
+    var bottomNavVisible by remember {
+        mutableStateOf(true)
+    }
+
+    when(navBackStackEntry?.destination?.route) {
+        AuthScreen.Login.route -> bottomNavVisible = false
+        AuthScreen.SignUp.route -> bottomNavVisible = false
+        ProfileSubScreen.ProfileDetail.route -> bottomNavVisible = false
+        ProfileSubScreen.AddressBook.route -> bottomNavVisible = false
+        ProfileSubScreen.OrderHistory.route -> bottomNavVisible = false
+        ProfileSubScreen.Settings.route -> bottomNavVisible = false
+        else -> bottomNavVisible = true
+    }
 
     AnimatedVisibility(
-        visible = navBackStackEntry?.destination?.route != AuthScreen.Login.route
-                && navBackStackEntry?.destination?.route != AuthScreen.SignUp.route,
+        visible = bottomNavVisible,
         enter = slideInVertically(initialOffsetY = { it }),
         exit = slideOutVertically(targetOffsetY = { it }),
     ) {

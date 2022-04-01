@@ -1,7 +1,10 @@
 package com.khue.joliecafejp.presentation.screens.login
 
+import android.app.Activity
+import android.content.Context
 import android.util.Patterns
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -58,7 +61,9 @@ fun LoginScreen(
     LaunchedEffect(user) {
         println("Login $user")
         if (user != null) {
-            navController.navigate(BOTTOM_ROUTE)
+            navController.navigate(BOTTOM_ROUTE) {
+                launchSingleTop = true
+            }
         }
     }
 
@@ -218,7 +223,9 @@ fun LoginScreen(
                     indication = null,
                     interactionSource = remember { MutableInteractionSource() }
                 ) {
-                    navController.navigate(AuthScreen.ForgotPassword.route)
+                    navController.navigate(AuthScreen.ForgotPassword.route) {
+                        launchSingleTop = true
+                    }
                 },
             text = stringResource(R.string.forgot_password),
             fontFamily = raleway,
@@ -312,6 +319,8 @@ fun LoginScreen(
             }
         )
     }
+
+    HandleBackPress(context =  context)
 }
 
 fun validateUserName(userName: String, onError: (String) -> Unit) {
@@ -327,6 +336,14 @@ fun validatePassword(password: String, onError: (String) -> Unit) {
         password.trim().isEmpty() -> onError("Password is empty")
         password.length < 6 -> onError("Password less then 6 character")
         else -> onError("")
+    }
+}
+
+@Composable
+fun HandleBackPress(context: Context) {
+    val activity = (context as? Activity)
+    BackHandler {
+        activity?.finish()
     }
 }
 

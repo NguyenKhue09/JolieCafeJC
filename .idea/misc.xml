@@ -3,8 +3,11 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/AndroidStudioProjects/JolieCafeJP/app/src/main/res/drawable-v24/ic_arrow_back.xml" value="0.144" />
+        <entry key="..\:/AndroidStudioProjects/JolieCafeJP/app/src/main/res/drawable/ic_camera.xml" value="0.1" />
         <entry key="..\:/AndroidStudioProjects/JolieCafeJP/app/src/main/res/drawable/ic_facebook_logo.xml" value="0.231" />
         <entry key="..\:/AndroidStudioProjects/JolieCafeJP/app/src/main/res/drawable/ic_google_icon.xml" value="0.1" />
+        <entry key="..\:/AndroidStudioProjects/JolieCafeJP/app/src/main/res/drawable/ic_map.xml" value="0.1" />
         <entry key="..\:/AndroidStudioProjects/JolieCafeJP/app/src/main/res/font/fonts.xml" value="0.28020833333333334" />
       </map>
     </option>

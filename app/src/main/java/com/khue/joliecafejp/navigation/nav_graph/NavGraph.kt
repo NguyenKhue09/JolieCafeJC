@@ -7,7 +7,9 @@ import com.khue.joliecafejp.presentation.screens.login.LoginViewModel
 
 const val BOTTOM_ROUTE = "bottom"
 const val AUTHENTICATION_ROUTE = "authentication"
+const val PROFILE_SUB_ROUTE = "profile_sub_route"
 const val ROOT_GRAPH_ROUTE = "root"
+const val NONE_ROUTE = "none"
 
 @Composable
 fun SetupNavGraph(

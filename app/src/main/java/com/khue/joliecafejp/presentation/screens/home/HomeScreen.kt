@@ -32,7 +32,9 @@ fun HomeScreen(
     LaunchedEffect(user){
         println("Home $user")
         if (user == null) {
-            navController.navigate(AUTHENTICATION_ROUTE)
+            navController.navigate(AUTHENTICATION_ROUTE) {
+                launchSingleTop = true
+            }
         }
     }
 

@@ -20,6 +20,15 @@ class LoginViewModel @Inject constructor(): ViewModel() {
     private val _count: MutableStateFlow<Int> = MutableStateFlow(0)
     val count: StateFlow<Int> = _count
 
+    init {
+        if (FirebaseAuth.getInstance().currentUser != null) {
+            _user.value = User(
+                email = FirebaseAuth.getInstance().currentUser?.email!!,
+                displayName = FirebaseAuth.getInstance().currentUser?.displayName!!
+            )
+        }
+    }
+
     fun signIn(email: String, displayName: String){
         _user.value = User(email, displayName)
         println(user.value)
