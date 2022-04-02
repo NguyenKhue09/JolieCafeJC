@@ -16,6 +16,11 @@ private val text_color_2 = Color(0xFFE7A15C)
 private val dark_text_color = Color(0xFF707070)
 private val grey_opacity60_primary = Color(0xFF746860)
 private val title_text_color = Color(0xFFE7A15C)
+private val button_text_color = Color(0xFF4E341B)
+
+
+val Colors.buttonTextColor
+    get() = button_text_color
 
 val Colors.greyPrimary
     get() = grey_primary

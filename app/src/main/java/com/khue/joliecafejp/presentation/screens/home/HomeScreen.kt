@@ -15,6 +15,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.google.firebase.auth.FirebaseAuth
 import com.khue.joliecafejp.navigation.nav_graph.AUTHENTICATION_ROUTE
+import com.khue.joliecafejp.navigation.nav_screen.AuthScreen
+import com.khue.joliecafejp.navigation.nav_screen.BottomBarScreen
 import com.khue.joliecafejp.presentation.screens.login.LoginViewModel
 import com.khue.joliecafejp.ui.theme.greyPrimary
 import com.khue.joliecafejp.viewmodels.HomeViewModel
@@ -33,6 +35,9 @@ fun HomeScreen(
         println("Home $user")
         if (user == null) {
             navController.navigate(AUTHENTICATION_ROUTE) {
+                popUpTo(BottomBarScreen.Home.route) {
+                    inclusive = true
+                }
                 launchSingleTop = true
             }
         }

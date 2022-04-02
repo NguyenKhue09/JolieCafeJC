@@ -21,6 +21,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -86,29 +87,30 @@ fun TextFieldCustom(
             interactionSource = interactionSource,
             visualTransformation = visualTransformation,
             enabled = enabled,
-        ) { innerTextField ->
-            TextFieldDefaults.TextFieldDecorationBox(
-                value = textFieldValue.value.toString(),
-                visualTransformation = visualTransformation,
-                innerTextField = innerTextField,
-                singleLine = true,
-                enabled = enabled,
-                interactionSource = interactionSource,
-                contentPadding = PaddingValues(0.dp),
-                isError = isError,
-                trailingIcon = trailingIcon ,
-                placeholder = {
-                    Text(
-                        text = placeHolder,
-                        fontFamily = raleway,
-                        color = MaterialTheme.colors.textColor,
-                        fontSize = 13.sp,
-                        textAlign = TextAlign.Left,
-                    )
-                },
-                colors = colors
-            )
-        }
+            decorationBox = @Composable { innerTextField ->
+                TextFieldDefaults.TextFieldDecorationBox(
+                    value = textFieldValue.value.text,
+                    visualTransformation = visualTransformation,
+                    innerTextField = innerTextField,
+                    placeholder = {
+                        Text(
+                            text = placeHolder,
+                            fontFamily = raleway,
+                            color = MaterialTheme.colors.textColor,
+                            fontSize = 13.sp,
+                            textAlign = TextAlign.Left,
+                        )
+                    },
+                    singleLine = true,
+                    enabled = enabled,
+                    interactionSource = interactionSource,
+                    contentPadding = PaddingValues(0.dp),
+                    isError = isError,
+                    trailingIcon = trailingIcon,
+                    colors = colors
+                )
+            }
+        )
 
         if (error.isNotEmpty()) {
             Text(

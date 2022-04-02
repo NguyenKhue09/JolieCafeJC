@@ -62,7 +62,9 @@ fun LoginScreen(
         println("Login $user")
         if (user != null) {
             navController.navigate(BOTTOM_ROUTE) {
-                launchSingleTop = true
+                popUpTo(AuthScreen.Login.route) {
+                    inclusive = true
+                }
             }
         }
     }
