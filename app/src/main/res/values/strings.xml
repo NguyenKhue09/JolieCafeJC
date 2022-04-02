@@ -11,7 +11,6 @@
     <string name="sign_in_content">SIGN IN</string>
     <string name="or">--- OR ---</string>
     <string name="sign_up_title">SIGN UP</string>
-    <string name="email_title">Email</string>
     <string name="confirm_password_title">Confirm password</string>
     <string name="sign_up_content">SIGN UP</string>
     <string name="username_placeholder">Enter your username</string>
@@ -38,4 +37,9 @@
     <string name="profile_logo">Profile logo</string>
     <string name="sweet_latte">Sweet Latte</string>
     <string name="image_picker">Image Picker</string>
+    <string name="email_title">Email</string>
+    <string name="edit">Edit</string>
+    <string name="name">Name</string>
+    <string name="phone_number">Phone number</string>
+    <string name="save">Save</string>
 </resources>
