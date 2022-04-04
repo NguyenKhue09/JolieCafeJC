@@ -2,6 +2,7 @@ package com.khue.joliecafejp.presentation.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.material.Card
@@ -9,6 +10,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.khue.joliecafejp.ui.theme.EXTRA_LARGE_PADDING
 import com.khue.joliecafejp.ui.theme.Shapes
 import com.khue.joliecafejp.ui.theme.greyOpacity60Primary
@@ -17,19 +19,23 @@ import com.khue.joliecafejp.ui.theme.greyOpacity60Primary
 fun CardCustom(
     onClick: () -> Unit,
     shape: CornerBasedShape = Shapes.medium,
-    content: @Composable () -> Unit
+    paddingValues: PaddingValues = PaddingValues(
+        top = EXTRA_LARGE_PADDING,
+        start = EXTRA_LARGE_PADDING,
+        end = EXTRA_LARGE_PADDING,
+        bottom = 0.dp
+    ),
+    content: @Composable () -> Unit,
 ) {
     Card(
-        modifier = Modifier.padding(
-            top = EXTRA_LARGE_PADDING,
-            start = EXTRA_LARGE_PADDING,
-            end = EXTRA_LARGE_PADDING
-        ).clickable(
-            indication = null,
-            interactionSource = remember { MutableInteractionSource() }
-        ) {
-            onClick()
-        },
+        modifier = Modifier
+            .padding(paddingValues)
+            .clickable(
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() }
+            ) {
+                onClick()
+            },
         shape = shape,
         backgroundColor = MaterialTheme.colors.greyOpacity60Primary
     ) {

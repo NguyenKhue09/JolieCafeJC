@@ -26,7 +26,7 @@
     <string name="error">error</string>
     <string name="forgot_password_title">FORGOT YOUR PASSWORD?</string>
     <string name="forgot_password_sub_title">No worries! Enter your email address and we\'ll help you reset your password.</string>
-    <string name="confirm">CONFIRM</string>
+    <string name="confirm">Confirm</string>
     <string name="favorite">Favorite</string>
     <string name="profile">Profile</string>
     <string name="address_book">Address book</string>
@@ -46,5 +46,9 @@
     <string name="camera">Camera</string>
     <string name="gallery">Gallery</string>
     <string name="choose_from_gallery">Choose from gallery</string>
-    <string name="cancel">CANCEL</string>
+    <string name="cancel">Cancel</string>
+    <string name="change">Change</string>
+    <string name="current_password">Current password</string>
+    <string name="new_password">New password</string>
+    <string name="enter_your_new_password">Enter your new password</string>
 </resources>
