@@ -25,12 +25,13 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.type.Fraction
 import com.khue.joliecafejp.ui.theme.*
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun TextFieldCustom(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     textFieldValue: MutableState<TextFieldValue>,
     keyBoardType: KeyboardType,
     trailingIcon: @Composable() (() -> Unit)?,
@@ -39,11 +40,14 @@ fun TextFieldCustom(
     error: String = "",
     isError: Boolean = error.isNotEmpty(),
     padding: Dp = 20.dp,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    fraction: Float  = 1f,
+    maxLines: Int = 1,
+    singleLine: Boolean = true
 ) {
     Column(
         modifier = Modifier
-            .fillMaxWidth()
+            .fillMaxWidth(fraction = fraction)
             .padding(start = padding, end = padding)
     ) {
 
@@ -78,8 +82,8 @@ fun TextFieldCustom(
                 color = MaterialTheme.colors.textColor,
             ),
             cursorBrush = SolidColor(MaterialTheme.colors.textColor),
-            maxLines = 1,
-            singleLine = true,
+            maxLines = maxLines,
+            singleLine = singleLine,
             keyboardOptions = KeyboardOptions(
                 keyboardType = keyBoardType,
                 imeAction = ImeAction.Next
@@ -101,7 +105,7 @@ fun TextFieldCustom(
                             textAlign = TextAlign.Left,
                         )
                     },
-                    singleLine = true,
+                    singleLine = singleLine,
                     enabled = enabled,
                     interactionSource = interactionSource,
                     contentPadding = PaddingValues(0.dp),
