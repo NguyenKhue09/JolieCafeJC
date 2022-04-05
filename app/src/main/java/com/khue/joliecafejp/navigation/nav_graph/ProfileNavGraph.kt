@@ -32,7 +32,7 @@ fun NavGraphBuilder.profileNavGraph(
         composable(
             route = ProfileSubScreen.OrderHistory.route
         ) {
-            OrderHistory()
+            OrderHistory(navController = navController)
         }
         composable(
             route = ProfileSubScreen.Settings.route

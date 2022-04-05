@@ -13,6 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -28,12 +29,18 @@ import com.khue.joliecafejp.presentation.common.TextFieldCustom
 import com.khue.joliecafejp.presentation.components.AddressBookItem
 import com.khue.joliecafejp.presentation.components.ButtonCustom
 import com.khue.joliecafejp.presentation.components.CardCustom
+import com.khue.joliecafejp.presentation.components.CustomDialog
 import com.khue.joliecafejp.ui.theme.*
 
 @Composable
 fun AddressBook(
     navController: NavHostController
 ) {
+
+    val configuration = LocalConfiguration.current
+    val screenHeight = (configuration.screenHeightDp.toFloat() * 0.8).dp
+
+    var showDeleteCustomDialog by remember { mutableStateOf(false) }
 
     val scrollState = rememberScrollState()
     val nestedScrollState = rememberScrollState()
@@ -100,20 +107,36 @@ fun AddressBook(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            Column(
+            LazyColumn(
                 modifier = Modifier
-                    .verticalScroll(state = nestedScrollState),
+                    .fillMaxWidth()
+                    .height(screenHeight),
                 verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                repeat(5) {
-                    AddressBookItem(
-                        name = "",
-                        phoneNumber = "",
-                        address = "",
-                        onDelete = {},
-                        onUpdate = { _, _, _ -> },
-                    )
+                repeat(10) {
+                    item {
+                        if (showDeleteCustomDialog) {
+                            CustomDialog(
+                                title = "Delete address?",
+                                content = "Do you really want to delete this address?",
+                                onDismiss = { showDeleteCustomDialog = false },
+                                onNegativeClick = { showDeleteCustomDialog = false },
+                                onPositiveClick = { showDeleteCustomDialog = false }
+                            )
+                        }
+
+                        AddressBookItem(
+                            name = "",
+                            phoneNumber = "",
+                            address = "",
+                            onDelete = {
+                                showDeleteCustomDialog = true
+                            },
+                            onUpdate = { _, _, _ -> },
+                        )
+                    }
+
                 }
             }
 
@@ -352,7 +375,7 @@ fun CardAddNewAddress(
 @Composable
 fun CardAddNewAddressPrev() {
     val isAddNewAddress = remember {
-        mutableStateOf(true)
+        mutableStateOf(false)
     }
 
     val isDefaultAddress = remember {
