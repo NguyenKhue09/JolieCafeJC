@@ -30,11 +30,14 @@ fun AddressBookItem(
     address: String,
     onDelete: () -> Unit,
     onUpdate: (String, String, String) -> Unit,
-    onSetDefault: () -> Unit
 ) {
 
     var isEdit by remember {
-        mutableStateOf(true)
+        mutableStateOf(false)
+    }
+
+    var isDefaultAddress by remember {
+        mutableStateOf(false)
     }
 
     val userNameTextState = remember { mutableStateOf(TextFieldValue("Sweet Latte")) }
@@ -66,25 +69,41 @@ fun AddressBookItem(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
 
-                TextFieldCustom(
-                    textFieldValue = userNameTextState,
-                    keyBoardType = KeyboardType.Text,
-                    trailingIcon = {
-                        if (userNameError.value.isNotEmpty()) Icon(
-                            Icons.Filled.Error,
-                            stringResource(R.string.error),
-                            tint = MaterialTheme.colors.error
-                        )
-                    },
-                    placeHolder = "Sweet Latte",
-                    visualTransformation = VisualTransformation.None,
-                    error = userNameError.value,
-                    padding = 0.dp,
-                    enabled = isEdit,
-                    fraction = 0.7f
-                )
+                Column(
+                    modifier = Modifier.fillMaxWidth(if(isEdit) 1f else 0.7f),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.Start
+                ) {
 
-                AnimatedVisibility(visible = isEdit) {
+                    AnimatedVisibility(visible = isEdit) {
+                        Text(
+                            text = stringResource(R.string.name),
+                            fontFamily = raleway,
+                            color = MaterialTheme.colors.greySecondary,
+                            fontSize = MaterialTheme.typography.caption.fontSize,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+
+                    TextFieldCustom(
+                        textFieldValue = userNameTextState,
+                        keyBoardType = KeyboardType.Text,
+                        trailingIcon = {
+                            if (userNameError.value.isNotEmpty()) Icon(
+                                Icons.Filled.Error,
+                                stringResource(R.string.error),
+                                tint = MaterialTheme.colors.error
+                            )
+                        },
+                        placeHolder = "Sweet Latte",
+                        visualTransformation = VisualTransformation.None,
+                        error = userNameError.value,
+                        padding = 0.dp,
+                        enabled = isEdit,
+                    )
+                }
+
+                AnimatedVisibility(visible = !isEdit) {
                     Row(
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
@@ -113,6 +132,17 @@ fun AddressBookItem(
                 }
             }
 
+            AnimatedVisibility(visible = isEdit) {
+                Text(
+                    modifier = Modifier.padding(top = EXTRA_LARGE_PADDING),
+                    text = stringResource(R.string.phone_number),
+                    fontFamily = raleway,
+                    color = MaterialTheme.colors.greySecondary,
+                    fontSize = MaterialTheme.typography.caption.fontSize,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
             TextFieldCustom(
                 modifier = Modifier.align(alignment = Alignment.Start),
                 textFieldValue = userPhoneNumberState,
@@ -130,6 +160,17 @@ fun AddressBookItem(
                 padding = 0.dp,
                 enabled = isEdit,
             )
+
+            AnimatedVisibility(visible = isEdit) {
+                Text(
+                    modifier = Modifier.padding(top = EXTRA_LARGE_PADDING),
+                    text = stringResource(R.string.address),
+                    fontFamily = raleway,
+                    color = MaterialTheme.colors.greySecondary,
+                    fontSize = MaterialTheme.typography.caption.fontSize,
+                    fontWeight = FontWeight.Bold
+                )
+            }
 
             TextFieldCustom(
                 modifier = Modifier.align(alignment = Alignment.Start),
@@ -151,43 +192,80 @@ fun AddressBookItem(
                 singleLine = false
             )
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.End
-            ) {
-                ButtonCustom(
-                    buttonContent = stringResource(id = R.string.cancel),
-                    backgroundColor = Color.Transparent,
-                    textColor = MaterialTheme.colors.textColor,
-                    onClick = {
-                    },
-                    paddingValues = PaddingValues(top = EXTRA_LARGE_PADDING),
-                    contentPadding = PaddingValues(
-                        horizontal = EXTRA_LARGE_PADDING,
-                        vertical = EXTRA_SMALL_PADDING
-                    ),
-                    buttonElevation = ButtonDefaults.elevation(
-                        defaultElevation = 0.dp,
-                        pressedElevation = 0.dp
-                    )
-                )
-                ButtonCustom(
-                    buttonContent = stringResource(id = R.string.confirm),
-                    backgroundColor = MaterialTheme.colors.titleTextColor,
-                    textColor = MaterialTheme.colors.textColor,
-                    onClick = {
-                    },
-                    paddingValues = PaddingValues(
-                        start = EXTRA_LARGE_PADDING,
-                        top = EXTRA_LARGE_PADDING
-                    ),
-                    contentPadding = PaddingValues(
-                        horizontal = EXTRA_LARGE_PADDING,
-                        vertical = EXTRA_SMALL_PADDING
-                    ),
-                    buttonElevation = null
-                )
+            AnimatedVisibility(visible = isEdit) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.Start
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Start
+                    ) {
+                        Checkbox(
+                            checked = isDefaultAddress,
+                            onCheckedChange = { checked ->
+                                isDefaultAddress = checked
+                            },
+                            colors = CheckboxDefaults.colors(
+                                uncheckedColor = MaterialTheme.colors.textColor,
+                                checkedColor = MaterialTheme.colors.titleTextColor
+                            )
+                        )
+
+                        Text(
+                            text = stringResource(R.string.set_as_default_address),
+                            fontFamily = raleway,
+                            color = MaterialTheme.colors.greySecondary,
+                            fontSize = MaterialTheme.typography.caption.fontSize,
+                            fontWeight = FontWeight.Bold
+                        )
+
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        ButtonCustom(
+                            buttonContent = stringResource(id = R.string.cancel),
+                            backgroundColor = Color.Transparent,
+                            textColor = MaterialTheme.colors.textColor,
+                            onClick = {
+                                      isEdit = false
+                            },
+                            paddingValues = PaddingValues(top = EXTRA_LARGE_PADDING),
+                            contentPadding = PaddingValues(
+                                horizontal = EXTRA_LARGE_PADDING,
+                                vertical = EXTRA_SMALL_PADDING
+                            ),
+                            buttonElevation = ButtonDefaults.elevation(
+                                defaultElevation = 0.dp,
+                                pressedElevation = 0.dp
+                            )
+                        )
+                        ButtonCustom(
+                            buttonContent = stringResource(id = R.string.confirm),
+                            backgroundColor = MaterialTheme.colors.titleTextColor,
+                            textColor = MaterialTheme.colors.textColor,
+                            onClick = {
+                                      isEdit = false
+                            },
+                            paddingValues = PaddingValues(
+                                start = EXTRA_LARGE_PADDING,
+                                top = EXTRA_LARGE_PADDING
+                            ),
+                            contentPadding = PaddingValues(
+                                horizontal = EXTRA_LARGE_PADDING,
+                                vertical = EXTRA_SMALL_PADDING
+                            ),
+                            buttonElevation = null
+                        )
+                    }
+                }
             }
         }
     }
@@ -203,6 +281,5 @@ fun AddressBookPrev() {
         address = "",
         onDelete = {},
         onUpdate = { _, _, _ ->},
-        onSetDefault = {}
     )
 }
