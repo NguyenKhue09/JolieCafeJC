@@ -1,17 +1,13 @@
 package com.khue.joliecafejp.presentation.screens.profile
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -20,7 +16,7 @@ import com.khue.joliecafejp.R
 import com.khue.joliecafejp.navigation.nav_graph.NONE_ROUTE
 import com.khue.joliecafejp.navigation.nav_screen.ProfileSubScreen
 import com.khue.joliecafejp.presentation.components.CardCustom
-import com.khue.joliecafejp.presentation.components.CircleImage
+import com.khue.joliecafejp.presentation.components.CustomImage
 import com.khue.joliecafejp.ui.theme.*
 
 @Composable
@@ -37,7 +33,7 @@ fun ProfileScreen(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        CircleImage()
+        CustomImage()
         
         Text(
             text = stringResource(R.string.sweet_latte),

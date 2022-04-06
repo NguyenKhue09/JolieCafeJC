@@ -59,4 +59,8 @@
     <string name="enter_your_new_phone_number">Enter your new phone number</string>
     <string name="enter_your_new_user_name">Enter your new username</string>
     <string name="add_new_address">Add new address</string>
+    <string name="summary">Summary</string>
+    <string name="subtotal">Subtotal</string>
+    <string name="shipping_fee">Shipping fee</string>
+    <string name="total">Total</string>
 </resources>

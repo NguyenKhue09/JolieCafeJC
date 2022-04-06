@@ -26,10 +26,7 @@ import androidx.navigation.NavHostController
 import com.khue.joliecafejp.R
 import com.khue.joliecafejp.navigation.nav_screen.ProfileSubScreen
 import com.khue.joliecafejp.presentation.common.TextFieldCustom
-import com.khue.joliecafejp.presentation.components.AddressBookItem
-import com.khue.joliecafejp.presentation.components.ButtonCustom
-import com.khue.joliecafejp.presentation.components.CardCustom
-import com.khue.joliecafejp.presentation.components.CustomDialog
+import com.khue.joliecafejp.presentation.components.*
 import com.khue.joliecafejp.ui.theme.*
 
 @Composable
@@ -43,7 +40,6 @@ fun AddressBook(
     var showDeleteCustomDialog by remember { mutableStateOf(false) }
 
     val scrollState = rememberScrollState()
-    val nestedScrollState = rememberScrollState()
 
     val isAddNewAddress = remember {
         mutableStateOf(false)
@@ -74,28 +70,10 @@ fun AddressBook(
         modifier = Modifier.fillMaxSize(),
         backgroundColor = MaterialTheme.colors.greyPrimary,
         topBar = {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Start
-            ) {
-                IconButton(onClick = { navController.popBackStack() }) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_arrow_back),
-                        contentDescription = stringResource(
-                            id = ProfileSubScreen.ProfileDetail.titleId
-                        ),
-                        tint = MaterialTheme.colors.textColor
-                    )
-                }
-                Text(
-                    text = stringResource(
-                        id = ProfileSubScreen.AddressBook.titleId
-                    ),
-                    fontSize = MaterialTheme.typography.h6.fontSize,
-                    fontFamily = ralewayMedium,
-                    color = MaterialTheme.colors.titleTextColor
-                )
-            }
+            TopBar(
+                titleId =  ProfileSubScreen.ProfileDetail.titleId,
+                navController = navController
+            )
         },
     ) {
 

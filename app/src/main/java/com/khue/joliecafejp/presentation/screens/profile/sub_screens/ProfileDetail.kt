@@ -34,10 +34,7 @@ import androidx.navigation.NavHostController
 import com.khue.joliecafejp.R
 import com.khue.joliecafejp.navigation.nav_screen.ProfileSubScreen
 import com.khue.joliecafejp.presentation.common.TextFieldCustom
-import com.khue.joliecafejp.presentation.components.ButtonCustom
-import com.khue.joliecafejp.presentation.components.CardCustom
-import com.khue.joliecafejp.presentation.components.CircleImage
-import com.khue.joliecafejp.presentation.components.ImagePickerBottomSheetContent
+import com.khue.joliecafejp.presentation.components.*
 import com.khue.joliecafejp.ui.theme.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -111,28 +108,10 @@ fun ProfileDetail(
             modifier = Modifier.fillMaxSize(),
             backgroundColor = MaterialTheme.colors.greyPrimary,
             topBar = {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Start
-                ) {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_arrow_back),
-                            contentDescription = stringResource(
-                                id = ProfileSubScreen.ProfileDetail.titleId
-                            ),
-                            tint = MaterialTheme.colors.textColor
-                        )
-                    }
-                    Text(
-                        text = stringResource(
-                            id = ProfileSubScreen.ProfileDetail.titleId
-                        ),
-                        fontSize = MaterialTheme.typography.h6.fontSize,
-                        fontFamily = ralewayMedium,
-                        color = MaterialTheme.colors.titleTextColor
-                    )
-                }
+                TopBar(
+                    titleId = ProfileSubScreen.ProfileDetail.titleId,
+                    navController = navController
+                )
             },
         ) {
             Column(
@@ -200,7 +179,7 @@ fun BoxUserImage(
         modifier = Modifier.padding(bottom = EXTRA_EXTRA_LARGE_PADDING),
         contentAlignment = Alignment.BottomEnd
     ) {
-        CircleImage()
+        CustomImage()
         IconButton(
             modifier = Modifier
                 .offset(ICON_BUTTON_PROFILE_OFFSET, ICON_BUTTON_PROFILE_OFFSET)
