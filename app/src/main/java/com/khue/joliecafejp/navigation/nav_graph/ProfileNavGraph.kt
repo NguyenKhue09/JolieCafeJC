@@ -37,7 +37,9 @@ fun NavGraphBuilder.profileNavGraph(
         composable(
             route = ProfileSubScreen.Settings.route
         ) {
-            Settings()
+            Settings(
+                navHostController = navController
+            )
         }
     }
 }

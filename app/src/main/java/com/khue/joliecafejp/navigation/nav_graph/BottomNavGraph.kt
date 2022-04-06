@@ -28,7 +28,10 @@ fun NavGraphBuilder.bottomNavGraph(navController: NavHostController, loginViewMo
             CartScreen()
         }
         composable(route = BottomBarScreen.Profile.route) {
-            ProfileScreen(navController = navController)
+            ProfileScreen(
+                navController = navController,
+                loginViewModel = loginViewModel
+            )
         }
     }
 }

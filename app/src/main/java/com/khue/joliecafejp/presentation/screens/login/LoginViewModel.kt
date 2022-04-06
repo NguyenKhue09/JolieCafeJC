@@ -34,6 +34,10 @@ class LoginViewModel @Inject constructor(): ViewModel() {
         println(user.value)
     }
 
+    fun signOut() {
+        _user.value = null
+    }
+
     fun increaseCount() {
         _count.value = _count.value.plus(1)
     }
