@@ -116,6 +116,7 @@ fun ProfileDetail(
         ) {
             Column(
                 modifier = Modifier
+                    .padding(it)
                     .verticalScroll(scrollState)
                     .fillMaxSize(),
                 verticalArrangement = Arrangement.Top,

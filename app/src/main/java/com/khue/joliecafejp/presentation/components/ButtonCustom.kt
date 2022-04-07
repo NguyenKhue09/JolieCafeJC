@@ -18,7 +18,7 @@ fun ButtonCustom(
     onClick: () -> Unit,
     paddingValues: PaddingValues,
     contentPadding: PaddingValues,
-    buttonElevation: ButtonElevation?
+    buttonElevation: ButtonElevation?,
 ) {
 
     TextButton(

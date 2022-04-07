@@ -1,5 +1,6 @@
 package com.khue.joliecafejp.navigation.nav_graph
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -14,14 +15,22 @@ const val NONE_ROUTE = "none"
 @Composable
 fun SetupNavGraph(
     navController: NavHostController,
-    loginViewModel: LoginViewModel
+    loginViewModel: LoginViewModel,
+    paddingValues: PaddingValues
 ) {
     NavHost(
         navController = navController,
         startDestination = BOTTOM_ROUTE,
         route = ROOT_GRAPH_ROUTE
     ) {
-        bottomNavGraph(navController = navController, loginViewModel)
-        authNavGraph(navController = navController, loginViewModel)
+        bottomNavGraph(
+            navController = navController,
+            loginViewModel = loginViewModel,
+            paddingValues = paddingValues
+        )
+        authNavGraph(
+            navController = navController,
+            loginViewModel = loginViewModel
+        )
     }
 }

@@ -24,10 +24,7 @@ import com.khue.joliecafejp.navigation.nav_graph.SetupNavGraph
 import com.khue.joliecafejp.navigation.nav_screen.AuthScreen
 import com.khue.joliecafejp.navigation.nav_screen.ProfileSubScreen
 import com.khue.joliecafejp.presentation.screens.login.LoginViewModel
-import com.khue.joliecafejp.ui.theme.bottomNavCornerRadius
-import com.khue.joliecafejp.ui.theme.greyOpacity60Primary
-import com.khue.joliecafejp.ui.theme.greyPrimaryVariant
-import com.khue.joliecafejp.ui.theme.textColor
+import com.khue.joliecafejp.ui.theme.*
 
 
 @Composable
@@ -38,9 +35,14 @@ fun MainScreen(
     Scaffold(
         bottomBar = {
                 BottomBar(navController = navController)
-        }
+        },
+        backgroundColor = MaterialTheme.colors.greyPrimary
     ) {
-        SetupNavGraph(navController = navController, loginViewModel)
+        SetupNavGraph(
+            navController = navController,
+            loginViewModel = loginViewModel,
+            paddingValues = it
+        )
     }
 }
 
@@ -59,14 +61,14 @@ fun BottomBar(navController: NavHostController) {
         mutableStateOf(true)
     }
 
-    when(navBackStackEntry?.destination?.route) {
-        AuthScreen.Login.route -> bottomNavVisible = false
-        AuthScreen.SignUp.route -> bottomNavVisible = false
-        ProfileSubScreen.ProfileDetail.route -> bottomNavVisible = false
-        ProfileSubScreen.AddressBook.route -> bottomNavVisible = false
-        ProfileSubScreen.OrderHistory.route -> bottomNavVisible = false
-        ProfileSubScreen.Settings.route -> bottomNavVisible = false
-        else -> bottomNavVisible = true
+    bottomNavVisible = when(navBackStackEntry?.destination?.route) {
+        AuthScreen.Login.route -> false
+        AuthScreen.SignUp.route -> false
+        ProfileSubScreen.ProfileDetail.route -> false
+        ProfileSubScreen.AddressBook.route -> false
+        ProfileSubScreen.OrderHistory.route -> false
+        ProfileSubScreen.Settings.route -> false
+        else -> true
     }
 
     AnimatedVisibility(

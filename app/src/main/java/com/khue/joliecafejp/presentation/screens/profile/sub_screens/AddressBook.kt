@@ -1,6 +1,8 @@
 package com.khue.joliecafejp.presentation.screens.profile.sub_screens
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.gestures.ScrollableState
+import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -13,6 +15,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -28,6 +32,8 @@ import com.khue.joliecafejp.navigation.nav_screen.ProfileSubScreen
 import com.khue.joliecafejp.presentation.common.TextFieldCustom
 import com.khue.joliecafejp.presentation.components.*
 import com.khue.joliecafejp.ui.theme.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 @Composable
 fun AddressBook(
@@ -40,6 +46,8 @@ fun AddressBook(
     var showDeleteCustomDialog by remember { mutableStateOf(false) }
 
     val scrollState = rememberScrollState()
+    val coroutineScope = rememberCoroutineScope()
+    val scrollToPosition  = remember { mutableStateOf(0F) }
 
     val isAddNewAddress = remember {
         mutableStateOf(false)
@@ -71,7 +79,7 @@ fun AddressBook(
         backgroundColor = MaterialTheme.colors.greyPrimary,
         topBar = {
             TopBar(
-                titleId =  ProfileSubScreen.ProfileDetail.titleId,
+                titleId =  ProfileSubScreen.AddressBook.titleId,
                 navController = navController
             )
         },
@@ -79,6 +87,7 @@ fun AddressBook(
 
         Column(
             modifier = Modifier
+                .padding(it)
                 .fillMaxSize()
                 .verticalScroll(state = scrollState),
             verticalArrangement = Arrangement.SpaceBetween,
@@ -127,6 +136,9 @@ fun AddressBook(
                 newUserPhoneNumberError = newUserPhoneNumberError,
                 newUserAddressState = newUserAddressState,
                 newUserAddressError = newUserAddressError,
+                scrollState = scrollState,
+                coroutineScope = coroutineScope,
+                scrollToPosition = scrollToPosition
             ) {
 
             }
@@ -147,10 +159,18 @@ fun CardAddNewAddress(
     newUserPhoneNumberError: MutableState<String>,
     newUserAddressState: MutableState<TextFieldValue>,
     newUserAddressError: MutableState<String>,
+    coroutineScope: CoroutineScope,
+    scrollState: ScrollableState,
+    scrollToPosition: MutableState<Float>,
     onAddNewAddress: () -> Unit,
 ) {
 
-    CardCustom(onClick = {}) {
+    CardCustom(
+        modifier = Modifier.onGloballyPositioned { coordinates ->
+            scrollToPosition.value = coordinates.positionInParent().y
+        },
+        onClick = {}
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -176,6 +196,9 @@ fun CardAddNewAddress(
                     IconButton(
                         onClick = {
                             isAddNewAddress.value = true
+                            coroutineScope.launch {
+                                scrollState.animateScrollBy(scrollToPosition.value)
+                            }
                         }
                     ) {
                         Icon(
@@ -376,17 +399,17 @@ fun CardAddNewAddressPrev() {
         mutableStateOf("")
     }
 
-    CardAddNewAddress(
-        isAddNewAddress = isAddNewAddress,
-        isDefaultAddress = isDefaultAddress,
-        newUserNameTextState = newUserNameTextState,
-        newUserNameError = newUserNameError,
-        newUserPhoneNumberState = newUserPhoneNumberState,
-        newUserPhoneNumberError = newUserPhoneNumberError,
-        newUserAddressState = newUserAddressState,
-        newUserAddressError = newUserAddressError,
-    ) {
-
-    }
+//    CardAddNewAddress(
+//        isAddNewAddress = isAddNewAddress,
+//        isDefaultAddress = isDefaultAddress,
+//        newUserNameTextState = newUserNameTextState,
+//        newUserNameError = newUserNameError,
+//        newUserPhoneNumberState = newUserPhoneNumberState,
+//        newUserPhoneNumberError = newUserPhoneNumberError,
+//        newUserAddressState = newUserAddressState,
+//        newUserAddressError = newUserAddressError,
+//    ) {
+//
+//    }
 
 }

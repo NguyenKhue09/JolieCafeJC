@@ -12,6 +12,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -21,7 +23,11 @@ import com.khue.joliecafejp.R
 import com.khue.joliecafejp.ui.theme.*
 
 @Composable
-fun OrderHistoryItem() {
+fun OrderHistoryItem(
+    modifier: Modifier = Modifier,
+    scrollToPosition: MutableState<Float>,
+    onExpanded: () -> Unit
+) {
 
     var isExpanded by remember {
         mutableStateOf(false)
@@ -31,7 +37,12 @@ fun OrderHistoryItem() {
         targetValue = if (!isExpanded) 180f else 0f
     )
 
-    CardCustom(onClick = {}) {
+    CardCustom(
+        modifier = modifier.onGloballyPositioned { coordinates ->
+            scrollToPosition.value = coordinates.positionInParent().y
+        },
+        onClick = {}
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -59,6 +70,7 @@ fun OrderHistoryItem() {
                 IconButton(
                     onClick = {
                         isExpanded = !isExpanded
+                        onExpanded()
                     }
                 ) {
                     Icon(
@@ -260,5 +272,7 @@ fun OrderHistoryItem() {
 @Preview
 @Composable
 fun OrderHistoryItemPrev() {
-    OrderHistoryItem()
+//    OrderHistoryItem(
+//        onExpanded = {}
+//    )
 }

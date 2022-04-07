@@ -15,6 +15,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
@@ -28,6 +31,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.khue.joliecafejp.presentation.screens.login.LoginViewModel
 import com.khue.joliecafejp.ui.theme.*
 import kotlinx.coroutines.launch
+import kotlin.math.absoluteValue
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -35,49 +39,43 @@ fun CartScreen(
     loginViewModel: LoginViewModel = hiltViewModel()
 ) {
 
-    var skipHalfExpanded by remember { mutableStateOf(false) }
-    val state = rememberModalBottomSheetState(
-        initialValue = ModalBottomSheetValue.Hidden,
-        skipHalfExpanded = skipHalfExpanded
-    )
-    val scope = rememberCoroutineScope()
-    ModalBottomSheetLayout(
-        sheetState = state,
-        sheetContent = {
-            LazyColumn {
-                items(50) {
-                    ListItem(
-                        text = { Text("Item $it") },
-                        icon = {
-                            Icon(
-                                Icons.Default.Favorite,
-                                contentDescription = "Localized description"
-                            )
-                        }
-                    )
-                }
-            }
-        }
+    var columnHigh by remember {
+        mutableStateOf(0.dp)
+    }
+
+    var boxHigh by remember {
+        mutableStateOf(0.dp)
+    }
+
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
+
         Column(
-            modifier = Modifier.fillMaxSize().padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier
+                .onGloballyPositioned {
+                    columnHigh = it.size.height.dp
+                }
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .background(Color.White)
         ) {
-            Row(
-                Modifier.toggleable(
-                    value = skipHalfExpanded,
-                    role = Role.Checkbox,
-                    onValueChange = { checked -> skipHalfExpanded = checked }
-                )
+            Box(
+                modifier = Modifier
+                    .onGloballyPositioned {
+                        boxHigh = (it.size.height.dp)
+                    }
+                    .size(100.dp)
+                    .background(color = MaterialTheme.colors.titleTextColor),
             ) {
-                Checkbox(checked = skipHalfExpanded, onCheckedChange = null)
-                Spacer(Modifier.width(16.dp))
-                Text("Skip Half Expanded State")
-            }
-            Spacer(Modifier.height(20.dp))
-            Button(onClick = { scope.launch { state.show() } }) {
-                Text("Click to show sheet")
+                Text(text = "Box high 100")
             }
         }
+
+        Text(text = "Column high $columnHigh")
+        Text(text = "Box high $boxHigh")
+
     }
 }

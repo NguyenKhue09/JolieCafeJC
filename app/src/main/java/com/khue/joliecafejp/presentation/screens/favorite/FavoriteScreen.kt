@@ -29,7 +29,9 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPagerApi::class)
 @Composable
-fun FavoriteScreen() {
+fun FavoriteScreen(
+    paddingValues: PaddingValues
+) {
 
     val tabs = listOf(
         "All",
@@ -45,9 +47,10 @@ fun FavoriteScreen() {
 
     Column(
         modifier = Modifier
+            .padding(paddingValues)
             .fillMaxSize()
             .background(MaterialTheme.colors.greyPrimary)
-            .padding(start = 20.dp, top = 20.dp, bottom = 58.dp, end = 20.dp),
+            .padding(start = 20.dp, top = 20.dp, end = 20.dp),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start
     ) {

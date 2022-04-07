@@ -1,5 +1,6 @@
 package com.khue.joliecafejp.navigation.nav_graph
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
@@ -13,7 +14,11 @@ import com.khue.joliecafejp.presentation.screens.profile.ProfileScreen
 
 
 
-fun NavGraphBuilder.bottomNavGraph(navController: NavHostController, loginViewModel: LoginViewModel) {
+fun NavGraphBuilder.bottomNavGraph(
+    navController: NavHostController,
+    loginViewModel: LoginViewModel,
+    paddingValues: PaddingValues
+) {
     navigation(
         startDestination = BottomBarScreen.Home.route,
         route = BOTTOM_ROUTE
@@ -22,7 +27,9 @@ fun NavGraphBuilder.bottomNavGraph(navController: NavHostController, loginViewMo
             HomeScreen(navController = navController, loginViewModel)
         }
         composable(route = BottomBarScreen.Favorite.route) {
-            FavoriteScreen()
+            FavoriteScreen(
+                paddingValues = paddingValues
+            )
         }
         composable(route = BottomBarScreen.Cart.route) {
             CartScreen()

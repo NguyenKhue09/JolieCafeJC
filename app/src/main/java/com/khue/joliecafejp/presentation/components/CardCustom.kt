@@ -17,7 +17,7 @@ import com.khue.joliecafejp.ui.theme.greyOpacity60Primary
 
 @Composable
 fun CardCustom(
-    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
     shape: CornerBasedShape = Shapes.medium,
     paddingValues: PaddingValues = PaddingValues(
         top = EXTRA_LARGE_PADDING,
@@ -25,10 +25,11 @@ fun CardCustom(
         end = EXTRA_LARGE_PADDING,
         bottom = 0.dp
     ),
+    onClick: () -> Unit,
     content: @Composable () -> Unit,
 ) {
     Card(
-        modifier = Modifier
+        modifier = modifier
             .padding(paddingValues)
             .clickable(
                 indication = null,
