@@ -18,12 +18,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.pager.HorizontalPager
+import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.rememberPagerState
 import com.khue.joliecafejp.R
 import com.khue.joliecafejp.ui.theme.*
 import kotlinx.coroutines.launch
 
 
+@OptIn(ExperimentalPagerApi::class)
 @Composable
 fun FavoriteScreen() {
 
@@ -35,7 +39,9 @@ fun FavoriteScreen() {
         "Pasty"
     )
 
-    var selectedTabIndex by remember { mutableStateOf(0) }
+
+    val pagerState = rememberPagerState(initialPage = 0)
+    val coroutineScope = rememberCoroutineScope()
 
     Column(
         modifier = Modifier
@@ -56,26 +62,29 @@ fun FavoriteScreen() {
 
         CustomScrollableTabRow(
             tabs = tabs,
-            selectedTabIndex = selectedTabIndex,
+            pagerState = pagerState
         ) { tabIndex ->
-            selectedTabIndex = tabIndex
+            coroutineScope.launch {
+                pagerState.animateScrollToPage(page = tabIndex)
+            }
         }
 
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier.fillMaxSize().background(color = Color.White)
-        ) {
-            Text(tabs[selectedTabIndex])
+        HorizontalPager(
+            count = tabs.size,
+            state = pagerState,
+        ) { page ->
+            FavoriteBody(title = tabs[page])
         }
     }
 }
 
 
+@OptIn(ExperimentalPagerApi::class)
 @Composable
 fun CustomScrollableTabRow(
     tabs: List<String>,
-    selectedTabIndex: Int,
-    onTabClick: (Int) -> Unit
+    pagerState: PagerState,
+    onTabClick: (Int) -> Unit,
 ) {
     val density = LocalDensity.current
     val tabWidths = remember {
@@ -86,17 +95,19 @@ fun CustomScrollableTabRow(
         tabWidthStateList
     }
 
+
+
     ScrollableTabRow(
         modifier = Modifier.padding(top = 24.dp),
-        selectedTabIndex = selectedTabIndex,
+        selectedTabIndex = pagerState.currentPage,
         backgroundColor = Color.Transparent,
         contentColor = MaterialTheme.colors.textColor,
         edgePadding = 0.dp,
         indicator = { tabPositions ->
             TabRowDefaults.Indicator(
                 modifier = Modifier.customTabIndicatorOffset(
-                    currentTabPosition = tabPositions[selectedTabIndex],
-                    tabWidth = tabWidths[selectedTabIndex]
+                    currentTabPosition = tabPositions[pagerState.currentPage],
+                    tabWidth = tabWidths[pagerState.currentPage]
                 ),
                 color = MaterialTheme.colors.titleTextColor
             )
@@ -105,7 +116,7 @@ fun CustomScrollableTabRow(
         tabs.forEachIndexed { tabIndex, tab ->
             Tab(
                 modifier = Modifier.height(30.dp),
-                selected = selectedTabIndex == tabIndex,
+                selected = pagerState.currentPage == tabIndex,
                 onClick = { onTabClick(tabIndex) },
                 selectedContentColor = MaterialTheme.colors.titleTextColor,
                 unselectedContentColor = MaterialTheme.colors.textColor,

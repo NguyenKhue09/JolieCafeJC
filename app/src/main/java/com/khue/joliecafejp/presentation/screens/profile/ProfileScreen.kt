@@ -6,6 +6,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -14,7 +15,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavHostController
 import com.google.firebase.auth.FirebaseAuth
 import com.khue.joliecafejp.R
+import com.khue.joliecafejp.navigation.nav_graph.AUTHENTICATION_ROUTE
 import com.khue.joliecafejp.navigation.nav_graph.NONE_ROUTE
+import com.khue.joliecafejp.navigation.nav_screen.BottomBarScreen
 import com.khue.joliecafejp.navigation.nav_screen.ProfileSubScreen
 import com.khue.joliecafejp.presentation.components.CardCustom
 import com.khue.joliecafejp.presentation.components.CustomImage
@@ -27,7 +30,8 @@ fun ProfileScreen(
     loginViewModel: LoginViewModel
 ) {
 
-    val profileBottomNavItem = ProfileSubScreen::class.sealedSubclasses.mapNotNull { it.objectInstance }
+    val profileBottomNavItem =
+        ProfileSubScreen::class.sealedSubclasses.mapNotNull { it.objectInstance }
 
     Column(
         modifier = Modifier
@@ -37,7 +41,7 @@ fun ProfileScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         CustomImage()
-        
+
         Text(
             text = stringResource(R.string.sweet_latte),
             modifier = Modifier.padding(top = LARGE_PADDING, bottom = LARGE_PADDING),
@@ -56,6 +60,12 @@ fun ProfileScreen(
                     } else {
                         FirebaseAuth.getInstance().signOut()
                         loginViewModel.signOut()
+                        navController.navigate(AUTHENTICATION_ROUTE) {
+                            popUpTo(BottomBarScreen.Home.route) {
+                                inclusive = true
+                            }
+                            launchSingleTop = true
+                        }
                     }
                 }
             ) {
