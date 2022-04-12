@@ -14,7 +14,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -38,7 +37,7 @@ fun FavoriteItem(
             modifier = modifier
                 .fillMaxWidth()
                 .padding(
-                    all = EXTRA_SMALL_PADDING
+                    all = MEDIUM_SMALL_PADDING
                 ),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
@@ -68,7 +67,9 @@ fun FavoriteItem(
                     horizontalArrangement = Arrangement.Start
                 ) {
                     Text(
-                        modifier = modifier.wrapContentSize(align = Alignment.CenterStart).weight(4f, false),
+                        modifier = modifier
+                            .wrapContentSize(align = Alignment.CenterStart)
+                            .weight(4f, false),
                         text = "Latte",
                         fontFamily = raleway,
                         color = MaterialTheme.colors.textColor,
@@ -87,7 +88,9 @@ fun FavoriteItem(
                     )
 
                     Text(
-                        modifier = modifier.wrapContentSize(align = Alignment.CenterStart).weight(4f, false),
+                        modifier = modifier
+                            .wrapContentSize(align = Alignment.CenterStart)
+                            .weight(4f, false),
                         text = "50",
                         fontFamily = montserratFontFamily,
                         color = MaterialTheme.colors.textColor,
@@ -96,8 +99,13 @@ fun FavoriteItem(
                         overflow = TextOverflow.Ellipsis,
                     )
 
+                    Spacer(modifier = Modifier.width(EXTRA_EXTRA_SMALL_PADDING))
+
                     Icon(
-                        modifier = modifier.size(15.dp).wrapContentSize(align = Alignment.CenterStart).weight(1f, false),
+                        modifier = modifier
+                            .size(15.dp)
+                            .wrapContentSize(align = Alignment.CenterStart)
+                            .weight(1f, false),
                         painter = painterResource(id = R.drawable.ic_favorite),
                         contentDescription = stringResource(id = R.string.favorite),
                         tint = MaterialTheme.colors.textColor

@@ -9,7 +9,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -30,9 +29,9 @@ fun ProductOrderHistoryItem(
         modifier = modifier
             .fillMaxWidth()
             .padding(
-                start = EXTRA_SMALL_PADDING,
-                top = EXTRA_SMALL_PADDING,
-                end = EXTRA_SMALL_PADDING
+                start = MEDIUM_SMALL_PADDING,
+                top = MEDIUM_SMALL_PADDING,
+                end = MEDIUM_SMALL_PADDING
             )
             .height(IntrinsicSize.Max),
         horizontalArrangement = Arrangement.SpaceBetween,

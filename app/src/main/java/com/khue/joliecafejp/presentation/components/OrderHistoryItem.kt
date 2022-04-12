@@ -2,6 +2,9 @@ package com.khue.joliecafejp.presentation.components
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Icon
@@ -70,7 +73,7 @@ fun OrderHistoryItem(
                 IconButton(
                     onClick = {
                         isExpanded = !isExpanded
-                        onExpanded()
+                        if(isExpanded) onExpanded()
                     }
                 ) {
                     Icon(
@@ -82,7 +85,10 @@ fun OrderHistoryItem(
                 }
             }
 
-            AnimatedVisibility(visible = isExpanded) {
+            AnimatedVisibility(
+                visible = isExpanded,
+                exit = fadeOut() + shrinkVertically(animationSpec = tween(durationMillis = 500))
+            ) {
                 Column(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalAlignment = Alignment.Start,

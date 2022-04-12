@@ -6,7 +6,6 @@ import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -124,7 +123,7 @@ fun ImagePickerBottomSheetContent(
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = MaterialTheme.colors.textColor
             ),
-            contentPadding = PaddingValues(all = EXTRA_SMALL_PADDING),
+            contentPadding = PaddingValues(all = MEDIUM_SMALL_PADDING),
             onClick = {
                 coroutineScope.launch { modalBottomSheetState.hide() }
             }

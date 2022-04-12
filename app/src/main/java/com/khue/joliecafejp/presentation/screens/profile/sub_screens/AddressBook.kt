@@ -3,7 +3,6 @@ package com.khue.joliecafejp.presentation.screens.profile.sub_screens
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.gestures.ScrollableState
 import androidx.compose.foundation.gestures.animateScrollBy
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
@@ -17,7 +16,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInParent
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -39,10 +37,6 @@ import kotlinx.coroutines.launch
 fun AddressBook(
     navController: NavHostController
 ) {
-
-    val configuration = LocalConfiguration.current
-    val screenHeight = (configuration.screenHeightDp.toFloat() * 0.8).dp
-
     var showDeleteCustomDialog by remember { mutableStateOf(false) }
 
     val scrollState = rememberScrollState()
@@ -97,7 +91,7 @@ fun AddressBook(
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(screenHeight),
+                    .weight(1f),
                 verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -340,7 +334,7 @@ fun CardAddNewAddress(
                             paddingValues = PaddingValues(top = EXTRA_LARGE_PADDING),
                             contentPadding = PaddingValues(
                                 horizontal = EXTRA_LARGE_PADDING,
-                                vertical = EXTRA_SMALL_PADDING
+                                vertical = MEDIUM_SMALL_PADDING
                             ),
                             buttonElevation = ButtonDefaults.elevation(
                                 defaultElevation = 0.dp,
@@ -361,7 +355,7 @@ fun CardAddNewAddress(
                             ),
                             contentPadding = PaddingValues(
                                 horizontal = EXTRA_LARGE_PADDING,
-                                vertical = EXTRA_SMALL_PADDING
+                                vertical = MEDIUM_SMALL_PADDING
                             ),
                             buttonElevation = null
                         )

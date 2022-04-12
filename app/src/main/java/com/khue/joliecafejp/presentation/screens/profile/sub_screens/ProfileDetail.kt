@@ -39,6 +39,7 @@ import com.khue.joliecafejp.ui.theme.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
+
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ProfileDetail(
@@ -436,7 +437,7 @@ fun CardChangePassword(
                         paddingValues = PaddingValues(top = EXTRA_LARGE_PADDING),
                         contentPadding = PaddingValues(
                             horizontal = EXTRA_LARGE_PADDING,
-                            vertical = EXTRA_SMALL_PADDING
+                            vertical = MEDIUM_SMALL_PADDING
                         ),
                         buttonElevation = ButtonDefaults.elevation(
                             defaultElevation = 0.dp,
@@ -458,7 +459,7 @@ fun CardChangePassword(
                         ),
                         contentPadding = PaddingValues(
                             horizontal = EXTRA_LARGE_PADDING,
-                            vertical = EXTRA_SMALL_PADDING
+                            vertical = MEDIUM_SMALL_PADDING
                         ),
                         buttonElevation = null
                     )
@@ -599,7 +600,7 @@ fun CardNewPassword(
                     paddingValues = PaddingValues(top = EXTRA_LARGE_PADDING),
                     contentPadding = PaddingValues(
                         horizontal = EXTRA_LARGE_PADDING,
-                        vertical = EXTRA_SMALL_PADDING
+                        vertical = MEDIUM_SMALL_PADDING
                     ),
                     buttonElevation = ButtonDefaults.elevation(
                         defaultElevation = 0.dp,
@@ -622,7 +623,7 @@ fun CardNewPassword(
                     ),
                     contentPadding = PaddingValues(
                         horizontal = EXTRA_LARGE_PADDING,
-                        vertical = EXTRA_SMALL_PADDING
+                        vertical = MEDIUM_SMALL_PADDING
                     ),
                     buttonElevation = null
                 )

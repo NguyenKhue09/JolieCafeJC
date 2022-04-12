@@ -1,8 +1,6 @@
 package com.khue.joliecafejp.presentation.components
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -240,7 +238,7 @@ fun AddressBookItem(
                             paddingValues = PaddingValues(top = EXTRA_LARGE_PADDING),
                             contentPadding = PaddingValues(
                                 horizontal = EXTRA_LARGE_PADDING,
-                                vertical = EXTRA_SMALL_PADDING
+                                vertical = MEDIUM_SMALL_PADDING
                             ),
                             buttonElevation = ButtonDefaults.elevation(
                                 defaultElevation = 0.dp,
@@ -260,7 +258,7 @@ fun AddressBookItem(
                             ),
                             contentPadding = PaddingValues(
                                 horizontal = EXTRA_LARGE_PADDING,
-                                vertical = EXTRA_SMALL_PADDING
+                                vertical = MEDIUM_SMALL_PADDING
                             ),
                             buttonElevation = null
                         )

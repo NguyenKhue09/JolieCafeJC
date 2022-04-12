@@ -6,7 +6,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import com.khue.joliecafejp.navigation.nav_screen.BottomBarScreen
-import com.khue.joliecafejp.presentation.screens.cart.CartScreen
+import com.khue.joliecafejp.presentation.screens.cart.CardScreen
 import com.khue.joliecafejp.presentation.screens.favorite.FavoriteScreen
 import com.khue.joliecafejp.presentation.screens.home.HomeScreen
 import com.khue.joliecafejp.presentation.screens.login.LoginViewModel
@@ -32,7 +32,7 @@ fun NavGraphBuilder.bottomNavGraph(
             )
         }
         composable(route = BottomBarScreen.Cart.route) {
-            CartScreen()
+            CardScreen()
         }
         composable(route = BottomBarScreen.Profile.route) {
             ProfileScreen(

@@ -15,8 +15,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.layout.*
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
@@ -35,7 +34,7 @@ import kotlin.math.absoluteValue
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun CartScreen(
+fun CardScreen(
     loginViewModel: LoginViewModel = hiltViewModel()
 ) {
 
@@ -48,16 +47,15 @@ fun CartScreen(
     }
 
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize().onGloballyPositioned {
+            columnHigh = it.size.height.dp
+        },
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
         Column(
             modifier = Modifier
-                .onGloballyPositioned {
-                    columnHigh = it.size.height.dp
-                }
                 .fillMaxWidth()
                 .wrapContentHeight()
                 .background(Color.White)
@@ -67,15 +65,16 @@ fun CartScreen(
                     .onGloballyPositioned {
                         boxHigh = (it.size.height.dp)
                     }
-                    .size(100.dp)
+                    .height(100.dp)
+                    .width(392.dp)
                     .background(color = MaterialTheme.colors.titleTextColor),
             ) {
-                Text(text = "Box high 100")
+                Text(text = "Box high 100", color = MaterialTheme.colors.textColor)
             }
         }
 
-        Text(text = "Column high $columnHigh")
-        Text(text = "Box high $boxHigh")
-
+        Text(text = "Column high $columnHigh", color = MaterialTheme.colors.textColor)
+        Text(text = "Box high $boxHigh", color = MaterialTheme.colors.textColor)
+        Text(text = "Density ${LocalDensity.current.density}", color = MaterialTheme.colors.textColor)
     }
 }

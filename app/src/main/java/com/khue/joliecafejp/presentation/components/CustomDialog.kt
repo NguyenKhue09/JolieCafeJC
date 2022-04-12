@@ -14,7 +14,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.khue.joliecafejp.R
 import com.khue.joliecafejp.ui.theme.*
-import kotlinx.coroutines.launch
 
 @Composable
 fun CustomDialog(
@@ -89,7 +88,7 @@ fun CustomDialog(
                         paddingValues = PaddingValues(top = 0.dp),
                         contentPadding = PaddingValues(
                             horizontal = EXTRA_LARGE_PADDING,
-                            vertical = EXTRA_SMALL_PADDING
+                            vertical = MEDIUM_SMALL_PADDING
                         ),
                         buttonElevation = ButtonDefaults.elevation(
                             defaultElevation = 0.dp,
@@ -107,7 +106,7 @@ fun CustomDialog(
                         ),
                         contentPadding = PaddingValues(
                             horizontal = EXTRA_LARGE_PADDING,
-                            vertical = EXTRA_SMALL_PADDING
+                            vertical = MEDIUM_SMALL_PADDING
                         ),
                         buttonElevation = null
                     )
