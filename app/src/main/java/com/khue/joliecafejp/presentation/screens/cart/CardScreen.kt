@@ -14,6 +14,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.*
 import androidx.compose.ui.platform.LocalDensity
@@ -71,7 +72,17 @@ fun CardScreen(
             ) {
                 Text(text = "Box high 100", color = MaterialTheme.colors.textColor)
             }
+
+            Card(
+                modifier = Modifier
+                    .size(200.dp)
+                    .clip(MaterialTheme.shapes.medium)
+                    .background(Color.Red),
+            ) {
+
+            }
         }
+
 
         Text(text = "Column high $columnHigh", color = MaterialTheme.colors.textColor)
         Text(text = "Box high $boxHigh", color = MaterialTheme.colors.textColor)

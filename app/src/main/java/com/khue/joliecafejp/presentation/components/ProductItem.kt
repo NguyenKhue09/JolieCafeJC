@@ -2,10 +2,8 @@ package com.khue.joliecafejp.presentation.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,12 +20,13 @@ import com.khue.joliecafejp.presentation.common.CardCustom
 import com.khue.joliecafejp.ui.theme.*
 
 @Composable
-fun FavoriteItem(
+fun ProductItem(
     modifier: Modifier = Modifier,
     name: String = "",
+    type: String = "",
     favorites: Int = 0,
     price: Int = 0,
-    onFavClick: () -> Unit = {},
+    onAdd: () -> Unit = {},
     onClick: () -> Unit = {}
 ) {
     CardCustom(
@@ -118,6 +117,19 @@ fun FavoriteItem(
                 }
 
                 Text(
+                    modifier = modifier
+                        .wrapContentSize()
+                        .padding(vertical = EXTRA_EXTRA_SMALL_PADDING),
+                    text = "Coffee",
+                    fontFamily = raleway,
+                    color = MaterialTheme.colors.textColor,
+                    fontSize = MaterialTheme.typography.caption.fontSize,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Text(
                     modifier = modifier.wrapContentSize(),
                     text = "90.000 VND",
                     fontFamily = montserratFontFamily,
@@ -129,13 +141,25 @@ fun FavoriteItem(
 
             }
 
-            IconButton(
-                onClick = {},
+            Button(
+                onClick = onAdd,
+                colors = ButtonDefaults.buttonColors(
+                    contentColor = MaterialTheme.colors.textColor,
+                    backgroundColor = MaterialTheme.colors.textColor2
+                ),
+                shape = MaterialTheme.shapes.medium,
+                contentPadding = PaddingValues(all = SMALL_PADDING),
             ) {
                 Icon(
-                    painter = painterResource(id = R.drawable.ic_heart_fill),
+                    painter = painterResource(id = R.drawable.ic_cart),
                     contentDescription = stringResource(id = R.string.favorite),
-                    tint = MaterialTheme.colors.titleTextColor
+                    tint = MaterialTheme.colors.textColor
+                )
+                Spacer(modifier = Modifier.width(SMALL_PADDING))
+                Text(
+                    text = stringResource(R.string.add),
+                    fontSize = MaterialTheme.typography.subtitle2.fontSize,
+                    fontFamily = ralewayMedium,
                 )
             }
         }
@@ -144,6 +168,6 @@ fun FavoriteItem(
 
 @Preview
 @Composable
-fun FavoriteItemPrev() {
-    FavoriteItem()
+fun ProductItemPrev() {
+    ProductItem()
 }

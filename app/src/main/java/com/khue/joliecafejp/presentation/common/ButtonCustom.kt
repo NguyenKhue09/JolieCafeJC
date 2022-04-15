@@ -1,13 +1,11 @@
-package com.khue.joliecafejp.presentation.components
+package com.khue.joliecafejp.presentation.common
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import com.khue.joliecafejp.ui.theme.ralewayMedium
 
 @Composable

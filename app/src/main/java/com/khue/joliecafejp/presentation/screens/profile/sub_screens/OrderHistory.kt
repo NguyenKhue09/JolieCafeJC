@@ -9,20 +9,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
-import com.khue.joliecafejp.R
 import com.khue.joliecafejp.navigation.nav_screen.ProfileSubScreen
 import com.khue.joliecafejp.presentation.components.OrderHistoryItem
-import com.khue.joliecafejp.presentation.components.ProductOrderHistoryItem
-import com.khue.joliecafejp.presentation.components.TopBar
+import com.khue.joliecafejp.presentation.common.TopBar
 import com.khue.joliecafejp.ui.theme.greyPrimary
-import com.khue.joliecafejp.ui.theme.ralewayMedium
-import com.khue.joliecafejp.ui.theme.textColor
-import com.khue.joliecafejp.ui.theme.titleTextColor
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 

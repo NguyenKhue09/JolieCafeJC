@@ -6,7 +6,6 @@ import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -19,8 +18,8 @@ import com.khue.joliecafejp.navigation.nav_graph.AUTHENTICATION_ROUTE
 import com.khue.joliecafejp.navigation.nav_graph.NONE_ROUTE
 import com.khue.joliecafejp.navigation.nav_screen.BottomBarScreen
 import com.khue.joliecafejp.navigation.nav_screen.ProfileSubScreen
-import com.khue.joliecafejp.presentation.components.CardCustom
-import com.khue.joliecafejp.presentation.components.CustomImage
+import com.khue.joliecafejp.presentation.common.CardCustom
+import com.khue.joliecafejp.presentation.common.CustomImage
 import com.khue.joliecafejp.presentation.screens.login.LoginViewModel
 import com.khue.joliecafejp.ui.theme.*
 

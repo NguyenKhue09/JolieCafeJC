@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.TextFieldDefaults.indicatorLine
@@ -34,9 +35,11 @@ fun TextFieldCustom(
     modifier: Modifier = Modifier,
     textFieldValue: MutableState<TextFieldValue>,
     keyBoardType: KeyboardType,
+    imeAction: ImeAction = ImeAction.Next,
     trailingIcon: @Composable() (() -> Unit)?,
     placeHolder: String,
     visualTransformation: VisualTransformation,
+    keyboardActions: KeyboardActions = KeyboardActions.Default,
     error: String = "",
     isError: Boolean = error.isNotEmpty(),
     padding: Dp = 20.dp,
@@ -86,8 +89,9 @@ fun TextFieldCustom(
             singleLine = singleLine,
             keyboardOptions = KeyboardOptions(
                 keyboardType = keyBoardType,
-                imeAction = ImeAction.Next
+                imeAction = imeAction
             ),
+            keyboardActions = keyboardActions,
             interactionSource = interactionSource,
             visualTransformation = visualTransformation,
             enabled = enabled,

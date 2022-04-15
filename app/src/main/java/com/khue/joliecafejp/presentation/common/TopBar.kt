@@ -1,4 +1,4 @@
-package com.khue.joliecafejp.presentation.components
+package com.khue.joliecafejp.presentation.common
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row

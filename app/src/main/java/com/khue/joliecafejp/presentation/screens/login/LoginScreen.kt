@@ -27,7 +27,6 @@ import androidx.compose.ui.text.input.*
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.facebook.CallbackManager
 import com.facebook.FacebookSdk
@@ -38,17 +37,12 @@ import com.khue.joliecafejp.R
 import com.khue.joliecafejp.firebase.firebase_authentication.face_book_signin.FirebaseFacebookLogin
 import com.khue.joliecafejp.firebase.firebase_authentication.gmail_password_authentication.FirebaseGmailPasswordAuth
 import com.khue.joliecafejp.firebase.firebase_authentication.google_signin.AuthResultContract
-import com.khue.joliecafejp.navigation.nav_graph.AUTHENTICATION_ROUTE
 import com.khue.joliecafejp.navigation.nav_graph.BOTTOM_ROUTE
 import com.khue.joliecafejp.navigation.nav_screen.AuthScreen
 import com.khue.joliecafejp.presentation.common.FaceOrGoogleLogin
 import com.khue.joliecafejp.presentation.common.TextCustom
 import com.khue.joliecafejp.presentation.common.TextFieldCustom
 import com.khue.joliecafejp.ui.theme.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
-import kotlinx.coroutines.withContext
 
 @Composable
 fun LoginScreen(

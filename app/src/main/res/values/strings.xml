@@ -65,4 +65,9 @@
     <string name="total">Total</string>
     <string name="notification">Notifications</string>
     <string name="language">Language</string>
+    <string name="notifications">Notifications</string>
+    <string name="user_name">Hi, %s!</string>
+    <string name="user_coins">%d coins</string>
+    <string name="categories">Categories</string>
+    <string name="best_sellers">Best sellers</string>
 </resources>

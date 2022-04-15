@@ -13,8 +13,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavHostController
 import com.khue.joliecafejp.R
 import com.khue.joliecafejp.navigation.nav_screen.ProfileSubScreen
-import com.khue.joliecafejp.presentation.components.CardCustom
-import com.khue.joliecafejp.presentation.components.TopBar
+import com.khue.joliecafejp.presentation.common.CardCustom
+import com.khue.joliecafejp.presentation.common.TopBar
 import com.khue.joliecafejp.ui.theme.*
 
 @Composable
