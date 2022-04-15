@@ -34,19 +34,22 @@ import com.google.accompanist.pager.*
 import com.khue.joliecafejp.R
 import com.khue.joliecafejp.navigation.nav_graph.AUTHENTICATION_ROUTE
 import com.khue.joliecafejp.navigation.nav_screen.BottomBarScreen
+import com.khue.joliecafejp.navigation.nav_screen.HomeSubScreen
 import com.khue.joliecafejp.presentation.common.TextCustom
 import com.khue.joliecafejp.presentation.components.CategoryButton
 import com.khue.joliecafejp.presentation.components.HomeTopBar
+import com.khue.joliecafejp.presentation.components.ImagePickerBottomSheetContent
 import com.khue.joliecafejp.presentation.components.ProductItem
 import com.khue.joliecafejp.presentation.screens.login.LoginViewModel
 import com.khue.joliecafejp.presentation.viewmodels.HomeViewModel
 import com.khue.joliecafejp.ui.theme.*
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.yield
 import kotlin.math.absoluteValue
 
 
-@OptIn(ExperimentalPagerApi::class)
+@OptIn(ExperimentalPagerApi::class, ExperimentalMaterialApi::class)
 @Composable
 fun HomeScreen(
     navController: NavHostController,
@@ -58,7 +61,13 @@ fun HomeScreen(
     val searchTextState by homeViewModel.searchTextState
     val pagerState = rememberPagerState()
 
-    LaunchedEffect(user){
+    // Bottom Sheet
+    val coroutineScope = rememberCoroutineScope()
+    val state = rememberModalBottomSheetState(
+        initialValue = ModalBottomSheetValue.Hidden
+    )
+
+    LaunchedEffect(user) {
         if (user == null) {
             navController.navigate(AUTHENTICATION_ROUTE) {
                 popUpTo(BottomBarScreen.Home.route) {
@@ -68,67 +77,88 @@ fun HomeScreen(
             }
         }
     }
-    
-    
-    Scaffold(
-        topBar = {
-            HomeTopBar(
-                userName = "Khue",
-                userCoins = 300
-            ) {
-            }
-        },
-        backgroundColor = MaterialTheme.colors.greyPrimary
-    ) { paddingValues ->
-        val padding = paddingValues.calculateBottomPadding()
 
-
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(start = EXTRA_LARGE_PADDING, end = EXTRA_LARGE_PADDING, bottom = padding)
-                .verticalScroll(state = rememberScrollState()),
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            SearchBar(
-                text = searchTextState,
-                onCloseClicked = {
-                    homeViewModel.updateSearchTextState(newValue = "")
-                },
-                onSearchClicked = { searchString ->
-
-                },
-                onTextChange = { newValue ->
-                    homeViewModel.updateSearchTextState(newValue = newValue)
-                }
+    ModalBottomSheetLayout(
+        sheetState = state,
+        modifier = Modifier.fillMaxSize(),
+        sheetContent = {
+            ImagePickerBottomSheetContent(
+                coroutineScope = coroutineScope,
+                modalBottomSheetState = state
             )
-            ImageSlider(pagerState = pagerState)
-            Categories()
-            TextCustom(
-                modifier = Modifier
-                    .align(alignment = Alignment.Start)
-                    .padding(vertical = EXTRA_LARGE_PADDING),
-                content = stringResource(R.string.best_sellers),
-                color = MaterialTheme.colors.textColor2,
-                fontFamily = ralewayMedium
-            )
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(400.dp),
-            ) {
-                repeat(10) {
-                    item {
-                        ProductItem()
+        }
+    ) {
+        Scaffold(
+            topBar = {
+                HomeTopBar(
+                    userName = user!!.displayName,
+                    userCoins = 300
+                ) {
+                    navController.navigate(HomeSubScreen.Notifications.route) {
+                        launchSingleTop = true
                     }
                 }
-                item {
-                    Spacer(modifier = Modifier.height(EXTRA_LARGE_PADDING))
-                }
-            }
+            },
+            backgroundColor = MaterialTheme.colors.greyPrimary
+        ) { paddingValues ->
+            val padding = paddingValues.calculateBottomPadding()
 
-            Spacer(modifier = Modifier.height(58.dp))
+
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(
+                        start = EXTRA_LARGE_PADDING,
+                        end = EXTRA_LARGE_PADDING,
+                        bottom = padding
+                    )
+                    .verticalScroll(state = rememberScrollState()),
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                SearchBar(
+                    text = searchTextState,
+                    onCloseClicked = {
+                        homeViewModel.updateSearchTextState(newValue = "")
+                    },
+                    onSearchClicked = { searchString ->
+
+                    },
+                    onTextChange = { newValue ->
+                        homeViewModel.updateSearchTextState(newValue = newValue)
+                    }
+                )
+                ImageSlider(pagerState = pagerState)
+                Categories()
+                TextCustom(
+                    modifier = Modifier
+                        .align(alignment = Alignment.Start)
+                        .padding(vertical = EXTRA_LARGE_PADDING),
+                    content = stringResource(R.string.best_sellers),
+                    color = MaterialTheme.colors.textColor2,
+                    fontFamily = ralewayMedium
+                )
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(400.dp),
+                ) {
+                    repeat(10) {
+                        item {
+                            ProductItem(
+                                onAdd = {
+                                    coroutineScope.launch { state.show() }
+                                }
+                            )
+                        }
+                    }
+                    item {
+                        Spacer(modifier = Modifier.height(EXTRA_LARGE_PADDING))
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(58.dp))
+            }
         }
     }
 }
@@ -299,7 +329,7 @@ fun Categories() {
         "Coffee",
         "More"
     )
-    
+
     Column(
         modifier = Modifier
             .fillMaxWidth()

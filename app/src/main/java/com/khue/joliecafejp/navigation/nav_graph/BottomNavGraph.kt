@@ -20,12 +20,19 @@ fun NavGraphBuilder.bottomNavGraph(
     paddingValues: PaddingValues
 ) {
     navigation(
-        startDestination = BottomBarScreen.Home.route,
+        startDestination = "home-root",
         route = BOTTOM_ROUTE
     ) {
-        composable(route = BottomBarScreen.Home.route) {
-            HomeScreen(navController = navController, loginViewModel)
+        navigation(
+            startDestination = BottomBarScreen.Home.route,
+            route = "home-root"
+        ) {
+            composable(route = BottomBarScreen.Home.route) {
+                HomeScreen(navController = navController, loginViewModel)
+            }
+            homeSubNavGraph(navController = navController)
         }
+
         composable(route = BottomBarScreen.Favorite.route) {
             FavoriteScreen(
                 paddingValues = paddingValues
@@ -34,8 +41,18 @@ fun NavGraphBuilder.bottomNavGraph(
         composable(route = BottomBarScreen.Cart.route) {
             CardScreen()
         }
-        composable(route = BottomBarScreen.Profile.route) {
-            ProfileScreen(
+
+        navigation(
+            startDestination = BottomBarScreen.Profile.route,
+            route = "profile-root"
+        ) {
+            composable(route = BottomBarScreen.Profile.route) {
+                ProfileScreen(
+                    navController = navController,
+                    loginViewModel = loginViewModel
+                )
+            }
+            profileNavGraph(
                 navController = navController,
                 loginViewModel = loginViewModel
             )

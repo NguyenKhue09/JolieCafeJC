@@ -8,6 +8,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
@@ -20,7 +21,8 @@ import com.khue.joliecafejp.ui.theme.titleTextColor
 @Composable
 fun TopBar(
     titleId: Int,
-    navController: NavHostController
+    navController: NavHostController,
+    trailingButton: (@Composable () -> Unit)? = null
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -36,6 +38,7 @@ fun TopBar(
             )
         }
         Text(
+            modifier = Modifier.weight(1f, fill = true),
             text = stringResource(
                 id = titleId
             ),
@@ -43,5 +46,8 @@ fun TopBar(
             fontFamily = ralewayMedium,
             color = MaterialTheme.colors.titleTextColor
         )
+        if (trailingButton != null) {
+            trailingButton()
+        }
     }
 }

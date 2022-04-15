@@ -18,7 +18,7 @@ import com.khue.joliecafejp.ui.theme.greyOpacity60Primary
 @Composable
 fun CardCustom(
     modifier: Modifier = Modifier,
-    shape: CornerBasedShape = Shapes.medium,
+    shape: CornerBasedShape = MaterialTheme.shapes.medium,
     paddingValues: PaddingValues = PaddingValues(
         top = EXTRA_LARGE_PADDING,
         start = EXTRA_LARGE_PADDING,

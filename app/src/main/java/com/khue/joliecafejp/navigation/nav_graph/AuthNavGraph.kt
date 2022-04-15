@@ -35,7 +35,5 @@ fun NavGraphBuilder.authNavGraph(
         ) {
             ForgotPassword(navController = navController)
         }
-
-        profileNavGraph(navController = navController, loginViewModel = loginViewModel)
     }
 }

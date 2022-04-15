@@ -22,6 +22,7 @@ import androidx.navigation.compose.rememberNavController
 import com.khue.joliecafejp.navigation.nav_screen.BottomBarScreen
 import com.khue.joliecafejp.navigation.nav_graph.SetupNavGraph
 import com.khue.joliecafejp.navigation.nav_screen.AuthScreen
+import com.khue.joliecafejp.navigation.nav_screen.HomeSubScreen
 import com.khue.joliecafejp.navigation.nav_screen.ProfileSubScreen
 import com.khue.joliecafejp.presentation.screens.login.LoginViewModel
 import com.khue.joliecafejp.ui.theme.*
@@ -68,6 +69,8 @@ fun BottomBar(navController: NavHostController) {
         ProfileSubScreen.AddressBook.route -> false
         ProfileSubScreen.OrderHistory.route -> false
         ProfileSubScreen.Settings.route -> false
+        HomeSubScreen.Notifications.route -> false
+        HomeSubScreen.Categories.route -> false
         else -> true
     }
 
