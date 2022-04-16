@@ -35,6 +35,7 @@ import com.khue.joliecafejp.R
 import com.khue.joliecafejp.navigation.nav_graph.AUTHENTICATION_ROUTE
 import com.khue.joliecafejp.navigation.nav_screen.BottomBarScreen
 import com.khue.joliecafejp.navigation.nav_screen.HomeSubScreen
+import com.khue.joliecafejp.presentation.common.ProductOptionsBottomSheet
 import com.khue.joliecafejp.presentation.common.TextCustom
 import com.khue.joliecafejp.presentation.components.CategoryButton
 import com.khue.joliecafejp.presentation.components.HomeTopBar
@@ -54,6 +55,7 @@ import kotlin.math.absoluteValue
 fun HomeScreen(
     navController: NavHostController,
     loginViewModel: LoginViewModel,
+    paddingValues: PaddingValues,
     homeViewModel: HomeViewModel = hiltViewModel()
 ) {
 
@@ -78,11 +80,18 @@ fun HomeScreen(
         }
     }
 
+    LaunchedEffect(key1 = true) {
+        if (state.isVisible) {
+            state.hide()
+        }
+    }
+
     ModalBottomSheetLayout(
         sheetState = state,
         modifier = Modifier.fillMaxSize(),
         sheetContent = {
-            ImagePickerBottomSheetContent(
+            ProductOptionsBottomSheet(
+                paddingValues = paddingValues,
                 coroutineScope = coroutineScope,
                 modalBottomSheetState = state
             )
@@ -156,8 +165,6 @@ fun HomeScreen(
                         Spacer(modifier = Modifier.height(EXTRA_LARGE_PADDING))
                     }
                 }
-
-                Spacer(modifier = Modifier.height(58.dp))
             }
         }
     }
@@ -345,16 +352,19 @@ fun Categories() {
             color = MaterialTheme.colors.textColor2,
             fontFamily = ralewayMedium
         )
-        FlowRow(
-            modifier = Modifier
-                .wrapContentHeight()
-                .fillMaxWidth(),
-            mainAxisSize = Wrap,
-            crossAxisAlignment = FlowCrossAxisAlignment.Center,
-            mainAxisSpacing = CATEGORY_BUTTON_SPACING
-        ) {
-            categories.map {
-                CategoryButton(title = it) {
+
+        categories.chunked(4).forEach { subList ->
+            FlowRow(
+                modifier = Modifier
+                    .wrapContentHeight()
+                    .fillMaxWidth(),
+                mainAxisSize = Wrap,
+                crossAxisAlignment = FlowCrossAxisAlignment.Center,
+                mainAxisAlignment = MainAxisAlignment.SpaceBetween
+            ) {
+                subList.map {
+                    CategoryButton(title = it) {
+                    }
                 }
             }
         }

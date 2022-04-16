@@ -71,4 +71,6 @@
     <string name="categories">Categories</string>
     <string name="best_sellers">Best sellers</string>
     <string name="check">Check</string>
+    <string name="sugar">Sugar:</string>
+    <string name="ice">Ice:</string>
 </resources>

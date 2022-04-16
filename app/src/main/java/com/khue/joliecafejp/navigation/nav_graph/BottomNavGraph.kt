@@ -28,7 +28,11 @@ fun NavGraphBuilder.bottomNavGraph(
             route = "home-root"
         ) {
             composable(route = BottomBarScreen.Home.route) {
-                HomeScreen(navController = navController, loginViewModel)
+                HomeScreen(
+                    navController = navController,
+                    loginViewModel = loginViewModel,
+                    paddingValues = paddingValues
+                )
             }
             homeSubNavGraph(navController = navController)
         }

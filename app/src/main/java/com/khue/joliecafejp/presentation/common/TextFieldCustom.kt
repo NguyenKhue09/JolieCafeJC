@@ -38,7 +38,7 @@ fun TextFieldCustom(
     imeAction: ImeAction = ImeAction.Next,
     trailingIcon: @Composable() (() -> Unit)?,
     placeHolder: String,
-    visualTransformation: VisualTransformation,
+    visualTransformation: VisualTransformation = VisualTransformation.None,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     error: String = "",
     isError: Boolean = error.isNotEmpty(),
