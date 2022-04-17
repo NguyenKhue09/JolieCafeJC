@@ -98,6 +98,7 @@ fun HomeScreen(
         }
     ) {
         Scaffold(
+            modifier = Modifier.padding(paddingValues),
             topBar = {
                 HomeTopBar(
                     userName = user!!.displayName,
@@ -156,7 +157,7 @@ fun HomeScreen(
                         item {
                             ProductItem(
                                 onAdd = {
-                                    coroutineScope.launch { state.show() }
+                                    coroutineScope.launch { state.animateTo(ModalBottomSheetValue.Expanded) }
                                 }
                             )
                         }
