@@ -22,7 +22,8 @@ import com.khue.joliecafejp.ui.theme.*
 fun CategoryButton(
     title: String = "Juice",
     iconId: Int = R.drawable.ic_watermelon,
-    onClick: () -> Unit
+    isSelected: Boolean = false,
+    onClick: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -35,7 +36,7 @@ fun CategoryButton(
             modifier = Modifier
                 .size(CATEGORY_BUTTON_SIZE)
                 .clip(CircleShape)
-                .background(color = MaterialTheme.colors.greyOpacity60Primary),
+                .background(color = if (isSelected) MaterialTheme.colors.selectedColor else MaterialTheme.colors.greyOpacity60Primary),
             onClick = onClick
         ) {
             Icon(

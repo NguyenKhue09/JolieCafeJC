@@ -15,7 +15,8 @@ import com.khue.joliecafejp.presentation.components.CategoryButton
 @Composable
 fun CategoriesButtonGroup(
     categories: List<CategoryButtonItem>,
-    onButtonClicked: (String) -> Unit
+    selectedButton: String?,
+    onButtonClicked: (String) -> Unit,
 ) {
 
     Column(
@@ -37,7 +38,8 @@ fun CategoriesButtonGroup(
                 subList.map {
                     CategoryButton(
                         title = it.title,
-                        iconId = it.iconId
+                        iconId = it.iconId,
+                        isSelected = selectedButton == it.title
                     ) {
                         onButtonClicked(it.title)
                     }

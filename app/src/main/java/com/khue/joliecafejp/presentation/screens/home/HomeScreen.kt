@@ -173,7 +173,10 @@ fun HomeScreen(
                     fontFamily = ralewayMedium
                 )
 
-                CategoriesButtonGroup(categories = categories) { category ->
+                CategoriesButtonGroup(
+                    categories = categories,
+                    selectedButton = null
+                ) { category ->
                     navController.navigate(HomeSubScreen.Categories.passCategory(category = category)) {
                         launchSingleTop = true
                     }

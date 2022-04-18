@@ -18,6 +18,11 @@ private val grey_opacity60_primary = Color(0xFF746860)
 private val title_text_color = Color(0xFFE7A15C)
 private val button_text_color = Color(0xFF4E341B)
 private val error_text_color = Color(0xFFF24E1E)
+private val selected_color = Color(0x99BC834B)
+
+
+val Colors.selectedColor
+    get() = selected_color
 
 val Colors.errorTextColor
     get() = error_text_color

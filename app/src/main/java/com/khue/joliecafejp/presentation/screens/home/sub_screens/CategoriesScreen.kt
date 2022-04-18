@@ -32,6 +32,7 @@ fun CategoriesScreen(
 ) {
 
     val searchTextState by categoryViewModel.searchTextState
+    val selectedCategory by categoryViewModel.selectedCategory
 
     val categories = listOf(
         CategoryButtonItem(
@@ -92,7 +93,11 @@ fun CategoriesScreen(
                 }
             )
             Spacer(modifier = Modifier.height(EXTRA_LARGE_PADDING))
-            CategoriesButtonGroup(categories = categories) { category ->
+            CategoriesButtonGroup(
+                categories = categories,
+                selectedButton = selectedCategory
+            ) { category ->
+                categoryViewModel.updateSelectedCategory(newValue = category)
             }
             Spacer(modifier = Modifier.height(EXTRA_LARGE_PADDING))
             LazyVerticalGrid(
