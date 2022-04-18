@@ -2,6 +2,7 @@ package com.khue.joliecafejp.presentation.common
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -37,6 +38,9 @@ fun VerticalProductItem(
     Column(
         modifier = Modifier
             .clip(shape = MaterialTheme.shapes.medium)
+            .clickable {
+                onItemClicked("")
+            }
             .background(color = MaterialTheme.colors.greyOpacity60Primary)
             .padding(all = SMALL_PADDING)
             .width(intrinsicSize = IntrinsicSize.Min),
