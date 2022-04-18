@@ -12,6 +12,10 @@ sealed class HomeSubScreen(
     )
     object Categories: HomeSubScreen(
         titleId = R.string.categories,
-        route = "categories"
-    )
+        route = "categories/{category}"
+    ) {
+        fun passCategory(category: String): String {
+            return "categories/$category"
+        }
+    }
 }

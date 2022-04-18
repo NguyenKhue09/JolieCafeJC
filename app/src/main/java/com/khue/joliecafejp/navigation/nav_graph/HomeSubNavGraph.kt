@@ -1,12 +1,11 @@
 package com.khue.joliecafejp.navigation.nav_graph
 
-import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavHostController
+import androidx.navigation.*
 import androidx.navigation.compose.composable
-import androidx.navigation.navigation
 import com.khue.joliecafejp.navigation.nav_screen.HomeSubScreen
 import com.khue.joliecafejp.presentation.screens.home.sub_screens.CategoriesScreen
 import com.khue.joliecafejp.presentation.screens.home.sub_screens.NotificationsScreen
+import com.khue.joliecafejp.utils.Constants.Companion.CATEGORY
 
 
 fun NavGraphBuilder.homeSubNavGraph(
@@ -24,9 +23,19 @@ fun NavGraphBuilder.homeSubNavGraph(
             )
         }
         composable(
-            route = HomeSubScreen.Categories.route
-        ) {
-            CategoriesScreen()
+            route = HomeSubScreen.Categories.route,
+            arguments = listOf(navArgument(CATEGORY) {
+                type = NavType.StringType
+            })
+        ) { navBackStackEntry ->
+
+            val action = navBackStackEntry.arguments?.getString(CATEGORY) ?: "All"
+
+            println(action)
+
+            CategoriesScreen(
+                navController = navController
+            )
         }
     }
 }
