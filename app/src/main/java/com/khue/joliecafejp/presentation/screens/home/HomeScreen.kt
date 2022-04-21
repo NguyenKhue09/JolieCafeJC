@@ -199,6 +199,9 @@ fun HomeScreen(
                             HorizontalProductItem(
                                 onAdd = {
                                     coroutineScope.launch { state.animateTo(ModalBottomSheetValue.Expanded) }
+                                },
+                                onClick = {
+                                    navController.navigate("detail")
                                 }
                             )
                         }

@@ -26,7 +26,6 @@ class CategoryViewModel @Inject constructor(
     init {
         val category = savedStateHandle.get<String>(CATEGORY)
         updateSelectedCategory(category?: "All")
-        TODO("Call api load new item for category")
     }
 
     fun updateSearchTextState(newValue: String) {

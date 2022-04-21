@@ -71,6 +71,7 @@ fun BottomBar(navController: NavHostController) {
         ProfileSubScreen.Settings.route -> false
         HomeSubScreen.Notifications.route -> false
         HomeSubScreen.Categories.route -> false
+        "detail" -> false
         else -> true
     }
 

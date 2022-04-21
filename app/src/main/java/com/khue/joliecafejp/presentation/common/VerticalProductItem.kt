@@ -37,7 +37,7 @@ fun VerticalProductItem(
 
     Column(
         modifier = Modifier
-            .clip(shape = MaterialTheme.shapes.medium)
+            .clip(shape = MaterialTheme.shapes.large)
             .clickable {
                 onItemClicked("")
             }
