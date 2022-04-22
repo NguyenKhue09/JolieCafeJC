@@ -81,4 +81,8 @@
     <string name="topping">Topping:</string>
     <string name="description">Description</string>
     <string name="more_products">More products</string>
+    <string name="review">Review</string>
+    <string name="avgRating">%d/5</string>
+    <string name="all">All</string>
+    <string name="buy_now">Buy Now</string>
 </resources>
