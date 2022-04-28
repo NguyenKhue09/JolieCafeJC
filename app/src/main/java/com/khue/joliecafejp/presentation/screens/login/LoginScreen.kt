@@ -42,6 +42,7 @@ import com.khue.joliecafejp.navigation.nav_screen.AuthScreen
 import com.khue.joliecafejp.presentation.common.FaceOrGoogleLogin
 import com.khue.joliecafejp.presentation.common.TextCustom
 import com.khue.joliecafejp.presentation.common.TextFieldCustom
+import com.khue.joliecafejp.presentation.viewmodels.LoginViewModel
 import com.khue.joliecafejp.ui.theme.*
 
 @Composable
@@ -154,21 +155,21 @@ fun LoginScreen(
             color = MaterialTheme.colors.textColor2,
         )
 
-        TextFieldCustom(
-            modifier = Modifier.align(alignment = Alignment.Start),
-            textFieldValue = userNameTextState,
-            keyBoardType = KeyboardType.Text,
-            trailingIcon = {
-                if (userNameError.isNotEmpty()) Icon(
-                    Icons.Filled.Error,
-                    stringResource(R.string.error),
-                    tint = MaterialTheme.colors.error
-                )
-            },
-            placeHolder = stringResource(R.string.username_placeholder),
-            visualTransformation = VisualTransformation.None,
-            error = userNameError,
-        )
+//        TextFieldCustom(
+//            modifier = Modifier.align(alignment = Alignment.Start),
+//            textFieldValue = userNameTextState,
+//            keyBoardType = KeyboardType.Text,
+//            trailingIcon = {
+//                if (userNameError.isNotEmpty()) Icon(
+//                    Icons.Filled.Error,
+//                    stringResource(R.string.error),
+//                    tint = MaterialTheme.colors.error
+//                )
+//            },
+//            placeHolder = stringResource(R.string.username_placeholder),
+//            visualTransformation = VisualTransformation.None,
+//            error = userNameError,
+//        )
 
 
         TextCustom(
@@ -179,37 +180,37 @@ fun LoginScreen(
             color = MaterialTheme.colors.textColor2,
         )
 
-        TextFieldCustom(
-            modifier = Modifier.align(alignment = Alignment.Start),
-            textFieldValue = passwordTextState,
-            keyBoardType = KeyboardType.Password,
-            trailingIcon = {
-                if (passwordError.isEmpty()) {
-                    val image = if (passwordVisible)
-                        Icons.Filled.Visibility
-                    else Icons.Filled.VisibilityOff
-
-                    val description =
-                        if (passwordVisible) stringResource(R.string.hide_password) else stringResource(
-                            R.string.show_password
-                        )
-
-                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                        Icon(imageVector = image, description)
-                    }
-                } else {
-                    Icon(
-                        Icons.Filled.Error,
-                        stringResource(R.string.error),
-                        tint = MaterialTheme.colors.error
-                    )
-                }
-
-            },
-            placeHolder = stringResource(R.string.password_placeholder),
-            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            error = passwordError
-        )
+//        TextFieldCustom(
+//            modifier = Modifier.align(alignment = Alignment.Start),
+//            textFieldValue = passwordTextState,
+//            keyBoardType = KeyboardType.Password,
+//            trailingIcon = {
+//                if (passwordError.isEmpty()) {
+//                    val image = if (passwordVisible)
+//                        Icons.Filled.Visibility
+//                    else Icons.Filled.VisibilityOff
+//
+//                    val description =
+//                        if (passwordVisible) stringResource(R.string.hide_password) else stringResource(
+//                            R.string.show_password
+//                        )
+//
+//                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+//                        Icon(imageVector = image, description)
+//                    }
+//                } else {
+//                    Icon(
+//                        Icons.Filled.Error,
+//                        stringResource(R.string.error),
+//                        tint = MaterialTheme.colors.error
+//                    )
+//                }
+//
+//            },
+//            placeHolder = stringResource(R.string.password_placeholder),
+//            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+//            error = passwordError
+//        )
 
         Text(
             modifier = Modifier

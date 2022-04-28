@@ -9,7 +9,7 @@ import com.khue.joliecafejp.navigation.nav_screen.BottomBarScreen
 import com.khue.joliecafejp.presentation.screens.cart.CardScreen
 import com.khue.joliecafejp.presentation.screens.favorite.FavoriteScreen
 import com.khue.joliecafejp.presentation.screens.home.HomeScreen
-import com.khue.joliecafejp.presentation.screens.login.LoginViewModel
+import com.khue.joliecafejp.presentation.viewmodels.LoginViewModel
 import com.khue.joliecafejp.presentation.screens.profile.ProfileScreen
 
 

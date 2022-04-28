@@ -1,16 +1,24 @@
 package com.khue.joliecafejp.presentation.screens.detail
 
-import androidx.compose.foundation.*
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -28,54 +36,97 @@ import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
 import com.khue.joliecafejp.R
 import com.khue.joliecafejp.presentation.common.ButtonCustom
+import com.khue.joliecafejp.presentation.common.CommentBottomSheet
 import com.khue.joliecafejp.presentation.common.VerticalProductItem
 import com.khue.joliecafejp.presentation.components.CommentItem
 import com.khue.joliecafejp.ui.theme.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun DetailScreen(
     navController: NavController
 ) {
 
-    val state = rememberScrollState()
-    var scrolledY = 0f
-    var previousOffset = 0
+    val state = rememberLazyListState()
     var density = LocalDensity.current.density
 
-    Scaffold(
-        backgroundColor = MaterialTheme.colors.greyPrimary,
+    val (selectedRating, onSelectedRating) = remember {
+        mutableStateOf(R.string.all)
+    }
+
+    val bottomSheetState = rememberModalBottomSheetState(
+        initialValue = ModalBottomSheetValue.Hidden
+    )
+    val coroutineScope = rememberCoroutineScope()
+
+
+    ModalBottomSheetLayout(
+        sheetState = bottomSheetState,
+        modifier = Modifier.fillMaxSize(),
+        sheetContent = {
+            CommentBottomSheet()
+        }
     ) {
-        Box(
-            modifier = Modifier
-                .padding(it)
-                .fillMaxSize(),
+        Scaffold(
+            backgroundColor = MaterialTheme.colors.greyPrimary,
         ) {
-            Column(
+            Box(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(state = state)
+                    .padding(it)
+                    .fillMaxSize(),
             ) {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    state = state
+                ) {
 
-                ProductImageSection(state = state)
+                    item {
+                        ProductImageSection(
+                            state = state,
+                        )
+                    }
 
-                ProductNameSection() {}
+                    item {
+                        ProductNameSection() {}
+                    }
 
-                PriceAndRatingSection()
+                    item {
+                        PriceAndRatingSection()
+                    }
 
-                DescriptionSection()
+                    item {
+                        DescriptionSection()
+                    }
 
-                RatingSection()
+                    item {
+                        RatingSection(
+                            selectedRating = selectedRating,
+                            onSelectedRating = onSelectedRating,
+                            coroutineScope = coroutineScope,
+                            bottomSheetState = bottomSheetState
+                        )
+                    }
 
-                CommentSection()
+                    item {
+                        CommentSection()
+                    }
 
-                MoreProductSection()
+                    item {
+                        MoreProductSection()
+                    }
+                }
+
+                DetailScreenTopBar(navController = navController)
+
+                BottomButtonAction(
+                    modifier = Modifier.align(Alignment.BottomCenter),
+                    onAddToCardClicked = {},
+                    onButNowClicked = {}
+                )
             }
-            DetailScreenTopBar(navController = navController)
-            BottomButtonAction(
-                modifier = Modifier.align(Alignment.BottomCenter),
-                onAddToCardClicked = {},
-                onButNowClicked = {}
-            )
         }
     }
 }
@@ -93,8 +144,12 @@ fun DetailScreenTopBar(navController: NavController) {
     ) {
         IconButton(
             modifier = Modifier
+                .shadow(
+                    elevation = 4.dp,
+                    shape = CircleShape
+                )
                 .clip(shape = CircleShape)
-                .background(MaterialTheme.colors.greyOpacity60Primary),
+                .background(MaterialTheme.colors.textColor),
             onClick = { navController.popBackStack() }
         ) {
             Icon(
@@ -107,14 +162,15 @@ fun DetailScreenTopBar(navController: NavController) {
 }
 
 @Composable
-fun ProductImageSection(state: ScrollState) {
+fun ProductImageSection(state: LazyListState) {
+    var scrolledY = 0f
+    var previousOffset = 0
     Image(
         modifier = Modifier
             .graphicsLayer {
-                //scrolledY += state.value - previousOffset
-                translationY -= (state.value / density)
-                //previousOffset = state.value
-                println(state.value)
+                scrolledY += state.firstVisibleItemScrollOffset - previousOffset
+                translationY = scrolledY * 0.1f
+                previousOffset = state.firstVisibleItemScrollOffset
             }
             .fillMaxWidth()
             .height(PRODUCT_IMAGE_HEIGHT),
@@ -264,12 +320,19 @@ fun MoreProductSection() {
                 }
             }
         }
+        Spacer(modifier = Modifier.height(BOTTOM_NAV_HEIGHT))
+        Spacer(modifier = Modifier.height(EXTRA_LARGE_PADDING))
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun RatingSection(
     avgRating: Int = 5,
+    selectedRating: Int,
+    onSelectedRating: (Int) -> Unit,
+    coroutineScope: CoroutineScope,
+    bottomSheetState: ModalBottomSheetState
 ) {
     Column(
         modifier = Modifier
@@ -278,13 +341,29 @@ fun RatingSection(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start
     ) {
-        Text(
-            text = stringResource(R.string.review),
-            fontFamily = raleway,
-            color = MaterialTheme.colors.textColor,
-            fontSize = MaterialTheme.typography.subtitle2.fontSize,
-            fontWeight = FontWeight.Bold
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = stringResource(R.string.review),
+                fontFamily = raleway,
+                color = MaterialTheme.colors.textColor,
+                fontSize = MaterialTheme.typography.subtitle2.fontSize,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                modifier = Modifier.clickable {
+                    coroutineScope.launch { bottomSheetState.show() }
+                },
+                text = "Xem chi tiết...",
+                fontFamily = raleway,
+                color = MaterialTheme.colors.textColor2,
+                fontSize = MaterialTheme.typography.caption.fontSize,
+                fontWeight = FontWeight.Bold
+            )
+        }
         Spacer(modifier = Modifier.height(SMALL_PADDING))
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -315,12 +394,21 @@ fun RatingSection(
                 mainAxisSpacing = MEDIUM_PADDING,
                 crossAxisAlignment = FlowCrossAxisAlignment.Center
             ) {
-                ReviewFilterButton(text = stringResource(id = R.string.all), icon = null) {}
+                ReviewFilterButton(
+                    text = stringResource(id = R.string.all),
+                    icon = null,
+                    isSelected = selectedRating == R.string.all
+                ) {
+                    onSelectedRating(R.string.all)
+                }
                 repeat(6) {
                     ReviewFilterButton(
                         text = (6 - (it + 1)).toString(),
-                        icon = R.drawable.ic_favorite
-                    ) {}
+                        icon = R.drawable.ic_favorite,
+                        isSelected = selectedRating == (6 - (it + 1))
+                    ) {
+                        onSelectedRating((6 - (it + 1)))
+                    }
                 }
             }
         }
@@ -331,7 +419,8 @@ fun RatingSection(
 fun ReviewFilterButton(
     text: String,
     icon: Int?,
-    onClicked: () -> Unit
+    isSelected: Boolean,
+    onClicked: () -> Unit,
 ) {
     TextButton(
         onClick = onClicked,
@@ -340,7 +429,7 @@ fun ReviewFilterButton(
             vertical = EXTRA_EXTRA_SMALL_PADDING
         ),
         colors = ButtonDefaults.buttonColors(
-            backgroundColor = MaterialTheme.colors.greyOpacity60Primary
+            backgroundColor = if (isSelected) MaterialTheme.colors.textColor2 else MaterialTheme.colors.greyOpacity60Primary
         ),
         shape = MaterialTheme.shapes.medium
     ) {
@@ -363,15 +452,12 @@ fun ReviewFilterButton(
 
 @Composable
 fun CommentSection() {
-    LazyColumn(
-        modifier = Modifier.height(200.dp),
-        contentPadding = PaddingValues(horizontal = EXTRA_LARGE_PADDING),
-        verticalArrangement = Arrangement.spacedBy(EXTRA_LARGE_PADDING)
+    Column(
+        modifier = Modifier.padding(horizontal = EXTRA_LARGE_PADDING),
+        verticalArrangement = Arrangement.spacedBy(EXTRA_LARGE_PADDING),
     ) {
-        repeat(10) {
-            item {
+        repeat(3) {
                 CommentItem()
-            }
         }
     }
 }

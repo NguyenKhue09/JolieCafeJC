@@ -1,12 +1,14 @@
 package com.khue.joliecafejp.presentation.screens.sign_up
 
-import android.util.Patterns
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
@@ -15,7 +17,7 @@ import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -24,7 +26,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.*
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
@@ -46,8 +50,10 @@ import com.khue.joliecafejp.firebase.firebase_authentication.google_signin.AuthR
 import com.khue.joliecafejp.presentation.common.FaceOrGoogleLogin
 import com.khue.joliecafejp.presentation.common.TextCustom
 import com.khue.joliecafejp.presentation.common.TextFieldCustom
-import com.khue.joliecafejp.presentation.screens.login.LoginViewModel
+import com.khue.joliecafejp.presentation.viewmodels.LoginViewModel
+import com.khue.joliecafejp.presentation.viewmodels.SignUpViewModel
 import com.khue.joliecafejp.ui.theme.*
+import com.khue.joliecafejp.utils.RegistrationFormEvent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -56,15 +62,14 @@ import kotlinx.coroutines.withContext
 @Composable
 fun SignUpScreen(
     navController: NavHostController,
-    loginViewModel: LoginViewModel = hiltViewModel()
+    loginViewModel: LoginViewModel = hiltViewModel(),
+    signUpViewModel: SignUpViewModel = hiltViewModel()
 ) {
+
+    val state = signUpViewModel.state
 
     val scrollState = rememberScrollState()
     val context = LocalContext.current
-    val userNameTextState = remember { mutableStateOf(TextFieldValue("")) }
-    val passwordTextState = remember { mutableStateOf(TextFieldValue("")) }
-    val emailTextState = remember { mutableStateOf(TextFieldValue("")) }
-    val confirmPasswordTextState = remember { mutableStateOf(TextFieldValue("")) }
 
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
     var confirmPasswordVisible by rememberSaveable { mutableStateOf(false) }
@@ -122,17 +127,19 @@ fun SignUpScreen(
             }
         }
 
-    var userNameError by remember {
-        mutableStateOf("")
-    }
-    var emailError by remember {
-        mutableStateOf("")
-    }
-    var passwordError by remember {
-        mutableStateOf("")
-    }
-    var confirmPasswordError by remember {
-        mutableStateOf("")
+    LaunchedEffect(key1 = context) {
+        signUpViewModel.validationEvents.collect { event ->
+            when (event) {
+                is SignUpViewModel.ValidationEvent.Success -> {
+                    FirebaseGmailPasswordAuth().registerUser(
+                        email = state.email,
+                        password = state.password,
+                        context = context,
+                        navController = navController
+                    )
+                }
+            }
+        }
     }
 
     Column(
@@ -171,10 +178,13 @@ fun SignUpScreen(
 
         TextFieldCustom(
             modifier = Modifier.align(alignment = Alignment.Start),
-            textFieldValue = userNameTextState,
+            textFieldValue = state.userName,
+            onTextChange = {
+                signUpViewModel.onEvent(RegistrationFormEvent.UserNameChanged(it))
+            },
             keyBoardType = KeyboardType.Text,
             trailingIcon = {
-                if (userNameError.isNotEmpty()) {
+                if (state.userNameError.isNotEmpty()) {
                     Icon(
                         Icons.Filled.Error,
                         stringResource(R.string.error),
@@ -184,7 +194,7 @@ fun SignUpScreen(
             },
             placeHolder = stringResource(R.string.username_placeholder),
             visualTransformation = VisualTransformation.None,
-            error = userNameError
+            error = state.userNameError
         )
 
         TextCustom(
@@ -197,10 +207,13 @@ fun SignUpScreen(
 
         TextFieldCustom(
             modifier = Modifier.align(alignment = Alignment.Start),
-            textFieldValue = emailTextState,
+            textFieldValue = state.email,
+            onTextChange = {
+                signUpViewModel.onEvent(RegistrationFormEvent.EmailChanged(it))
+            },
             keyBoardType = KeyboardType.Email,
             trailingIcon = {
-                if (emailError.isNotEmpty()) {
+                if (state.emailError.isNotEmpty()) {
                     Icon(
                         Icons.Filled.Error,
                         stringResource(R.string.error),
@@ -210,7 +223,7 @@ fun SignUpScreen(
             },
             placeHolder = stringResource(R.string.email_placeholder),
             visualTransformation = VisualTransformation.None,
-            error = emailError
+            error = state.emailError
         )
 
         TextCustom(
@@ -223,10 +236,13 @@ fun SignUpScreen(
 
         TextFieldCustom(
             modifier = Modifier.align(alignment = Alignment.Start),
-            textFieldValue = passwordTextState,
+            textFieldValue = state.password,
+            onTextChange = {
+                signUpViewModel.onEvent(RegistrationFormEvent.PasswordChanged(it))
+            },
             keyBoardType = KeyboardType.Password,
             trailingIcon = {
-                if (passwordError.isEmpty()) {
+                if (state.passwordError.isEmpty()) {
                     val image = if (passwordVisible)
                         Icons.Filled.Visibility
                     else Icons.Filled.VisibilityOff
@@ -249,7 +265,7 @@ fun SignUpScreen(
             },
             placeHolder = stringResource(R.string.password_placeholder),
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            error = passwordError
+            error = state.passwordError
         )
 
         TextCustom(
@@ -262,10 +278,13 @@ fun SignUpScreen(
 
         TextFieldCustom(
             modifier = Modifier.align(alignment = Alignment.Start),
-            textFieldValue = confirmPasswordTextState,
+            textFieldValue = state.confirmPassword,
+            onTextChange = {
+                signUpViewModel.onEvent(RegistrationFormEvent.ConfirmPasswordChanged(it))
+            },
             keyBoardType = KeyboardType.Password,
             trailingIcon = {
-                if (confirmPasswordError.isEmpty()) {
+                if (state.confirmPasswordError.isEmpty()) {
                     val image = if (confirmPasswordVisible)
                         Icons.Filled.Visibility
                     else Icons.Filled.VisibilityOff
@@ -288,37 +307,13 @@ fun SignUpScreen(
             },
             placeHolder = stringResource(R.string.confirm_password_placeholder),
             visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            error = confirmPasswordError
+            error = state.confirmPasswordError
         )
 
         Button(
             modifier = Modifier.padding(top = 32.dp),
             onClick = {
-                validateUserName(username = userNameTextState.value.text.trim()) {
-                    userNameError = it
-                }
-                validateEmail(email = emailTextState.value.text.trim()) {
-                    emailError = it
-                }
-                validatePassword(password = passwordTextState.value.text.trim()) {
-                    passwordError = it
-                }
-                validateConfirmPassword(
-                    password = passwordTextState.value.text.trim(),
-                    confirmPassword = confirmPasswordTextState.value.text.trim()
-                ) {
-                    confirmPasswordError = it
-                }
-                if (userNameError.isEmpty() && emailError.isEmpty()
-                    && passwordError.isEmpty() && confirmPasswordError.isEmpty()
-                ) {
-                    FirebaseGmailPasswordAuth().registerUser(
-                        email = emailTextState.value.text.trim(),
-                        password = passwordTextState.value.text.trim(),
-                        context = context,
-                        navController = navController
-                    )
-                }
+                signUpViewModel.onEvent(RegistrationFormEvent.Submit)
             },
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = MaterialTheme.colors.greyPrimaryVariant
@@ -380,38 +375,6 @@ fun SignUpScreen(
                 }
             }
         )
-    }
-}
-
-fun validateUserName(username: String, onError: (String) -> Unit) {
-    when {
-        username.trim().isEmpty() -> onError("Username is empty")
-        else -> onError("")
-    }
-}
-
-fun validateEmail(email: String, onError: (String) -> Unit) {
-    when {
-        email.trim().isEmpty() -> onError("Email is empty")
-        !Patterns.EMAIL_ADDRESS.matcher(email).matches() -> onError("Your email wrong format")
-        else -> onError("")
-    }
-}
-
-fun validatePassword(password: String, onError: (String) -> Unit) {
-    when {
-        password.trim().isEmpty() -> onError("Password is empty")
-        password.length < 6 -> onError("Password less then 6 character")
-        else -> onError("")
-    }
-}
-
-fun validateConfirmPassword(password: String, confirmPassword: String, onError: (String) -> Unit) {
-    when {
-        confirmPassword.trim().isEmpty() -> onError("Confirm password is empty")
-        confirmPassword.length < 6 -> onError("Confirm password less then 6 character")
-        password != confirmPassword -> onError("Your confirm password not match your password")
-        else -> onError("")
     }
 }
 

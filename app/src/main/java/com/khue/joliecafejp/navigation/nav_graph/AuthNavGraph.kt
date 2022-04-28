@@ -7,9 +7,8 @@ import androidx.navigation.compose.navigation
 import com.khue.joliecafejp.navigation.nav_screen.AuthScreen
 import com.khue.joliecafejp.presentation.screens.forgot_password.ForgotPassword
 import com.khue.joliecafejp.presentation.screens.login.LoginScreen
-import com.khue.joliecafejp.presentation.screens.login.LoginViewModel
+import com.khue.joliecafejp.presentation.viewmodels.LoginViewModel
 import com.khue.joliecafejp.presentation.screens.sign_up.SignUpScreen
-import kotlin.math.log
 
 
 fun NavGraphBuilder.authNavGraph(

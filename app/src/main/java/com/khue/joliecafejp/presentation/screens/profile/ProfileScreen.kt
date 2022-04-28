@@ -20,7 +20,7 @@ import com.khue.joliecafejp.navigation.nav_screen.BottomBarScreen
 import com.khue.joliecafejp.navigation.nav_screen.ProfileSubScreen
 import com.khue.joliecafejp.presentation.common.CardCustom
 import com.khue.joliecafejp.presentation.common.CustomImage
-import com.khue.joliecafejp.presentation.screens.login.LoginViewModel
+import com.khue.joliecafejp.presentation.viewmodels.LoginViewModel
 import com.khue.joliecafejp.ui.theme.*
 
 @Composable

@@ -104,7 +104,8 @@ fun CategoriesScreen(
                 modifier = Modifier.weight(1f),
                 columns = GridCells.Fixed(2),
                 verticalArrangement = Arrangement.spacedBy(EXTRA_LARGE_PADDING),
-                horizontalArrangement = Arrangement.spacedBy(EXTRA_LARGE_PADDING)
+                horizontalArrangement = Arrangement.spacedBy(EXTRA_LARGE_PADDING),
+                contentPadding = PaddingValues(bottom = EXTRA_LARGE_PADDING)
             ) {
                 repeat(20) {
                     item {
@@ -115,7 +116,6 @@ fun CategoriesScreen(
                     }
                 }
             }
-            Spacer(modifier = Modifier.height(EXTRA_LARGE_PADDING))
         }
     }
 }

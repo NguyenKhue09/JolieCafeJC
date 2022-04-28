@@ -5,7 +5,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import com.khue.joliecafejp.navigation.nav_screen.ProfileSubScreen
-import com.khue.joliecafejp.presentation.screens.login.LoginViewModel
+import com.khue.joliecafejp.presentation.viewmodels.LoginViewModel
 import com.khue.joliecafejp.presentation.screens.profile.sub_screens.AddressBook
 import com.khue.joliecafejp.presentation.screens.profile.sub_screens.OrderHistory
 import com.khue.joliecafejp.presentation.screens.profile.sub_screens.ProfileDetail

@@ -1,4 +1,4 @@
-package com.khue.joliecafejp.presentation.screens.login
+package com.khue.joliecafejp.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
 import com.google.firebase.auth.FirebaseAuth
@@ -17,9 +17,6 @@ class LoginViewModel @Inject constructor(): ViewModel() {
     private val _user: MutableStateFlow<User?> = MutableStateFlow(null)
     val user: StateFlow<User?> = _user
 
-    private val _count: MutableStateFlow<Int> = MutableStateFlow(0)
-    val count: StateFlow<Int> = _count
-
     init {
         if (FirebaseAuth.getInstance().currentUser != null) {
             _user.value = User(
@@ -36,9 +33,5 @@ class LoginViewModel @Inject constructor(): ViewModel() {
 
     fun signOut() {
         _user.value = null
-    }
-
-    fun increaseCount() {
-        _count.value = _count.value.plus(1)
     }
 }

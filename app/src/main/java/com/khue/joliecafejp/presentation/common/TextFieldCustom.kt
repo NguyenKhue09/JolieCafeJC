@@ -33,7 +33,8 @@ import com.khue.joliecafejp.ui.theme.*
 @Composable
 fun TextFieldCustom(
     modifier: Modifier = Modifier,
-    textFieldValue: MutableState<TextFieldValue>,
+    textFieldValue: String,
+    onTextChange: (String) -> Unit,
     keyBoardType: KeyboardType,
     imeAction: ImeAction = ImeAction.Next,
     trailingIcon: @Composable() (() -> Unit)?,
@@ -75,9 +76,9 @@ fun TextFieldCustom(
                     interactionSource = interactionSource,
                     colors = colors
                 ),
-            value = textFieldValue.value,
+            value = textFieldValue,
             onValueChange = {
-                textFieldValue.value = it
+                onTextChange(it)
             },
             textStyle = TextStyle(
                 fontSize = MaterialTheme.typography.body1.fontSize,
@@ -97,7 +98,7 @@ fun TextFieldCustom(
             enabled = enabled,
             decorationBox = @Composable { innerTextField ->
                 TextFieldDefaults.TextFieldDecorationBox(
-                    value = textFieldValue.value.text,
+                    value = textFieldValue,
                     visualTransformation = visualTransformation,
                     innerTextField = innerTextField,
                     placeholder = {

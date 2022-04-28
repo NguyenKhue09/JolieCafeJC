@@ -3,8 +3,6 @@ package com.khue.joliecafejp.presentation.screens.home
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -30,7 +28,7 @@ import com.khue.joliecafejp.presentation.common.SearchBar
 import com.khue.joliecafejp.presentation.common.TextCustom
 import com.khue.joliecafejp.presentation.components.HomeTopBar
 import com.khue.joliecafejp.presentation.components.HorizontalProductItem
-import com.khue.joliecafejp.presentation.screens.login.LoginViewModel
+import com.khue.joliecafejp.presentation.viewmodels.LoginViewModel
 import com.khue.joliecafejp.presentation.viewmodels.HomeViewModel
 import com.khue.joliecafejp.ui.theme.*
 import kotlinx.coroutines.delay
@@ -51,6 +49,18 @@ fun HomeScreen(
     val user by loginViewModel.user.collectAsState()
     val searchTextState by homeViewModel.searchTextState
     val pagerState = rememberPagerState()
+
+    LaunchedEffect(user) {
+        println("user $user")
+        if (user == null) {
+            navController.navigate(AUTHENTICATION_ROUTE) {
+                popUpTo(BottomBarScreen.Home.route) {
+                    inclusive = true
+                }
+                launchSingleTop = true
+            }
+        }
+    }
 
     // Bottom Sheet
     val coroutineScope = rememberCoroutineScope()
@@ -93,17 +103,6 @@ fun HomeScreen(
         ),
     )
 
-    LaunchedEffect(user) {
-        if (user == null) {
-            navController.navigate(AUTHENTICATION_ROUTE) {
-                popUpTo(BottomBarScreen.Home.route) {
-                    inclusive = true
-                }
-                launchSingleTop = true
-            }
-        }
-    }
-
     LaunchedEffect(key1 = true) {
         if (state.isVisible) {
             state.hide()
@@ -138,78 +137,82 @@ fun HomeScreen(
             val padding = paddingValues.calculateBottomPadding()
 
 
-            Column(
+            LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(
                         start = EXTRA_LARGE_PADDING,
                         end = EXTRA_LARGE_PADDING,
                         bottom = padding
-                    )
-                    .verticalScroll(state = rememberScrollState()),
+                    ),
                 verticalArrangement = Arrangement.Top,
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.Start
             ) {
-                SearchBar(
-                    text = searchTextState,
-                    onCloseClicked = {
-                        homeViewModel.updateSearchTextState(newValue = "")
-                    },
-                    onSearchClicked = { searchString ->
+                item {
+                    SearchBar(
+                        text = searchTextState,
+                        onCloseClicked = {
+                            homeViewModel.updateSearchTextState(newValue = "")
+                        },
+                        onSearchClicked = { searchString ->
 
-                    },
-                    onTextChange = { newValue ->
-                        homeViewModel.updateSearchTextState(newValue = newValue)
-                    }
-                )
-                ImageSlider(pagerState = pagerState)
-
-                TextCustom(
-                    modifier = Modifier
-                        .align(alignment = Alignment.Start)
-                        .padding(vertical = EXTRA_LARGE_PADDING),
-                    content = stringResource(R.string.categories),
-                    color = MaterialTheme.colors.textColor2,
-                    fontFamily = ralewayMedium
-                )
-
-                CategoriesButtonGroup(
-                    categories = categories,
-                    selectedButton = null
-                ) { category ->
-                    navController.navigate(HomeSubScreen.Categories.passCategory(category = category)) {
-                        launchSingleTop = true
-                    }
+                        },
+                        onTextChange = { newValue ->
+                            homeViewModel.updateSearchTextState(newValue = newValue)
+                        }
+                    )
                 }
-                TextCustom(
-                    modifier = Modifier
-                        .align(alignment = Alignment.Start)
-                        .padding(vertical = EXTRA_LARGE_PADDING),
-                    content = stringResource(R.string.best_sellers),
-                    color = MaterialTheme.colors.textColor2,
-                    fontFamily = ralewayMedium
-                )
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(400.dp),
-                ) {
-                    repeat(10) {
-                        item {
-                            HorizontalProductItem(
-                                onAdd = {
-                                    coroutineScope.launch { state.animateTo(ModalBottomSheetValue.Expanded) }
-                                },
-                                onClick = {
-                                    navController.navigate("detail")
-                                }
-                            )
+                item {
+                    ImageSlider(pagerState = pagerState)
+                }
+
+                item {
+                    TextCustom(
+                        modifier = Modifier
+                            .padding(vertical = EXTRA_LARGE_PADDING),
+                        content = stringResource(R.string.categories),
+                        color = MaterialTheme.colors.textColor2,
+                        fontFamily = ralewayMedium
+                    )
+                }
+
+                item {
+                    CategoriesButtonGroup(
+                        categories = categories,
+                        selectedButton = null
+                    ) { category ->
+                        navController.navigate(HomeSubScreen.Categories.passCategory(category = category)) {
+                            launchSingleTop = true
                         }
                     }
+                }
+
+                item {
+                    TextCustom(
+                        modifier = Modifier
+                            .padding(vertical = EXTRA_LARGE_PADDING),
+                        content = stringResource(R.string.best_sellers),
+                        color = MaterialTheme.colors.textColor2,
+                        fontFamily = ralewayMedium
+                    )
+                }
+
+                repeat(10) {
                     item {
-                        Spacer(modifier = Modifier.height(EXTRA_LARGE_PADDING))
+                        HorizontalProductItem(
+                            onAdd = {
+                                coroutineScope.launch { state.animateTo(ModalBottomSheetValue.Expanded) }
+                            },
+                            onClick = {
+                                navController.navigate("detail")
+                            }
+                        )
                     }
                 }
+                item {
+                    Spacer(modifier = Modifier.height(EXTRA_LARGE_PADDING))
+                }
+
             }
         }
     }

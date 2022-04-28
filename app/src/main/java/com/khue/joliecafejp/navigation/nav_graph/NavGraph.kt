@@ -5,10 +5,8 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.khue.joliecafejp.navigation.nav_screen.ProfileSubScreen
 import com.khue.joliecafejp.presentation.screens.detail.DetailScreen
-import com.khue.joliecafejp.presentation.screens.login.LoginViewModel
-import com.khue.joliecafejp.presentation.screens.profile.sub_screens.ProfileDetail
+import com.khue.joliecafejp.presentation.viewmodels.LoginViewModel
 
 const val BOTTOM_ROUTE = "bottom"
 const val AUTHENTICATION_ROUTE = "authentication"
