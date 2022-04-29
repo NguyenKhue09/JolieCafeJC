@@ -3,7 +3,7 @@ package com.khue.joliecafejp.domain.use_cases.validation_form
 import android.util.Patterns
 import com.khue.joliecafejp.domain.model.ValidationResult
 
-class ValidateEmail {
+class ValidateEmailUseCase {
 
     fun execute(email: String): ValidationResult {
         if(email.isBlank()) {

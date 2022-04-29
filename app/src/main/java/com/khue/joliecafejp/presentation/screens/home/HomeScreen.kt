@@ -17,6 +17,7 @@ import androidx.compose.ui.util.lerp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.google.accompanist.pager.*
+import com.google.firebase.auth.FirebaseAuth
 import com.khue.joliecafejp.R
 import com.khue.joliecafejp.domain.model.CategoryButtonItem
 import com.khue.joliecafejp.navigation.nav_graph.AUTHENTICATION_ROUTE
@@ -46,12 +47,12 @@ fun HomeScreen(
     homeViewModel: HomeViewModel = hiltViewModel()
 ) {
 
-    val user by loginViewModel.user.collectAsState()
+    val user = FirebaseAuth.getInstance().currentUser
     val searchTextState by homeViewModel.searchTextState
     val pagerState = rememberPagerState()
 
     LaunchedEffect(user) {
-        println("user $user")
+        //println("user $user")
         if (user == null) {
             navController.navigate(AUTHENTICATION_ROUTE) {
                 popUpTo(BottomBarScreen.Home.route) {
@@ -124,7 +125,7 @@ fun HomeScreen(
             modifier = Modifier.padding(paddingValues),
             topBar = {
                 HomeTopBar(
-                    userName = user!!.displayName,
+                    userName = user?.displayName ?: "",
                     userCoins = 300
                 ) {
                     navController.navigate(HomeSubScreen.Notifications.route) {

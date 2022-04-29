@@ -52,10 +52,10 @@ class FirebaseFacebookLogin {
                     // Sign in success, update UI with the signed-in user's information
                     println("signInWithCredential:success")
                     val user = auth.currentUser
-                    loginViewModel.signIn(
-                        email = auth.currentUser?.email!!,
-                        displayName = auth.currentUser?.displayName!!
-                    )
+//                    loginViewModel.signIn(
+//                        email = auth.currentUser?.email!!,
+//                        displayName = auth.currentUser?.displayName!!
+//                    )
                     println(user?.displayName)
                     Toast.makeText(
                         context, "Welcome back ${user?.displayName}",

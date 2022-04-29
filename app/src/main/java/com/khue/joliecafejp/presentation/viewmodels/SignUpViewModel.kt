@@ -46,10 +46,10 @@ class SignUpViewModel @Inject constructor(
     }
 
     private fun submitData() {
-        val emailResult = validationUseCases.validationEmailUseCase.execute(state.email)
-        val passwordResult = validationUseCases.validationPassword.execute(state.password)
-        val confirmPasswordResult = validationUseCases.validationConfirmPassword.execute(state.password, state.confirmPassword)
-        val userNameResult = validationUseCases.validationUserNameUseCase.execute(state.userName)
+        val emailResult = validationUseCases.validationEmailUseCaseUseCase.execute(state.email)
+        val passwordResult = validationUseCases.validationPasswordUseCase.execute(state.password)
+        val confirmPasswordResult = validationUseCases.validationConfirmPasswordUseCase.execute(state.password, state.confirmPassword)
+        val userNameResult = validationUseCases.validationUserNameUseCaseUseCase.execute(state.userName)
 
         val hasError = listOf(
             emailResult,

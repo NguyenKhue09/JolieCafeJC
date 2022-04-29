@@ -111,10 +111,10 @@ fun SignUpScreen(
                                 Toast.makeText(context, e.message, Toast.LENGTH_LONG).show()
                             }
                         }
-                        loginViewModel.signIn(
-                            email = account.email!!,
-                            displayName = account.displayName!!
-                        )
+//                        loginViewModel.signIn(
+//                            email = account.email!!,
+//                            displayName = account.displayName!!
+//                        )
                         withContext(Dispatchers.Main) {
                             Toast.makeText(context, account.displayName, Toast.LENGTH_LONG).show()
                         }

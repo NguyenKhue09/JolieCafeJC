@@ -2,7 +2,7 @@ package com.khue.joliecafejp.domain.use_cases.validation_form
 
 import com.khue.joliecafejp.domain.model.ValidationResult
 
-class ValidatePassword {
+class ValidatePasswordUseCase {
 
     fun execute(password: String): ValidationResult {
         if (password.length < 8) {

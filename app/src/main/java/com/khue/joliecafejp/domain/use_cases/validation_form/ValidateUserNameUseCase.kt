@@ -2,14 +2,13 @@ package com.khue.joliecafejp.domain.use_cases.validation_form
 
 import com.khue.joliecafejp.domain.model.ValidationResult
 
+class ValidateUserNameUseCase {
 
-class ValidateConfirmPassword {
-
-    fun execute(password: String, confirmPassword: String): ValidationResult {
-        if (password != confirmPassword) {
+    fun execute(userName: String): ValidationResult {
+        if(userName.isBlank()) {
             return ValidationResult(
                 successful = false,
-                errorMessage = "The passwords don't match"
+                errorMessage = "The username can't be blank"
             )
         }
 

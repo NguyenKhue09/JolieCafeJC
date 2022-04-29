@@ -33,7 +33,7 @@ fun ForgotPassword(navController: NavHostController) {
 
     val scrollState = rememberScrollState()
     val context = LocalContext.current
-    val emailTextState = remember { mutableStateOf(TextFieldValue("")) }
+    val (emailTextState, onEmailChange) = remember { mutableStateOf("") }
     var emailError by remember {
         mutableStateOf("")
     }
@@ -84,6 +84,9 @@ fun ForgotPassword(navController: NavHostController) {
         TextFieldCustom(
             modifier = Modifier.align(alignment = Alignment.Start),
             textFieldValue = emailTextState,
+            onTextChange = {
+                           onEmailChange(it)
+            },
             keyBoardType = KeyboardType.Email,
             trailingIcon = {
                 if (emailError.isNotEmpty()) {
@@ -132,12 +135,12 @@ fun ForgotPassword(navController: NavHostController) {
                 modifier = Modifier
                     .padding(end = 20.dp),
                 onClick = {
-                    validateEmail(email = emailTextState.value.text.trim()) {
+                    validateEmail(email = emailTextState.trim()) {
                         emailError = it
                     }
                     if (emailError.isEmpty()) {
                         FirebaseGmailPasswordAuth().forgotPassword(
-                            email = emailTextState.value.text.trim(),
+                            email = emailTextState.trim(),
                             context= context,
                             navController = navController
                         )

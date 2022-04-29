@@ -59,28 +59,28 @@ fun ProfileDetail(
         mutableStateOf("")
     }
     val passwordVisible = rememberSaveable { mutableStateOf(false) }
-    val passwordTextState = remember { mutableStateOf(TextFieldValue("password")) }
+    val (passwordTextState, onPasswordChange) = remember { mutableStateOf("password") }
 
 
-    val userNameTextState = remember { mutableStateOf(TextFieldValue("Sweet Latte")) }
+    val (userNameTextState, onUserNameChange) = remember { mutableStateOf("Sweet Latte") }
     val userNameError = remember {
         mutableStateOf("")
     }
 
-    val userPhoneNumberState = remember { mutableStateOf(TextFieldValue("0123548655")) }
+    val (userPhoneNumberState, onUserPhoneNumberChange) = remember { mutableStateOf("0123548655") }
     val userPhoneNumberError = remember {
         mutableStateOf("")
     }
 
     val createNewPassword = rememberSaveable { mutableStateOf(false) }
 
-    val newPasswordTextState = remember { mutableStateOf(TextFieldValue("")) }
+    val (newPasswordTextState, onNewPasswordChange) = remember { mutableStateOf("") }
     val newPasswordError = remember {
         mutableStateOf("")
     }
     val newPasswordVisible = rememberSaveable { mutableStateOf(false) }
 
-    val confirmNewPasswordState = remember { mutableStateOf(TextFieldValue("")) }
+    val (confirmNewPasswordState, onNewConfirmPasswordChange) = remember { mutableStateOf("") }
     val confirmNewPasswordError = remember {
         mutableStateOf("")
     }
@@ -136,7 +136,9 @@ fun ProfileDetail(
                     userNameTextState = userNameTextState,
                     userNameError = userNameError,
                     userPhoneNumberState = userPhoneNumberState,
-                    userPhoneNumberError = userPhoneNumberError
+                    userPhoneNumberError = userPhoneNumberError,
+                    onUserNameChange = onUserNameChange,
+                    onUserPhoneNumberChange = onUserPhoneNumberChange
                 )
 
                 AnimatedVisibility(
@@ -147,7 +149,8 @@ fun ProfileDetail(
                         isChangePassword = isChangePassword,
                         passwordTextState = passwordTextState,
                         passwordError = passwordError,
-                        passwordVisible = passwordVisible
+                        passwordVisible = passwordVisible,
+                        onPasswordChange = onPasswordChange
                     )
                 }
 
@@ -162,7 +165,9 @@ fun ProfileDetail(
                         confirmNewPasswordState = confirmNewPasswordState,
                         confirmNewPasswordError = confirmNewPasswordError,
                         confirmNewPasswordVisible = confirmNewPasswordVisible,
-                        focusManager = focusManager
+                        focusManager = focusManager,
+                        onNewPasswordChange = onNewPasswordChange,
+                        onNewConfirmPasswordChange = onNewConfirmPasswordChange
                     )
                 }
 
@@ -234,10 +239,12 @@ fun CardUserEmail() {
 @Composable
 fun CardUserNameAndPhone(
     isEdit: MutableState<Boolean>,
-    userNameTextState: MutableState<TextFieldValue>,
+    userNameTextState: String,
     userNameError: MutableState<String>,
-    userPhoneNumberState: MutableState<TextFieldValue>,
+    userPhoneNumberState: String,
     userPhoneNumberError: MutableState<String>,
+    onUserNameChange: (String) -> Unit,
+    onUserPhoneNumberChange: (String) -> Unit,
 ) {
     CardCustom(onClick = {}) {
         Column(
@@ -279,6 +286,9 @@ fun CardUserNameAndPhone(
             TextFieldCustom(
                 modifier = Modifier.align(alignment = Alignment.Start),
                 textFieldValue = userNameTextState,
+                onTextChange = {
+                    onUserNameChange(it)
+                },
                 keyBoardType = KeyboardType.Text,
                 trailingIcon = {
                     if (userNameError.value.isNotEmpty()) Icon(
@@ -306,6 +316,9 @@ fun CardUserNameAndPhone(
             TextFieldCustom(
                 modifier = Modifier.align(alignment = Alignment.Start),
                 textFieldValue = userPhoneNumberState,
+                onTextChange = {
+                    onUserPhoneNumberChange(it)
+                },
                 keyBoardType = KeyboardType.Text,
                 trailingIcon = {
                     if (userPhoneNumberError.value.isNotEmpty()) Icon(
@@ -329,9 +342,10 @@ fun CardUserNameAndPhone(
 fun CardChangePassword(
     createNewPassword: MutableState<Boolean>,
     isChangePassword: MutableState<Boolean>,
-    passwordTextState: MutableState<TextFieldValue>,
+    passwordTextState: String,
     passwordError: MutableState<String>,
-    passwordVisible: MutableState<Boolean>
+    passwordVisible: MutableState<Boolean>,
+    onPasswordChange: (String) -> Unit
 ) {
     CardCustom(onClick = {}) {
         Column(
@@ -368,7 +382,7 @@ fun CardChangePassword(
                             interactionSource = remember { MutableInteractionSource() }
                         ) {
                             isChangePassword.value = true
-                            passwordTextState.value = TextFieldValue("")
+                            onPasswordChange("")
                         },
                         text = stringResource(R.string.change),
                         fontFamily = raleway,
@@ -382,6 +396,9 @@ fun CardChangePassword(
             TextFieldCustom(
                 modifier = Modifier.align(alignment = Alignment.Start),
                 textFieldValue = passwordTextState,
+                onTextChange = {
+                    onPasswordChange(it)
+                },
                 keyBoardType = KeyboardType.Password,
                 trailingIcon = {
                     if (passwordError.value.isEmpty()) {
@@ -432,7 +449,7 @@ fun CardChangePassword(
                         textColor = MaterialTheme.colors.textColor,
                         onClick = {
                             isChangePassword.value = false
-                            passwordTextState.value = TextFieldValue("password")
+                            onPasswordChange("password")
                         },
                         paddingValues = PaddingValues(top = EXTRA_LARGE_PADDING),
                         contentPadding = PaddingValues(
@@ -450,7 +467,7 @@ fun CardChangePassword(
                         textColor = MaterialTheme.colors.textColor,
                         onClick = {
                             isChangePassword.value = false
-                            passwordTextState.value = TextFieldValue("password")
+                            onPasswordChange("password")
                             createNewPassword.value = true
                         },
                         paddingValues = PaddingValues(
@@ -472,13 +489,15 @@ fun CardChangePassword(
 @Composable
 fun CardNewPassword(
     createNewPassword: MutableState<Boolean>,
-    newPasswordTextState: MutableState<TextFieldValue>,
+    newPasswordTextState: String,
     newPasswordError: MutableState<String>,
     newPasswordVisible: MutableState<Boolean>,
-    confirmNewPasswordState: MutableState<TextFieldValue>,
+    confirmNewPasswordState: String,
     confirmNewPasswordError: MutableState<String>,
     confirmNewPasswordVisible: MutableState<Boolean>,
-    focusManager: FocusManager
+    focusManager: FocusManager,
+    onNewPasswordChange: (String) -> Unit,
+    onNewConfirmPasswordChange: (String) -> Unit
 ) {
     CardCustom(
         onClick = {},
@@ -506,6 +525,9 @@ fun CardNewPassword(
             TextFieldCustom(
                 modifier = Modifier.align(alignment = Alignment.Start),
                 textFieldValue = newPasswordTextState,
+                onTextChange = {
+                    onNewPasswordChange(it)
+                },
                 keyBoardType = KeyboardType.Password,
                 trailingIcon = {
                     if (newPasswordError.value.isEmpty()) {
@@ -550,6 +572,9 @@ fun CardNewPassword(
             TextFieldCustom(
                 modifier = Modifier.align(alignment = Alignment.Start),
                 textFieldValue = confirmNewPasswordState,
+                onTextChange = {
+                    onNewConfirmPasswordChange(it)
+                },
                 keyBoardType = KeyboardType.Password,
                 trailingIcon = {
                     if (confirmNewPasswordError.value.isEmpty()) {
@@ -593,8 +618,8 @@ fun CardNewPassword(
                     textColor = MaterialTheme.colors.textColor,
                     onClick = {
                         focusManager.clearFocus()
-                        newPasswordTextState.value = TextFieldValue("")
-                        confirmNewPasswordState.value = TextFieldValue("")
+                        onNewPasswordChange("")
+                        onNewConfirmPasswordChange("")
                         createNewPassword.value = false
                     },
                     paddingValues = PaddingValues(top = EXTRA_LARGE_PADDING),
@@ -613,8 +638,8 @@ fun CardNewPassword(
                     textColor = MaterialTheme.colors.textColor,
                     onClick = {
                         focusManager.clearFocus()
-                        newPasswordTextState.value = TextFieldValue("")
-                        confirmNewPasswordState.value = TextFieldValue("")
+                        onNewPasswordChange("")
+                        onNewConfirmPasswordChange("")
                         createNewPassword.value = false
                     },
                     paddingValues = PaddingValues(

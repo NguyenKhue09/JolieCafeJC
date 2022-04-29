@@ -43,7 +43,10 @@ import com.khue.joliecafejp.presentation.common.FaceOrGoogleLogin
 import com.khue.joliecafejp.presentation.common.TextCustom
 import com.khue.joliecafejp.presentation.common.TextFieldCustom
 import com.khue.joliecafejp.presentation.viewmodels.LoginViewModel
+import com.khue.joliecafejp.presentation.viewmodels.SignUpViewModel
 import com.khue.joliecafejp.ui.theme.*
+import com.khue.joliecafejp.utils.RegistrationFormEvent
+import kotlin.math.log
 
 @Composable
 fun LoginScreen(
@@ -51,11 +54,12 @@ fun LoginScreen(
     loginViewModel: LoginViewModel
 ) {
 
-    val user by loginViewModel.user.collectAsState()
+    //val user by loginViewModel.user.collectAsState()
+    val state = loginViewModel.state
 
-    LaunchedEffect(user) {
-        println("Login $user")
-        if (user != null) {
+    LaunchedEffect(FirebaseAuth.getInstance().currentUser) {
+        //println("Login $user")
+        if (FirebaseAuth.getInstance().currentUser != null) {
             navController.navigate(BOTTOM_ROUTE) {
                 popUpTo(AuthScreen.Login.route) {
                     inclusive = true
@@ -91,13 +95,18 @@ fun LoginScreen(
                     val credentials = GoogleAuthProvider.getCredential(account.idToken, null)
                     mAuth.signInWithCredential(credentials).addOnCompleteListener { task ->
                         if (task.isSuccessful) {
-                            Toast.makeText(context, "Welcome back ${account.displayName}", Toast.LENGTH_LONG).show()
-                            loginViewModel.signIn(
-                                email = account.email!!,
-                                displayName = account.displayName!!
-                            )
+                            Toast.makeText(
+                                context,
+                                "Welcome back ${account.displayName}",
+                                Toast.LENGTH_LONG
+                            ).show()
+//                            loginViewModel.signIn(
+//                                email = account.email!!,
+//                                displayName = account.displayName!!
+//                            )
                         } else {
-                            Toast.makeText(context, "Google sign in failed", Toast.LENGTH_LONG).show()
+                            Toast.makeText(context, "Google sign in failed", Toast.LENGTH_LONG)
+                                .show()
                         }
                     }
                 }
@@ -110,16 +119,23 @@ fun LoginScreen(
 
     // https://stackoverflow.com/questions/69107068/facebook-login-with-jetpack-compose
 
-    val userNameTextState = remember { mutableStateOf(TextFieldValue("")) }
-    val passwordTextState = remember { mutableStateOf(TextFieldValue("")) }
-    var userNameError by remember {
-        mutableStateOf("")
-    }
-    var passwordError by remember {
-        mutableStateOf("")
-    }
 
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
+
+    LaunchedEffect(key1 = context) {
+        loginViewModel.validationEvents.collect { event ->
+            when (event) {
+                is LoginViewModel.ValidationEvent.Success -> {
+                    FirebaseGmailPasswordAuth().loginUser(
+                        email = state.email,
+                        password = state.password,
+                        context = context,
+                        navController = navController
+                    )
+                }
+            }
+        }
+    }
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -155,21 +171,24 @@ fun LoginScreen(
             color = MaterialTheme.colors.textColor2,
         )
 
-//        TextFieldCustom(
-//            modifier = Modifier.align(alignment = Alignment.Start),
-//            textFieldValue = userNameTextState,
-//            keyBoardType = KeyboardType.Text,
-//            trailingIcon = {
-//                if (userNameError.isNotEmpty()) Icon(
-//                    Icons.Filled.Error,
-//                    stringResource(R.string.error),
-//                    tint = MaterialTheme.colors.error
-//                )
-//            },
-//            placeHolder = stringResource(R.string.username_placeholder),
-//            visualTransformation = VisualTransformation.None,
-//            error = userNameError,
-//        )
+        TextFieldCustom(
+            modifier = Modifier.align(alignment = Alignment.Start),
+            textFieldValue = state.email,
+            onTextChange = {
+                loginViewModel.onEvent(RegistrationFormEvent.EmailChanged(it))
+            },
+            keyBoardType = KeyboardType.Text,
+            trailingIcon = {
+                if (state.emailError.isNotEmpty()) Icon(
+                    Icons.Filled.Error,
+                    stringResource(R.string.error),
+                    tint = MaterialTheme.colors.error
+                )
+            },
+            placeHolder = stringResource(R.string.username_placeholder),
+            visualTransformation = VisualTransformation.None,
+            error = state.emailError,
+        )
 
 
         TextCustom(
@@ -180,37 +199,40 @@ fun LoginScreen(
             color = MaterialTheme.colors.textColor2,
         )
 
-//        TextFieldCustom(
-//            modifier = Modifier.align(alignment = Alignment.Start),
-//            textFieldValue = passwordTextState,
-//            keyBoardType = KeyboardType.Password,
-//            trailingIcon = {
-//                if (passwordError.isEmpty()) {
-//                    val image = if (passwordVisible)
-//                        Icons.Filled.Visibility
-//                    else Icons.Filled.VisibilityOff
-//
-//                    val description =
-//                        if (passwordVisible) stringResource(R.string.hide_password) else stringResource(
-//                            R.string.show_password
-//                        )
-//
-//                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
-//                        Icon(imageVector = image, description)
-//                    }
-//                } else {
-//                    Icon(
-//                        Icons.Filled.Error,
-//                        stringResource(R.string.error),
-//                        tint = MaterialTheme.colors.error
-//                    )
-//                }
-//
-//            },
-//            placeHolder = stringResource(R.string.password_placeholder),
-//            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-//            error = passwordError
-//        )
+        TextFieldCustom(
+            modifier = Modifier.align(alignment = Alignment.Start),
+            textFieldValue = state.password,
+            onTextChange = {
+                loginViewModel.onEvent(RegistrationFormEvent.PasswordChanged(it))
+            },
+            keyBoardType = KeyboardType.Password,
+            trailingIcon = {
+                if (state.passwordError.isEmpty()) {
+                    val image = if (passwordVisible)
+                        Icons.Filled.Visibility
+                    else Icons.Filled.VisibilityOff
+
+                    val description =
+                        if (passwordVisible) stringResource(R.string.hide_password) else stringResource(
+                            R.string.show_password
+                        )
+
+                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                        Icon(imageVector = image, description)
+                    }
+                } else {
+                    Icon(
+                        Icons.Filled.Error,
+                        stringResource(R.string.error),
+                        tint = MaterialTheme.colors.error
+                    )
+                }
+
+            },
+            placeHolder = stringResource(R.string.password_placeholder),
+            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            error = state.passwordError,
+        )
 
         Text(
             modifier = Modifier
@@ -235,21 +257,7 @@ fun LoginScreen(
         Button(
             modifier = Modifier.padding(top = 32.dp),
             onClick = {
-                validateUserName(userNameTextState.value.text.trim()) {
-                    userNameError = it
-                }
-                validatePassword(passwordTextState.value.text.trim()) {
-                    passwordError = it
-                }
-
-                if (userNameError.isEmpty() && passwordError.isEmpty()) {
-                    FirebaseGmailPasswordAuth().loginUser(
-                        email = userNameTextState.value.text.trim(),
-                        password = passwordTextState.value.text.trim(),
-                        context = context,
-                        navController = navController
-                    )
-                }
+                loginViewModel.onEvent(RegistrationFormEvent.Submit)
             },
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = MaterialTheme.colors.greyPrimaryVariant
@@ -317,23 +325,7 @@ fun LoginScreen(
         )
     }
 
-    HandleBackPress(context =  context)
-}
-
-fun validateUserName(userName: String, onError: (String) -> Unit) {
-    when {
-        userName.trim().isEmpty() -> onError("Username is empty")
-        !Patterns.EMAIL_ADDRESS.matcher(userName).matches() -> onError("Your username wrong format")
-        else -> onError("")
-    }
-}
-
-fun validatePassword(password: String, onError: (String) -> Unit) {
-    when {
-        password.trim().isEmpty() -> onError("Password is empty")
-        password.length < 6 -> onError("Password less then 6 character")
-        else -> onError("")
-    }
+    HandleBackPress(context = context)
 }
 
 @Composable

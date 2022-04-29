@@ -7,10 +7,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -61,9 +58,13 @@ fun ProductOptionsBottomSheet(
     val (selectedOptionSize, onOptionSizeSelected) = remember { mutableStateOf(size[0]) }
     val (selectedOptionSugar, onOptionSugarSelected) = remember { mutableStateOf(percent[0]) }
     val (selectedOptionIce, onOptionIceSelected) = remember { mutableStateOf(percent[0]) }
-    val (selectedToppingOption, onToppingOptionSelected) = remember { mutableStateOf<ProductTopping?>(null) }
+    val (selectedToppingOption, onToppingOptionSelected) = remember {
+        mutableStateOf<ProductTopping?>(
+            null
+        )
+    }
 
-    val productNoteTextState = remember { mutableStateOf(TextFieldValue("")) }
+    val (productNoteTextState, onProductNoteTextChange) = remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier
@@ -174,7 +175,10 @@ fun ProductOptionsBottomSheet(
                 onToppingOptionSelected = onToppingOptionSelected
             )
             Spacer(modifier = Modifier.height(EXTRA_LARGE_PADDING))
-            ProductNote(noteTextState = productNoteTextState)
+            ProductNote(
+                noteTextState = productNoteTextState,
+                onProductNoteTextChange = onProductNoteTextChange
+            )
             Spacer(modifier = Modifier.height(EXTRA_LARGE_PADDING))
             Text(
                 text = stringResource(R.string.price),
@@ -366,7 +370,8 @@ fun ProductToppingOption(
 
 @Composable
 fun ProductNote(
-    noteTextState: MutableState<TextFieldValue>
+    noteTextState: String,
+    onProductNoteTextChange: (String) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -384,6 +389,9 @@ fun ProductNote(
         Spacer(modifier = Modifier.height(SMALL_PADDING))
         TextFieldCustom(
             textFieldValue = noteTextState,
+            onTextChange = {
+                onProductNoteTextChange(it)
+            },
             keyBoardType = KeyboardType.Text,
             trailingIcon = null,
             placeHolder = "Enter some note for product here",

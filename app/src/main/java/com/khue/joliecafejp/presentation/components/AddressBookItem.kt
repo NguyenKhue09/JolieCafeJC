@@ -40,17 +40,17 @@ fun AddressBookItem(
         mutableStateOf(false)
     }
 
-    val userNameTextState = remember { mutableStateOf(TextFieldValue("Sweet Latte")) }
+    val (userNameTextState, userNameTextChange) = remember { mutableStateOf("Sweet Latte") }
     val userNameError = remember {
         mutableStateOf("")
     }
 
-    val userPhoneNumberState = remember { mutableStateOf(TextFieldValue("0123548655")) }
+    val (userPhoneNumberState, userPhoneNumberChange) = remember { mutableStateOf("0123548655") }
     val userPhoneNumberError = remember {
         mutableStateOf("")
     }
 
-    val userAddressState = remember { mutableStateOf(TextFieldValue("12 Robusta Street, Frappe District, White City")) }
+    val (userAddressState, userAddressChange) = remember { mutableStateOf("12 Robusta Street, Frappe District, White City") }
     val userAddressError = remember {
         mutableStateOf("")
     }
@@ -70,7 +70,7 @@ fun AddressBookItem(
             ) {
 
                 Column(
-                    modifier = Modifier.fillMaxWidth(if(isEdit) 1f else 0.7f),
+                    modifier = Modifier.fillMaxWidth(if (isEdit) 1f else 0.7f),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.Start
                 ) {
@@ -87,6 +87,9 @@ fun AddressBookItem(
 
                     TextFieldCustom(
                         textFieldValue = userNameTextState,
+                        onTextChange = {
+                            userNameTextChange(it)
+                        },
                         keyBoardType = KeyboardType.Text,
                         trailingIcon = {
                             if (userNameError.value.isNotEmpty()) Icon(
@@ -146,6 +149,9 @@ fun AddressBookItem(
             TextFieldCustom(
                 modifier = Modifier.align(alignment = Alignment.Start),
                 textFieldValue = userPhoneNumberState,
+                onTextChange = {
+                    userPhoneNumberChange(it)
+                },
                 keyBoardType = KeyboardType.Text,
                 trailingIcon = {
                     if (userPhoneNumberError.value.isNotEmpty()) Icon(
@@ -175,6 +181,9 @@ fun AddressBookItem(
             TextFieldCustom(
                 modifier = Modifier.align(alignment = Alignment.Start),
                 textFieldValue = userAddressState,
+                onTextChange = {
+                    userAddressChange(it)
+                },
                 keyBoardType = KeyboardType.Text,
                 trailingIcon = {
                     if (userAddressError.value.isNotEmpty()) Icon(
@@ -235,7 +244,7 @@ fun AddressBookItem(
                             backgroundColor = Color.Transparent,
                             textColor = MaterialTheme.colors.textColor,
                             onClick = {
-                                      isEdit = false
+                                isEdit = false
                             },
                             paddingValues = PaddingValues(top = EXTRA_LARGE_PADDING),
                             contentPadding = PaddingValues(
@@ -252,7 +261,7 @@ fun AddressBookItem(
                             backgroundColor = MaterialTheme.colors.titleTextColor,
                             textColor = MaterialTheme.colors.textColor,
                             onClick = {
-                                      isEdit = false
+                                isEdit = false
                             },
                             paddingValues = PaddingValues(
                                 start = EXTRA_LARGE_PADDING,
@@ -280,6 +289,6 @@ fun AddressBookPrev() {
         phoneNumber = "",
         address = "",
         onDelete = {},
-        onUpdate = { _, _, _ ->},
+        onUpdate = { _, _, _ -> },
     )
 }

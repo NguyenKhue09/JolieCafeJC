@@ -58,7 +58,7 @@ fun ProfileScreen(
                         }
                     } else {
                         FirebaseAuth.getInstance().signOut()
-                        loginViewModel.signOut()
+//                        loginViewModel.signOut()
                         navController.navigate(AUTHENTICATION_ROUTE) {
                             popUpTo(BottomBarScreen.Home.route) {
                                 inclusive = true

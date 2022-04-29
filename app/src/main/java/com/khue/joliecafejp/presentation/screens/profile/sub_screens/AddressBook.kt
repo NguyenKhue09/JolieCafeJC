@@ -41,7 +41,7 @@ fun AddressBook(
 
     val scrollState = rememberScrollState()
     val coroutineScope = rememberCoroutineScope()
-    val scrollToPosition  = remember { mutableStateOf(0F) }
+    val scrollToPosition = remember { mutableStateOf(0F) }
 
     val isAddNewAddress = remember {
         mutableStateOf(false)
@@ -51,18 +51,18 @@ fun AddressBook(
         mutableStateOf(false)
     }
 
-    val newUserNameTextState = remember { mutableStateOf(TextFieldValue("")) }
+    val (newUserNameTextState, onNewUserNameChange) = remember { mutableStateOf("") }
     val newUserNameError = remember {
         mutableStateOf("")
     }
 
-    val newUserPhoneNumberState = remember { mutableStateOf(TextFieldValue("")) }
+    val (newUserPhoneNumberState, onNewUserPhoneNumberChange) = remember { mutableStateOf("") }
     val newUserPhoneNumberError = remember {
         mutableStateOf("")
     }
 
-    val newUserAddressState =
-        remember { mutableStateOf(TextFieldValue("")) }
+    val (newUserAddressState, onNewUserAddressChange) =
+        remember { mutableStateOf("") }
     val newUserAddressError = remember {
         mutableStateOf("")
     }
@@ -73,7 +73,7 @@ fun AddressBook(
         backgroundColor = MaterialTheme.colors.greyPrimary,
         topBar = {
             TopBar(
-                titleId =  ProfileSubScreen.AddressBook.titleId,
+                titleId = ProfileSubScreen.AddressBook.titleId,
                 navController = navController
             )
         },
@@ -125,17 +125,19 @@ fun AddressBook(
                 isAddNewAddress = isAddNewAddress,
                 isDefaultAddress = isDefaultAddress,
                 newUserNameTextState = newUserNameTextState,
+                onNewUserNameChange = onNewUserNameChange,
                 newUserNameError = newUserNameError,
                 newUserPhoneNumberState = newUserPhoneNumberState,
+                onNewUserPhoneNumberChange = onNewUserPhoneNumberChange,
                 newUserPhoneNumberError = newUserPhoneNumberError,
                 newUserAddressState = newUserAddressState,
+                onNewUserAddressChange = onNewUserAddressChange,
                 newUserAddressError = newUserAddressError,
                 scrollState = scrollState,
                 coroutineScope = coroutineScope,
-                scrollToPosition = scrollToPosition
-            ) {
-
-            }
+                scrollToPosition = scrollToPosition,
+                onAddNewAddress = {}
+            )
 
             Spacer(modifier = Modifier.height(EXTRA_LARGE_PADDING))
         }
@@ -147,16 +149,19 @@ fun AddressBook(
 fun CardAddNewAddress(
     isAddNewAddress: MutableState<Boolean>,
     isDefaultAddress: MutableState<Boolean>,
-    newUserNameTextState: MutableState<TextFieldValue>,
+    newUserNameTextState: String,
     newUserNameError: MutableState<String>,
-    newUserPhoneNumberState: MutableState<TextFieldValue>,
+    newUserPhoneNumberState: String,
     newUserPhoneNumberError: MutableState<String>,
-    newUserAddressState: MutableState<TextFieldValue>,
+    newUserAddressState: String,
     newUserAddressError: MutableState<String>,
     coroutineScope: CoroutineScope,
     scrollState: ScrollableState,
     scrollToPosition: MutableState<Float>,
     onAddNewAddress: () -> Unit,
+    onNewUserNameChange: (String) -> Unit,
+    onNewUserPhoneNumberChange: (String) -> Unit,
+    onNewUserAddressChange: (String) -> Unit,
 ) {
 
     CardCustom(
@@ -220,6 +225,9 @@ fun CardAddNewAddress(
 
                     TextFieldCustom(
                         textFieldValue = newUserNameTextState,
+                        onTextChange = {
+                            onNewUserNameChange(it)
+                        },
                         keyBoardType = KeyboardType.Text,
                         trailingIcon = {
                             if (newUserNameError.value.isNotEmpty()) Icon(
@@ -247,6 +255,9 @@ fun CardAddNewAddress(
                     TextFieldCustom(
                         modifier = Modifier.align(alignment = Alignment.Start),
                         textFieldValue = newUserPhoneNumberState,
+                        onTextChange = {
+                            onNewUserPhoneNumberChange(it)
+                        },
                         keyBoardType = KeyboardType.Text,
                         trailingIcon = {
                             if (newUserPhoneNumberError.value.isNotEmpty()) Icon(
@@ -276,6 +287,9 @@ fun CardAddNewAddress(
                     TextFieldCustom(
                         modifier = Modifier.align(alignment = Alignment.Start),
                         textFieldValue = newUserAddressState,
+                        onTextChange = {
+                            onNewUserAddressChange(it)
+                        },
                         keyBoardType = KeyboardType.Text,
                         trailingIcon = {
                             if (newUserAddressError.value.isNotEmpty()) Icon(
