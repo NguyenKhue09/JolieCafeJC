@@ -5,10 +5,10 @@ import com.khue.joliecafejp.domain.model.ApiResponseSingleData
 import com.khue.joliecafejp.domain.model.User
 import retrofit2.Response
 
-class CreateUserUseCase(
+class UserLoginUseCase(
     private val repository: Repository
 ) {
-    suspend operator fun invoke(data: Map<String, String>): Response<ApiResponseSingleData<User>> {
-        return repository.createUser(data = data)
+    suspend operator fun invoke(userId: String): Response<ApiResponseSingleData<User>> {
+        return repository.userLogin(userId = userId)
     }
 }

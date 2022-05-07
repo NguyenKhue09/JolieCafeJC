@@ -8,12 +8,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
 import com.khue.joliecafejp.R
 import com.khue.joliecafejp.presentation.common.CardCustom
 import com.khue.joliecafejp.ui.theme.*
@@ -24,10 +27,21 @@ fun HorizontalProductItem(
     name: String = "",
     type: String = "",
     favorites: Int = 0,
-    price: Int = 0,
+    price: Double = 0.0,
+    image: String = "",
     onAdd: () -> Unit = {},
     onClick: () -> Unit = {}
 ) {
+
+    val painter = rememberAsyncImagePainter(
+        model = ImageRequest.Builder(LocalContext.current)
+            .placeholder(R.drawable.image_logo)
+            .error(R.drawable.image_logo)
+            .data(image)
+            .crossfade(200)
+            .build()
+    )
+    
     CardCustom(
         paddingValues = PaddingValues(
             top = EXTRA_LARGE_PADDING,
@@ -52,7 +66,7 @@ fun HorizontalProductItem(
                     .height(IMAGE_PRODUCT_SIZE)
                     .width(IMAGE_PRODUCT_SIZE)
                     .clip(MaterialTheme.shapes.medium),
-                painter = painterResource(id = R.drawable.image_logo),
+                painter = painter,
                 contentDescription = stringResource(R.string.profile_logo),
                 contentScale = ContentScale.Crop,
             )
@@ -60,20 +74,21 @@ fun HorizontalProductItem(
             Column(
                 modifier = modifier
                     .padding(horizontal = SMALL_PADDING)
-                    .weight(weight = 1f, fill = true)
+                    .weight(weight = 1f, fill = false)
                     .wrapContentHeight(),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.Start
             ) {
                 Row(
+                    modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Start
                 ) {
                     Text(
                         modifier = modifier
                             .wrapContentSize(align = Alignment.CenterStart)
-                            .weight(4f, false),
-                        text = "Latte",
+                            .weight(1f, false),
+                        text = name,
                         fontFamily = raleway,
                         color = MaterialTheme.colors.textColor,
                         fontSize = MaterialTheme.typography.subtitle1.fontSize,
@@ -92,9 +107,8 @@ fun HorizontalProductItem(
 
                     Text(
                         modifier = modifier
-                            .wrapContentSize(align = Alignment.CenterStart)
-                            .weight(4f, false),
-                        text = "50",
+                            .wrapContentSize(align = Alignment.CenterStart),
+                        text = favorites.toString(),
                         fontFamily = montserratFontFamily,
                         color = MaterialTheme.colors.textColor,
                         fontSize = MaterialTheme.typography.subtitle1.fontSize,
@@ -107,8 +121,7 @@ fun HorizontalProductItem(
                     Icon(
                         modifier = modifier
                             .size(15.dp)
-                            .wrapContentSize(align = Alignment.CenterStart)
-                            .weight(1f, false),
+                            .wrapContentSize(align = Alignment.CenterStart),
                         painter = painterResource(id = R.drawable.ic_favorite),
                         contentDescription = stringResource(id = R.string.favorite),
                         tint = MaterialTheme.colors.textColor
@@ -119,7 +132,7 @@ fun HorizontalProductItem(
                     modifier = modifier
                         .wrapContentSize()
                         .padding(vertical = EXTRA_EXTRA_SMALL_PADDING),
-                    text = "Coffee",
+                    text = type,
                     fontFamily = raleway,
                     color = MaterialTheme.colors.textColor,
                     fontSize = MaterialTheme.typography.caption.fontSize,
@@ -130,7 +143,7 @@ fun HorizontalProductItem(
 
                 Text(
                     modifier = modifier.wrapContentSize(),
-                    text = "90.000 VND",
+                    text = stringResource(id = R.string.product_price, price.toString()),
                     fontFamily = montserratFontFamily,
                     color = MaterialTheme.colors.textColor,
                     fontSize = MaterialTheme.typography.caption.fontSize,

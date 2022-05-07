@@ -2,6 +2,7 @@ package com.khue.joliecafejp.data.repository
 
 import androidx.paging.PagingData
 import com.khue.joliecafejp.domain.model.ApiResponseSingleData
+import com.khue.joliecafejp.domain.model.FavoriteProduct
 import com.khue.joliecafejp.domain.model.Product
 import com.khue.joliecafejp.domain.model.User
 import com.khue.joliecafejp.domain.repository.DataStoreOperations
@@ -14,8 +15,16 @@ class Repository @Inject constructor(
     private val remote: RemoteDataSource,
     private val dataStore: DataStoreOperations
 ) {
-    suspend fun createUser(data: HashMap<String, Any>): Response<ApiResponseSingleData<User>> {
+    suspend fun createUser(data: Map<String, String>): Response<ApiResponseSingleData<User>> {
         return remote.createUser(data = data)
+    }
+
+    suspend fun userLogin(userId: String): Response<ApiResponseSingleData<User>> {
+        return remote.userLogin(userId = userId)
+    }
+
+    suspend fun getUserInfos(token: String): Response<ApiResponseSingleData<User>> {
+        return remote.getUserInfos(token = token)
     }
 
     fun getProducts(
@@ -24,6 +33,14 @@ class Repository @Inject constructor(
     ): Flow<PagingData<Product>> {
         return remote.getProducts(productQuery = productQuery, token = token)
     }
+
+    fun getUserFavoriteProducts(
+        productQuery: Map<String, String>,
+        token: String
+    ): Flow<PagingData<FavoriteProduct>> {
+        return remote.getUserFavoriteProducts(productQuery = productQuery, token = token)
+    }
+
 
     suspend fun saveUserToken(userToken: String) {
         dataStore.saveUserToken(userToken = userToken)

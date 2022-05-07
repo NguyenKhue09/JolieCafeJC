@@ -25,7 +25,7 @@ android {
         compileOptions {
             kotlin {
                 kotlinOptions {
-                    freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
+                    freeCompilerArgs += "-opt-in=kotlin.RequiresOptIn"
                 }
             }
         }
@@ -64,6 +64,7 @@ dependencies {
 
     // KotlinX Serialization
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.0"
+    implementation("com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:0.8.0")
 
     // Pager
     implementation "com.google.accompanist:accompanist-pager:0.24.6-alpha"
@@ -80,7 +81,7 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.0"
 
     // Compose Navigation
-    implementation("androidx.navigation:navigation-compose:2.5.0-alpha04")
+    implementation("androidx.navigation:navigation-compose:2.5.0-beta01")
 
     // Coroutines
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0'
@@ -92,13 +93,14 @@ dependencies {
 
     // Retrofit
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
-    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
     implementation "com.squareup.okhttp3:okhttp:5.0.0-alpha.3"
     implementation "com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.3"
 
     // DataStore
     implementation("androidx.datastore:datastore-preferences:1.0.0")
     implementation "androidx.compose.ui:ui-util:$compose_version"
+
+    // Flow layout
     implementation 'com.google.accompanist:accompanist-flowlayout:0.24.6-alpha'
 
     // Room component
@@ -130,14 +132,7 @@ dependencies {
     implementation 'androidx.hilt:hilt-navigation-compose:1.0.0'
 
     // Coil
-    implementation("io.coil-kt:coil:1.4.0")
-    implementation "com.google.accompanist:accompanist-coil:0.7.0"
-
-    // Gson
-    implementation 'com.google.code.gson:gson:2.8.9'
-
-    // Jsoup
-    implementation 'org.jsoup:jsoup:1.14.2'
+    implementation("io.coil-kt:coil-compose:2.0.0-rc03")
 
     implementation 'androidx.core:core-ktx:1.7.0'
     implementation "androidx.compose.ui:ui:$compose_version"

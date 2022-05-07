@@ -1,6 +1,7 @@
 package com.khue.joliecafejp.presentation.screens.profile.sub_screens
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.ScrollableState
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.layout.*
@@ -13,6 +14,7 @@ import androidx.compose.material.icons.filled.Error
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInParent
@@ -88,37 +90,68 @@ fun AddressBook(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            LazyColumn(
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .fillMaxSize()
                     .weight(1f),
-                verticalArrangement = Arrangement.Top,
-                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                repeat(10) {
-                    item {
-                        if (showDeleteCustomDialog) {
-                            CustomDialog(
-                                title = "Delete address?",
-                                content = "Do you really want to delete this address?",
-                                onDismiss = { showDeleteCustomDialog = false },
-                                onNegativeClick = { showDeleteCustomDialog = false },
-                                onPositiveClick = { showDeleteCustomDialog = false }
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    verticalArrangement = Arrangement.Top,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    repeat(10) {
+                        item {
+                            if (showDeleteCustomDialog) {
+                                CustomDialog(
+                                    title = "Delete address?",
+                                    content = "Do you really want to delete this address?",
+                                    onDismiss = { showDeleteCustomDialog = false },
+                                    onNegativeClick = { showDeleteCustomDialog = false },
+                                    onPositiveClick = { showDeleteCustomDialog = false }
+                                )
+                            }
+
+                            AddressBookItem(
+                                name = "",
+                                phoneNumber = "",
+                                address = "",
+                                paddingValues = if(it == 9) PaddingValues(
+                                    top = EXTRA_LARGE_PADDING,
+                                    start = EXTRA_LARGE_PADDING,
+                                    end = EXTRA_LARGE_PADDING,
+                                    bottom = EXTRA_LARGE_PADDING
+                                ) else PaddingValues(
+                                    top = EXTRA_LARGE_PADDING,
+                                    start = EXTRA_LARGE_PADDING,
+                                    end = EXTRA_LARGE_PADDING,
+                                    bottom = 0.dp
+                                ),
+                                onDelete = {
+                                    showDeleteCustomDialog = true
+                                },
+                                onUpdate = { _, _, _ -> },
                             )
                         }
 
-                        AddressBookItem(
-                            name = "",
-                            phoneNumber = "",
-                            address = "",
-                            onDelete = {
-                                showDeleteCustomDialog = true
-                            },
-                            onUpdate = { _, _, _ -> },
-                        )
                     }
-
                 }
+
+                Spacer(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(EXTRA_LARGE_PADDING)
+                        .align(Alignment.BottomCenter)
+                        .background(
+                            brush = Brush.verticalGradient(
+                                colors = listOf(
+                                    Color.Transparent,
+                                    MaterialTheme.colors.greyPrimary,
+                                ),
+                            )
+                        )
+                )
             }
 
             CardAddNewAddress(
@@ -168,6 +201,12 @@ fun CardAddNewAddress(
         modifier = Modifier.onGloballyPositioned { coordinates ->
             scrollToPosition.value = coordinates.positionInParent().y
         },
+        paddingValues = PaddingValues(
+            top = 0.dp,
+            start = EXTRA_LARGE_PADDING,
+            end = EXTRA_LARGE_PADDING,
+            bottom = 0.dp
+        ),
         onClick = {}
     ) {
         Column(

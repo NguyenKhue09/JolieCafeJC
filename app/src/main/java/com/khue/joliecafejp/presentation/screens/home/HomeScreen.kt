@@ -16,6 +16,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.items
 import com.google.accompanist.pager.*
 import com.google.firebase.auth.FirebaseAuth
 import com.khue.joliecafejp.R
@@ -32,6 +34,7 @@ import com.khue.joliecafejp.presentation.components.HorizontalProductItem
 import com.khue.joliecafejp.presentation.viewmodels.LoginViewModel
 import com.khue.joliecafejp.presentation.viewmodels.HomeViewModel
 import com.khue.joliecafejp.ui.theme.*
+import com.khue.joliecafejp.utils.ApiResult
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.yield
@@ -47,21 +50,31 @@ fun HomeScreen(
     homeViewModel: HomeViewModel = hiltViewModel()
 ) {
 
-    val user = FirebaseAuth.getInstance().currentUser
+
+
+    val userLoginResponse = loginViewModel.userLoginResponse
+    val userToken by loginViewModel.userToken.collectAsState(initial = "")
     val searchTextState by homeViewModel.searchTextState
     val pagerState = rememberPagerState()
 
-    LaunchedEffect(user) {
-        //println("user $user")
-        if (user == null) {
+    val bestSellerProducts = homeViewModel.getProducts(productQuery = mapOf("type" to "Coffee"), token = userToken).collectAsLazyPagingItems()
+
+    LaunchedEffect(userToken) {
+        if (userToken.isEmpty()) {
             navController.navigate(AUTHENTICATION_ROUTE) {
                 popUpTo(BottomBarScreen.Home.route) {
                     inclusive = true
                 }
                 launchSingleTop = true
             }
+
         }
     }
+
+    LaunchedEffect(key1 = true) {
+        if(userLoginResponse.value.data == null) loginViewModel.getUserInfos(token = userToken)
+    }
+
 
     // Bottom Sheet
     val coroutineScope = rememberCoroutineScope()
@@ -91,11 +104,11 @@ fun HomeScreen(
             iconId = R.drawable.ic_croissant_svgrepo_com
         ),
         CategoryButtonItem(
-            title = "Coffee",
+            title = "Milk shake",
             iconId = R.drawable.ic_coffee
         ),
         CategoryButtonItem(
-            title = "Coffee",
+            title = "Milk tea",
             iconId = R.drawable.ic_coffee
         ),
         CategoryButtonItem(
@@ -125,7 +138,8 @@ fun HomeScreen(
             modifier = Modifier.padding(paddingValues),
             topBar = {
                 HomeTopBar(
-                    userName = user?.displayName ?: "",
+                    userName = userLoginResponse.value.data?.fullName ?: "You",
+                    userImage = userLoginResponse.value.data?.thumbnail ?: FirebaseAuth.getInstance().currentUser?.photoUrl.toString(),
                     userCoins = 300
                 ) {
                     navController.navigate(HomeSubScreen.Notifications.route) {
@@ -198,18 +212,29 @@ fun HomeScreen(
                     )
                 }
 
-                repeat(10) {
-                    item {
+                items(
+                    items = bestSellerProducts,
+                    key = { product ->
+                        product.id
+                    }
+                ) { product ->
+                    product?.let {
                         HorizontalProductItem(
                             onAdd = {
                                 coroutineScope.launch { state.animateTo(ModalBottomSheetValue.Expanded) }
                             },
                             onClick = {
                                 navController.navigate("detail")
-                            }
+                            },
+                            name = product.name,
+                            type = product.type,
+                            favorites = product.avgRating,
+                            price = product.originPrice,
+                            image = product.thumbnail
                         )
                     }
                 }
+
                 item {
                     Spacer(modifier = Modifier.height(EXTRA_LARGE_PADDING))
                 }

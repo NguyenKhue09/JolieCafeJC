@@ -11,6 +11,7 @@ import com.khue.joliecafejp.domain.use_cases.ValidationUseCases
 import com.khue.joliecafejp.utils.RegistrationFormEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -20,7 +21,7 @@ class SignUpViewModel @Inject constructor(
     private val validationUseCases: ValidationUseCases
 ): ViewModel() {
 
-    var state by mutableStateOf(RegistrationFormState())
+    var state =  MutableStateFlow(RegistrationFormState())
 
     private val validationEventChannel = Channel<ValidationEvent>()
     val validationEvents = validationEventChannel.receiveAsFlow()
@@ -28,16 +29,16 @@ class SignUpViewModel @Inject constructor(
     fun onEvent(event: RegistrationFormEvent) {
         when(event) {
             is RegistrationFormEvent.EmailChanged -> {
-                state = state.copy(email = event.email)
+                state.value = state.value.copy(email = event.email)
             }
             is RegistrationFormEvent.PasswordChanged -> {
-                state = state.copy(password = event.password)
+                state.value = state.value.copy(password = event.password)
             }
             is RegistrationFormEvent.ConfirmPasswordChanged -> {
-                state = state.copy(confirmPassword =  event.confirmPassword)
+                state.value = state.value.copy(confirmPassword =  event.confirmPassword)
             }
             is RegistrationFormEvent.UserNameChanged -> {
-                state = state.copy(userName = event.username)
+                state.value = state.value.copy(userName = event.username)
             }
             is RegistrationFormEvent.Submit -> {
                 submitData()
@@ -46,10 +47,10 @@ class SignUpViewModel @Inject constructor(
     }
 
     private fun submitData() {
-        val emailResult = validationUseCases.validationEmailUseCaseUseCase.execute(state.email)
-        val passwordResult = validationUseCases.validationPasswordUseCase.execute(state.password)
-        val confirmPasswordResult = validationUseCases.validationConfirmPasswordUseCase.execute(state.password, state.confirmPassword)
-        val userNameResult = validationUseCases.validationUserNameUseCaseUseCase.execute(state.userName)
+        val emailResult = validationUseCases.validationEmailUseCaseUseCase.execute(state.value.email)
+        val passwordResult = validationUseCases.validationPasswordUseCase.execute(state.value.password)
+        val confirmPasswordResult = validationUseCases.validationConfirmPasswordUseCase.execute(state.value.password, state.value.confirmPassword)
+        val userNameResult = validationUseCases.validationUserNameUseCaseUseCase.execute(state.value.userName)
 
         val hasError = listOf(
             emailResult,
@@ -59,7 +60,7 @@ class SignUpViewModel @Inject constructor(
         ).any { !it.successful }
 
         if (hasError) {
-            state = state.copy(
+            state.value = state.value.copy(
                 emailError = emailResult.errorMessage,
                 passwordError = passwordResult.errorMessage,
                 confirmPasswordError = confirmPasswordResult.errorMessage,

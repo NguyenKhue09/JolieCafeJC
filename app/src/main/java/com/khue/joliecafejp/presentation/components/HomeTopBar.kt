@@ -35,7 +35,8 @@ fun HomeTopBar(
                 vertical = LARGE_PADDING
             ),
             height = IMAGE_USER_HOME_SIZE,
-            width = IMAGE_USER_HOME_SIZE
+            width = IMAGE_USER_HOME_SIZE,
+            image = userImage
         )
         Column(
             modifier = Modifier.weight(1f),

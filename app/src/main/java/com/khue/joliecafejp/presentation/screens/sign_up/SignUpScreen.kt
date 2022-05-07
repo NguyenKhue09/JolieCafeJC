@@ -38,6 +38,7 @@ import androidx.navigation.NavHostController
 import com.facebook.CallbackManager
 import com.facebook.FacebookSdk.setAdvertiserIDCollectionEnabled
 import com.facebook.FacebookSdk.setAutoLogAppEventsEnabled
+import com.google.android.gms.common.api.Api
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
@@ -47,12 +48,15 @@ import com.khue.joliecafejp.R
 import com.khue.joliecafejp.firebase.firebase_authentication.face_book_signin.FirebaseFacebookLogin
 import com.khue.joliecafejp.firebase.firebase_authentication.gmail_password_authentication.FirebaseGmailPasswordAuth
 import com.khue.joliecafejp.firebase.firebase_authentication.google_signin.AuthResultContract
+import com.khue.joliecafejp.navigation.nav_graph.BOTTOM_ROUTE
+import com.khue.joliecafejp.navigation.nav_screen.AuthScreen
 import com.khue.joliecafejp.presentation.common.FaceOrGoogleLogin
 import com.khue.joliecafejp.presentation.common.TextCustom
 import com.khue.joliecafejp.presentation.common.TextFieldCustom
 import com.khue.joliecafejp.presentation.viewmodels.LoginViewModel
 import com.khue.joliecafejp.presentation.viewmodels.SignUpViewModel
 import com.khue.joliecafejp.ui.theme.*
+import com.khue.joliecafejp.utils.ApiResult
 import com.khue.joliecafejp.utils.RegistrationFormEvent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -66,7 +70,10 @@ fun SignUpScreen(
     signUpViewModel: SignUpViewModel = hiltViewModel()
 ) {
 
-    val state = signUpViewModel.state
+    val mAuth: FirebaseAuth = FirebaseAuth.getInstance()
+    val state = signUpViewModel.state.collectAsState()
+    val userToken by loginViewModel.userToken.collectAsState(initial = "")
+    val userLoginResponse by loginViewModel.userLoginResponse.collectAsState(initial = ApiResult.Loading())
 
     val scrollState = rememberScrollState()
     val context = LocalContext.current
@@ -82,7 +89,6 @@ fun SignUpScreen(
     val auth: FirebaseAuth = Firebase.auth
 
     // setup google login
-    val coroutineScope = rememberCoroutineScope()
     var text by remember {
         mutableStateOf<String?>(null)
     }
@@ -90,7 +96,6 @@ fun SignUpScreen(
     val signInRequestCode = 1
     val authResultLauncher =
         rememberLauncherForActivityResult(contract = AuthResultContract()) { task ->
-
             try {
                 val account = task?.getResult(ApiException::class.java)
                 if (account == null) {
@@ -98,25 +103,39 @@ fun SignUpScreen(
                     Toast.makeText(context, text, Toast.LENGTH_LONG).show()
                 } else {
                     val credentials = GoogleAuthProvider.getCredential(account.idToken, null)
+                    mAuth.signInWithCredential(credentials).addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            Toast.makeText(
+                                context,
+                                "Welcome back ${account.displayName}",
+                                Toast.LENGTH_LONG
+                            ).show()
+                            val user = task.result.user
+                            val isNewUser = task.result.additionalUserInfo?.isNewUser
+                            user?.let {
+                                val useName = user.displayName
+                                val email = user.email
+                                if(!useName.isNullOrEmpty() && !email.isNullOrEmpty()) {
+                                    val data = mapOf(
+                                        "_id" to user.uid,
+                                        "fullname" to useName,
+                                        "email" to email
+                                    )
+                                    isNewUser?.let {
+                                        if (it) {
+                                            loginViewModel.createUser(userData = data)
+                                        } else {
+                                            loginViewModel.userLogin(userId = user.uid)
 
-                    coroutineScope.launch {
-                        try {
-                            auth.signInWithCredential(credentials).await()
-                            withContext(Dispatchers.Main) {
-                                Toast.makeText(context, "Successfully", Toast.LENGTH_LONG).show()
+                                        }
+                                    }
+                                }
+
                             }
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                            withContext(Dispatchers.Main) {
-                                Toast.makeText(context, e.message, Toast.LENGTH_LONG).show()
-                            }
-                        }
-//                        loginViewModel.signIn(
-//                            email = account.email!!,
-//                            displayName = account.displayName!!
-//                        )
-                        withContext(Dispatchers.Main) {
-                            Toast.makeText(context, account.displayName, Toast.LENGTH_LONG).show()
+
+                        } else {
+                            Toast.makeText(context, "Google sign in failed", Toast.LENGTH_LONG)
+                                .show()
                         }
                     }
                 }
@@ -132,12 +151,34 @@ fun SignUpScreen(
             when (event) {
                 is SignUpViewModel.ValidationEvent.Success -> {
                     FirebaseGmailPasswordAuth().registerUser(
-                        email = state.email,
-                        password = state.password,
+                        email = state.value.email,
+                        password = state.value.password,
+                        name = state.value.userName,
                         context = context,
-                        navController = navController
-                    )
+                    ) {
+                        loginViewModel.createUser(userData = it)
+                    }
                 }
+            }
+        }
+    }
+
+    LaunchedEffect(userToken) {
+        if (userToken.isNotEmpty()) {
+            navController.navigate(BOTTOM_ROUTE) {
+                popUpTo(AuthScreen.Login.route) {
+                    inclusive = true
+                }
+            }
+        }
+    }
+
+    LaunchedEffect(key1 = userLoginResponse) {
+        when(userLoginResponse) {
+            is ApiResult.Error -> {
+                Toast.makeText(context, userLoginResponse.message, Toast.LENGTH_SHORT).show()
+            }
+            else -> {
             }
         }
     }
@@ -178,13 +219,13 @@ fun SignUpScreen(
 
         TextFieldCustom(
             modifier = Modifier.align(alignment = Alignment.Start),
-            textFieldValue = state.userName,
+            textFieldValue = state.value.userName,
             onTextChange = {
                 signUpViewModel.onEvent(RegistrationFormEvent.UserNameChanged(it))
             },
             keyBoardType = KeyboardType.Text,
             trailingIcon = {
-                if (state.userNameError.isNotEmpty()) {
+                if (state.value.userNameError.isNotEmpty()) {
                     Icon(
                         Icons.Filled.Error,
                         stringResource(R.string.error),
@@ -194,7 +235,7 @@ fun SignUpScreen(
             },
             placeHolder = stringResource(R.string.username_placeholder),
             visualTransformation = VisualTransformation.None,
-            error = state.userNameError
+            error = state.value.userNameError
         )
 
         TextCustom(
@@ -207,13 +248,13 @@ fun SignUpScreen(
 
         TextFieldCustom(
             modifier = Modifier.align(alignment = Alignment.Start),
-            textFieldValue = state.email,
+            textFieldValue = state.value.email,
             onTextChange = {
                 signUpViewModel.onEvent(RegistrationFormEvent.EmailChanged(it))
             },
             keyBoardType = KeyboardType.Email,
             trailingIcon = {
-                if (state.emailError.isNotEmpty()) {
+                if (state.value.emailError.isNotEmpty()) {
                     Icon(
                         Icons.Filled.Error,
                         stringResource(R.string.error),
@@ -223,7 +264,7 @@ fun SignUpScreen(
             },
             placeHolder = stringResource(R.string.email_placeholder),
             visualTransformation = VisualTransformation.None,
-            error = state.emailError
+            error = state.value.emailError
         )
 
         TextCustom(
@@ -236,13 +277,13 @@ fun SignUpScreen(
 
         TextFieldCustom(
             modifier = Modifier.align(alignment = Alignment.Start),
-            textFieldValue = state.password,
+            textFieldValue = state.value.password,
             onTextChange = {
                 signUpViewModel.onEvent(RegistrationFormEvent.PasswordChanged(it))
             },
             keyBoardType = KeyboardType.Password,
             trailingIcon = {
-                if (state.passwordError.isEmpty()) {
+                if (state.value.passwordError.isEmpty()) {
                     val image = if (passwordVisible)
                         Icons.Filled.Visibility
                     else Icons.Filled.VisibilityOff
@@ -265,7 +306,7 @@ fun SignUpScreen(
             },
             placeHolder = stringResource(R.string.password_placeholder),
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            error = state.passwordError
+            error = state.value.passwordError
         )
 
         TextCustom(
@@ -278,13 +319,13 @@ fun SignUpScreen(
 
         TextFieldCustom(
             modifier = Modifier.align(alignment = Alignment.Start),
-            textFieldValue = state.confirmPassword,
+            textFieldValue = state.value.confirmPassword,
             onTextChange = {
                 signUpViewModel.onEvent(RegistrationFormEvent.ConfirmPasswordChanged(it))
             },
             keyBoardType = KeyboardType.Password,
             trailingIcon = {
-                if (state.confirmPasswordError.isEmpty()) {
+                if (state.value.confirmPasswordError.isEmpty()) {
                     val image = if (confirmPasswordVisible)
                         Icons.Filled.Visibility
                     else Icons.Filled.VisibilityOff
@@ -307,7 +348,7 @@ fun SignUpScreen(
             },
             placeHolder = stringResource(R.string.confirm_password_placeholder),
             visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            error = state.confirmPasswordError
+            error = state.value.confirmPasswordError
         )
 
         Button(
@@ -341,7 +382,9 @@ fun SignUpScreen(
                 authResultLauncher.launch(signInRequestCode)
             },
             faceAction = {
-                facebookLogin.facebookLogin(context, callbackManager, auth, loginViewModel)
+                facebookLogin.facebookLogin(context, callbackManager, auth) {
+                    loginViewModel.userLogin(userId = it)
+                }
             }
         )
 

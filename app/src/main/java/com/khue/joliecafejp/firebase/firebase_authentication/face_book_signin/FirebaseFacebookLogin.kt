@@ -17,7 +17,7 @@ import com.khue.joliecafejp.presentation.viewmodels.LoginViewModel
 
 class FirebaseFacebookLogin {
 
-    fun facebookLogin(context: Context, callbackManager: CallbackManager, auth: FirebaseAuth, loginViewModel: LoginViewModel) {
+    fun facebookLogin(context: Context, callbackManager: CallbackManager, auth: FirebaseAuth, loginFunction: (String) -> Unit) {
         LoginManager.getInstance().logInWithReadPermissions(
             context as ActivityResultRegistryOwner,
             callbackManager = callbackManager,
@@ -29,7 +29,7 @@ class FirebaseFacebookLogin {
             FacebookCallback<LoginResult> {
             override fun onSuccess(result: LoginResult) {
                 println("facebook:onSuccess:$result")
-                handleFacebookAccessToken(result.accessToken, context, auth, loginViewModel)
+                handleFacebookAccessToken(result.accessToken, context, auth, loginFunction)
             }
 
             override fun onCancel() {
@@ -42,7 +42,7 @@ class FirebaseFacebookLogin {
         })
     }
 
-    private fun handleFacebookAccessToken(token: AccessToken, context: Context, auth: FirebaseAuth, loginViewModel: LoginViewModel) {
+    private fun handleFacebookAccessToken(token: AccessToken, context: Context, auth: FirebaseAuth, loginFunction: (String) -> Unit) {
         println("handleFacebookAccessToken:$token")
 
         val credential = FacebookAuthProvider.getCredential(token.token)
@@ -52,15 +52,15 @@ class FirebaseFacebookLogin {
                     // Sign in success, update UI with the signed-in user's information
                     println("signInWithCredential:success")
                     val user = auth.currentUser
-//                    loginViewModel.signIn(
-//                        email = auth.currentUser?.email!!,
-//                        displayName = auth.currentUser?.displayName!!
-//                    )
                     println(user?.displayName)
                     Toast.makeText(
                         context, "Welcome back ${user?.displayName}",
                         Toast.LENGTH_SHORT
                     ).show()
+                    val userId = user?.uid
+                    userId?.let {
+                        loginFunction.invoke(it)
+                    }
                 } else {
                     // If sign in fails, display a message to the user.
                     println("signInWithCredential:failure  ${task.exception}")

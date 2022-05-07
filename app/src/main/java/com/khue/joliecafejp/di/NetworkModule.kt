@@ -1,5 +1,6 @@
 package com.khue.joliecafejp.di
 
+import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.khue.joliecafejp.data.remote.JolieCafeApi
 import com.khue.joliecafejp.data.repository.RemoteDataSourceImpl
 import com.khue.joliecafejp.domain.repository.RemoteDataSource
@@ -8,9 +9,12 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.json.Json
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
+import retrofit2.Converter
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
@@ -29,22 +33,24 @@ object NetworkModule {
             .build()
     }
 
+    @OptIn(ExperimentalSerializationApi::class)
     @Singleton
     @Provides
-    fun provideConverterFactory(): GsonConverterFactory {
-        return GsonConverterFactory.create()
+    fun provideConverterFactory(): Converter.Factory {
+        val contentType = "application/json".toMediaType()
+        return Json.asConverterFactory(contentType)
     }
 
     @Singleton
     @Provides
     fun provideRetrofitInstance(
         okHttpClient: OkHttpClient,
-        gsonConverterFactory: GsonConverterFactory
+        jsonConverterFactory: Converter.Factory
     ): Retrofit {
         return Retrofit.Builder()
             .baseUrl(BASE_URL)
             .client(okHttpClient)
-            .addConverterFactory(gsonConverterFactory)
+            .addConverterFactory(jsonConverterFactory)
             .build()
     }
 

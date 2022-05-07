@@ -28,6 +28,12 @@ fun AddressBookItem(
     name: String,
     phoneNumber: String,
     address: String,
+    paddingValues: PaddingValues = PaddingValues(
+        top = EXTRA_LARGE_PADDING,
+        start = EXTRA_LARGE_PADDING,
+        end = EXTRA_LARGE_PADDING,
+        bottom = 0.dp
+    ),
     onDelete: () -> Unit,
     onUpdate: (String, String, String) -> Unit,
 ) {
@@ -55,7 +61,10 @@ fun AddressBookItem(
         mutableStateOf("")
     }
 
-    CardCustom(onClick = {}) {
+    CardCustom(
+        onClick = {},
+        paddingValues = paddingValues
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()

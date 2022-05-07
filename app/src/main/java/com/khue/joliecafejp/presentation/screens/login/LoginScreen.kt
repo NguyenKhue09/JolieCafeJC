@@ -45,6 +45,7 @@ import com.khue.joliecafejp.presentation.common.TextFieldCustom
 import com.khue.joliecafejp.presentation.viewmodels.LoginViewModel
 import com.khue.joliecafejp.presentation.viewmodels.SignUpViewModel
 import com.khue.joliecafejp.ui.theme.*
+import com.khue.joliecafejp.utils.ApiResult
 import com.khue.joliecafejp.utils.RegistrationFormEvent
 import kotlin.math.log
 
@@ -54,12 +55,12 @@ fun LoginScreen(
     loginViewModel: LoginViewModel
 ) {
 
-    //val user by loginViewModel.user.collectAsState()
-    val state = loginViewModel.state
+    val userToken by loginViewModel.userToken.collectAsState(initial = "")
+    val state by loginViewModel.state.collectAsState()
+    val userLoginResponse by loginViewModel.userLoginResponse.collectAsState(initial = ApiResult.Loading())
 
-    LaunchedEffect(FirebaseAuth.getInstance().currentUser) {
-        //println("Login $user")
-        if (FirebaseAuth.getInstance().currentUser != null) {
+    LaunchedEffect(userToken) {
+        if (userToken.isNotEmpty()) {
             navController.navigate(BOTTOM_ROUTE) {
                 popUpTo(AuthScreen.Login.route) {
                     inclusive = true
@@ -85,7 +86,6 @@ fun LoginScreen(
     val signInRequestCode = 1
     val authResultLauncher =
         rememberLauncherForActivityResult(contract = AuthResultContract()) { task ->
-
             try {
                 val account = task?.getResult(ApiException::class.java)
                 if (account == null) {
@@ -100,10 +100,30 @@ fun LoginScreen(
                                 "Welcome back ${account.displayName}",
                                 Toast.LENGTH_LONG
                             ).show()
-//                            loginViewModel.signIn(
-//                                email = account.email!!,
-//                                displayName = account.displayName!!
-//                            )
+                            val user = task.result.user
+                            val isNewUser = task.result.additionalUserInfo?.isNewUser
+                            user?.let {
+                                val useName = user.displayName
+                                val email = user.email
+                                if(!useName.isNullOrEmpty() && !email.isNullOrEmpty()) {
+                                    val data = mapOf(
+                                        "_id" to user.uid,
+                                        "fullname" to useName,
+                                        "email" to email
+                                    )
+                                    isNewUser?.let {
+                                        if (it) {
+                                            loginViewModel.createUser(userData = data)
+                                        } else {
+
+                                            loginViewModel.userLogin(userId = user.uid)
+
+                                        }
+                                    }
+                                }
+
+                            }
+
                         } else {
                             Toast.makeText(context, "Google sign in failed", Toast.LENGTH_LONG)
                                 .show()
@@ -117,9 +137,6 @@ fun LoginScreen(
             }
         }
 
-    // https://stackoverflow.com/questions/69107068/facebook-login-with-jetpack-compose
-
-
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(key1 = context) {
@@ -129,11 +146,24 @@ fun LoginScreen(
                     FirebaseGmailPasswordAuth().loginUser(
                         email = state.email,
                         password = state.password,
-                        context = context,
-                        navController = navController
-                    )
+                        context = context
+                    ) { userId ->
+                        loginViewModel.userLogin(userId = userId)
+                    }
                 }
             }
+        }
+    }
+
+    LaunchedEffect(key1 = userLoginResponse) {
+        when(userLoginResponse) {
+            is ApiResult.Error -> {
+                Toast.makeText(context, userLoginResponse.message, Toast.LENGTH_SHORT).show()
+            }
+            is ApiResult.Success -> {
+                Toast.makeText(context, "Get your info success", Toast.LENGTH_SHORT).show()
+            }
+            else -> {}
         }
     }
 
@@ -289,7 +319,9 @@ fun LoginScreen(
                 authResultLauncher.launch(signInRequestCode)
             },
             faceAction = {
-                facebookLogin.facebookLogin(context, callbackManager, mAuth, loginViewModel)
+                facebookLogin.facebookLogin(context, callbackManager, mAuth) {
+                    loginViewModel.userLogin(userId = it)
+                }
             }
         )
 

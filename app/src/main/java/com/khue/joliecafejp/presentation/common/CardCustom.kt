@@ -10,6 +10,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.khue.joliecafejp.ui.theme.EXTRA_LARGE_PADDING
 import com.khue.joliecafejp.ui.theme.Shapes
@@ -25,6 +26,7 @@ fun CardCustom(
         end = EXTRA_LARGE_PADDING,
         bottom = 0.dp
     ),
+    backgroundColor: Color = MaterialTheme.colors.greyOpacity60Primary,
     onClick: () -> Unit,
     content: @Composable () -> Unit,
 ) {
@@ -38,7 +40,8 @@ fun CardCustom(
                 onClick()
             },
         shape = shape,
-        backgroundColor = MaterialTheme.colors.greyOpacity60Primary
+        backgroundColor = backgroundColor,
+        elevation = 0.dp
     ) {
         content()
     }

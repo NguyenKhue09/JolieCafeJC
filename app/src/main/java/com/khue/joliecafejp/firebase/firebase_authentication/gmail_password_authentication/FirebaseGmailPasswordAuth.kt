@@ -10,11 +10,20 @@ class FirebaseGmailPasswordAuth {
     var mAuth: FirebaseAuth = FirebaseAuth.getInstance()
 
 
-    fun registerUser(email: String, password: String, context: Context, navController: NavHostController) {
+    fun registerUser(email: String, password: String, name: String, context: Context, registerFunction: (Map<String, String>) -> Unit) {
         mAuth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if(task.isSuccessful) {
                     val firebaseUser: FirebaseUser? = task.result!!.user!!
+                    firebaseUser?.let {
+                        val userId = firebaseUser.uid
+                        val data = mapOf(
+                            "_id" to userId,
+                            "fullname" to name,
+                            "email" to email
+                        )
+                        registerFunction.invoke(data)
+                    }
 
                     Toast.makeText(context, "Register user successful!", Toast.LENGTH_SHORT).show()
                 } else {
@@ -26,10 +35,15 @@ class FirebaseGmailPasswordAuth {
             }
     }
 
-    fun loginUser(email: String, password: String, context: Context, navController: NavHostController) {
+    fun loginUser(email: String, password: String, context: Context, loginFunction: (String) -> Unit) {
+        println("$email $password")
         mAuth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
+                    val userId = task.result.user?.uid
+                    userId?.let {
+                        loginFunction.invoke(it)
+                    }
                     Toast.makeText(context, "Login successful", Toast.LENGTH_SHORT).show()
                 } else {
                     Toast.makeText(context, "Login failed!", Toast.LENGTH_SHORT).show()

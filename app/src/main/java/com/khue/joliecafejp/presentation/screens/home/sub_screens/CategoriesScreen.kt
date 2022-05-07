@@ -56,7 +56,11 @@ fun CategoriesScreen(
             iconId = R.drawable.ic_croissant_svgrepo_com
         ),
         CategoryButtonItem(
-            title = "More",
+            title = "Milk shake",
+            iconId = R.drawable.ic_coffee
+        ),
+        CategoryButtonItem(
+            title = "Milk tea",
             iconId = R.drawable.ic_coffee
         ),
     )

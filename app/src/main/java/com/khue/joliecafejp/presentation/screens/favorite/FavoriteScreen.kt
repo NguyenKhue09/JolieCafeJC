@@ -18,11 +18,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.rememberPagerState
 import com.khue.joliecafejp.R
+import com.khue.joliecafejp.presentation.viewmodels.FavoriteViewModel
 import com.khue.joliecafejp.ui.theme.*
 import kotlinx.coroutines.launch
 
@@ -30,7 +33,8 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalPagerApi::class)
 @Composable
 fun FavoriteScreen(
-    paddingValues: PaddingValues
+    paddingValues: PaddingValues,
+    favoriteViewModel: FavoriteViewModel = hiltViewModel()
 ) {
 
     val tabs = listOf(
@@ -38,12 +42,19 @@ fun FavoriteScreen(
         "Coffee",
         "Tea",
         "Juice",
-        "Pasty"
+        "Pasty",
+        "Milk shake",
+        "Milk tea"
     )
-
 
     val pagerState = rememberPagerState(initialPage = 0)
     val coroutineScope = rememberCoroutineScope()
+    var selectedPage by remember {
+        mutableStateOf(0)
+    }
+
+    val userToken by favoriteViewModel.userToken.collectAsState(initial = "")
+    val favoriteProducts = favoriteViewModel.favoriteProduct.collectAsLazyPagingItems()
 
     Column(
         modifier = Modifier
@@ -67,6 +78,7 @@ fun FavoriteScreen(
             tabs = tabs,
             pagerState = pagerState
         ) { tabIndex ->
+            selectedPage = tabIndex
             coroutineScope.launch {
                 pagerState.animateScrollToPage(page = tabIndex)
             }
@@ -75,8 +87,15 @@ fun FavoriteScreen(
         HorizontalPager(
             count = tabs.size,
             state = pagerState,
-        ) { page ->
-            FavoriteBody(title = tabs[page])
+        ) {
+            LaunchedEffect(key1 = selectedPage) {
+                favoriteViewModel.getUserFavoriteProducts(
+                    productQuery = mapOf("type" to tabs[selectedPage]),
+                    token = userToken
+                )
+            }
+
+            FavoriteBody(favoriteProducts = favoriteProducts)
         }
     }
 }

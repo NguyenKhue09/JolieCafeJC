@@ -1,9 +1,11 @@
 package com.khue.joliecafejp.domain.use_cases
 
-import com.khue.joliecafejp.domain.use_cases.api.CreateUserUseCase
-import com.khue.joliecafejp.domain.use_cases.api.GetProductsUseCase
+import com.khue.joliecafejp.domain.use_cases.api.*
 
 data class ApiUseCases(
     val createUserUseCase: CreateUserUseCase,
-    val getProductsUseCase: GetProductsUseCase
+    val userLoginUseCase: UserLoginUseCase,
+    val getUserInfosUseCase: GetUserInfosUseCase,
+    val getProductsUseCase: GetProductsUseCase,
+    val getUserFavoriteProductsUseCase: GetUserFavoriteProductsUseCase
 )

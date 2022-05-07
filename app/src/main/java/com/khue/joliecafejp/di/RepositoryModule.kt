@@ -7,8 +7,7 @@ import com.khue.joliecafejp.domain.repository.DataStoreOperations
 import com.khue.joliecafejp.domain.use_cases.ApiUseCases
 import com.khue.joliecafejp.domain.use_cases.DataStoreUseCases
 import com.khue.joliecafejp.domain.use_cases.ValidationUseCases
-import com.khue.joliecafejp.domain.use_cases.api.CreateUserUseCase
-import com.khue.joliecafejp.domain.use_cases.api.GetProductsUseCase
+import com.khue.joliecafejp.domain.use_cases.api.*
 import com.khue.joliecafejp.domain.use_cases.data_store.ReadUserTokenUseCase
 import com.khue.joliecafejp.domain.use_cases.data_store.SaveUserTokenUseCase
 import com.khue.joliecafejp.domain.use_cases.validation_form.ValidateConfirmPasswordUseCase
@@ -60,7 +59,10 @@ object RepositoryModule {
     fun provideApiUseCase(repository: Repository): ApiUseCases {
         return ApiUseCases(
             createUserUseCase = CreateUserUseCase(repository = repository),
-            getProductsUseCase = GetProductsUseCase(repository = repository)
+            userLoginUseCase = UserLoginUseCase(repository = repository),
+            getUserInfosUseCase = GetUserInfosUseCase(repository = repository),
+            getProductsUseCase = GetProductsUseCase(repository = repository),
+            getUserFavoriteProductsUseCase = GetUserFavoriteProductsUseCase(repository = repository)
         )
     }
 }
