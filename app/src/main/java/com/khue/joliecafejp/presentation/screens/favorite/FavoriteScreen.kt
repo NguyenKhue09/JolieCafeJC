@@ -49,9 +49,6 @@ fun FavoriteScreen(
 
     val pagerState = rememberPagerState(initialPage = 0)
     val coroutineScope = rememberCoroutineScope()
-    var selectedPage by remember {
-        mutableStateOf(0)
-    }
 
     val userToken by favoriteViewModel.userToken.collectAsState(initial = "")
     val favoriteProducts = favoriteViewModel.favoriteProduct.collectAsLazyPagingItems()
@@ -78,7 +75,6 @@ fun FavoriteScreen(
             tabs = tabs,
             pagerState = pagerState
         ) { tabIndex ->
-            selectedPage = tabIndex
             coroutineScope.launch {
                 pagerState.animateScrollToPage(page = tabIndex)
             }
@@ -88,9 +84,9 @@ fun FavoriteScreen(
             count = tabs.size,
             state = pagerState,
         ) {
-            LaunchedEffect(key1 = selectedPage) {
+            LaunchedEffect(key1 = pagerState.currentPage) {
                 favoriteViewModel.getUserFavoriteProducts(
-                    productQuery = mapOf("type" to tabs[selectedPage]),
+                    productQuery = mapOf("type" to tabs[pagerState.currentPage]),
                     token = userToken
                 )
             }

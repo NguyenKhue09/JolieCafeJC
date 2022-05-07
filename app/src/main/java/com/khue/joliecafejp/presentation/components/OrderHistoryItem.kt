@@ -74,7 +74,7 @@ fun OrderHistoryItem(
                 IconButton(
                     onClick = {
                         isExpanded = !isExpanded
-                        if(isExpanded) onExpanded()
+                        if (isExpanded) onExpanded()
                     }
                 ) {
                     Icon(
@@ -96,15 +96,15 @@ fun OrderHistoryItem(
                     verticalArrangement = Arrangement.Center
                 ) {
 
-                    LazyColumn(
-                        modifier = Modifier.height(150.dp)
+                    Column(
+                        modifier = Modifier.wrapContentHeight()
                     ) {
                         repeat(5) {
-                            item {
-                                ProductOrderHistoryItem()
-                            }
+                            ProductOrderHistoryItem()
                         }
                     }
+
+                    Spacer(modifier = Modifier.height(EXTRA_LARGE_PADDING))
 
                     Text(
                         modifier = Modifier

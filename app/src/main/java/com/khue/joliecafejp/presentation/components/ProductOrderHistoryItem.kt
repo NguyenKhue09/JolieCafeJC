@@ -29,9 +29,7 @@ fun ProductOrderHistoryItem(
         modifier = modifier
             .fillMaxWidth()
             .padding(
-                start = MEDIUM_SMALL_PADDING,
                 top = MEDIUM_SMALL_PADDING,
-                end = MEDIUM_SMALL_PADDING
             )
             .height(IntrinsicSize.Max),
         horizontalArrangement = Arrangement.SpaceBetween,
