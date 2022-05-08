@@ -1,5 +1,6 @@
 package com.khue.joliecafejp.presentation.screens.profile.sub_screens
 
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -20,21 +21,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.google.firebase.auth.FirebaseAuth
 import com.khue.joliecafejp.R
 import com.khue.joliecafejp.navigation.nav_screen.ProfileSubScreen
 import com.khue.joliecafejp.presentation.common.*
 import com.khue.joliecafejp.presentation.components.*
+import com.khue.joliecafejp.presentation.viewmodels.LoginViewModel
 import com.khue.joliecafejp.ui.theme.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -43,7 +46,8 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ProfileDetail(
-    navController: NavHostController
+    navController: NavHostController,
+    loginViewModel: LoginViewModel
 ) {
 
     val focusManager = LocalFocusManager.current
@@ -95,6 +99,28 @@ fun ProfileDetail(
         initialValue = ModalBottomSheetValue.Hidden
     )
 
+    var isGGorFaceLogin by remember {
+        mutableStateOf(true)
+    }
+
+    val userLoginResponse = loginViewModel.userLoginResponse.collectAsState()
+    val userToken by loginViewModel.userToken.collectAsState(initial = "")
+
+
+    FirebaseAuth.getInstance().currentUser?.getIdToken(false)?.addOnCompleteListener {
+        if(it.isSuccessful) {
+            val result = it.result.signInProvider
+            if(result.equals("password")) {
+                isGGorFaceLogin = false
+            }
+        }
+    }
+
+    LaunchedEffect(key1 = true) {
+        if(userLoginResponse.value.data == null) loginViewModel.getUserInfos(token = userToken)
+    }
+
+
     ModalBottomSheetLayout(
         sheetState = state,
         modifier = Modifier.fillMaxSize(),
@@ -126,10 +152,14 @@ fun ProfileDetail(
 
                 BoxUserImage(
                     coroutineScope = coroutineScope,
-                    state = state
+                    state = state,
+                    isGGorFaceLogin = isGGorFaceLogin,
+                    image = userLoginResponse.value.data?.thumbnail ?: FirebaseAuth.getInstance().currentUser?.photoUrl.toString()
                 )
 
-                CardUserEmail()
+                CardUserEmail(
+                    userEmail = userLoginResponse.value.data?.email ?: "Can't load your email"
+                )
 
                 CardUserNameAndPhone(
                     isEdit = isEdit,
@@ -145,6 +175,7 @@ fun ProfileDetail(
                     visible = !createNewPassword.value,
                 ) {
                     CardChangePassword(
+                        isGGorFaceLogin = isGGorFaceLogin,
                         createNewPassword = createNewPassword,
                         isChangePassword = isChangePassword,
                         passwordTextState = passwordTextState,
@@ -180,13 +211,18 @@ fun ProfileDetail(
 @Composable
 fun BoxUserImage(
     coroutineScope: CoroutineScope,
-    state: ModalBottomSheetState
+    state: ModalBottomSheetState,
+    isGGorFaceLogin: Boolean,
+    image: String
 ) {
+    val context = LocalContext.current
     Box(
         modifier = Modifier.padding(bottom = EXTRA_EXTRA_LARGE_PADDING),
         contentAlignment = Alignment.BottomEnd
     ) {
-        CustomImage()
+        CustomImage(
+            image = image
+        )
         IconButton(
             modifier = Modifier
                 .offset(ICON_BUTTON_PROFILE_OFFSET, ICON_BUTTON_PROFILE_OFFSET)
@@ -194,7 +230,11 @@ fun BoxUserImage(
                 .clip(CircleShape)
                 .background(color = MaterialTheme.colors.greySecondary),
             onClick = {
-                coroutineScope.launch { state.show() }
+                if(isGGorFaceLogin) {
+                    Toast.makeText(context, "Only login by Email and Password can change avatar", Toast.LENGTH_SHORT).show()
+                } else {
+                    coroutineScope.launch { state.show() }
+                }
             }
         ) {
             Icon(
@@ -207,7 +247,9 @@ fun BoxUserImage(
 }
 
 @Composable
-fun CardUserEmail() {
+fun CardUserEmail(
+    userEmail: String
+) {
     CardCustom(onClick = {}) {
         Column(
             modifier = Modifier
@@ -225,7 +267,7 @@ fun CardUserEmail() {
             )
             Text(
                 modifier = Modifier.padding(top = SMALL_PADDING),
-                text = "sweetlatte@gmail.com",
+                text = userEmail,
                 fontFamily = montserratFontFamily,
                 color = MaterialTheme.colors.textColor,
                 fontSize = MaterialTheme.typography.body1.fontSize,
@@ -345,8 +387,12 @@ fun CardChangePassword(
     passwordTextState: String,
     passwordError: MutableState<String>,
     passwordVisible: MutableState<Boolean>,
-    onPasswordChange: (String) -> Unit
+    onPasswordChange: (String) -> Unit,
+    isGGorFaceLogin: Boolean
 ) {
+
+    val context = LocalContext.current
+
     CardCustom(onClick = {}) {
         Column(
             modifier = Modifier
@@ -381,8 +427,12 @@ fun CardChangePassword(
                             indication = null,
                             interactionSource = remember { MutableInteractionSource() }
                         ) {
-                            isChangePassword.value = true
-                            onPasswordChange("")
+                            if(isGGorFaceLogin) {
+                                Toast.makeText(context, "Only login by Email and Password can change password", Toast.LENGTH_SHORT).show()
+                            } else {
+                                isChangePassword.value = true
+                                onPasswordChange("")
+                            }
                         },
                         text = stringResource(R.string.change),
                         fontFamily = raleway,

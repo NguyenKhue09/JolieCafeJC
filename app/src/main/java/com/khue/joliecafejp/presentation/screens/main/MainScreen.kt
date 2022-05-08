@@ -71,8 +71,14 @@ fun BottomBar(navController: NavHostController) {
         ProfileSubScreen.Settings.route -> false
         HomeSubScreen.Notifications.route -> false
         HomeSubScreen.Categories.route -> false
-        "detail" -> false
-        else -> true
+        else -> {
+            val route = navBackStackEntry?.destination?.route
+            if (route.isNullOrEmpty()) {
+                true
+            } else {
+                route.split('/')[0] != "detail"
+            }
+        }
     }
 
     AnimatedVisibility(

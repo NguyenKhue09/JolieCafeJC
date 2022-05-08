@@ -62,7 +62,9 @@ object RepositoryModule {
             userLoginUseCase = UserLoginUseCase(repository = repository),
             getUserInfosUseCase = GetUserInfosUseCase(repository = repository),
             getProductsUseCase = GetProductsUseCase(repository = repository),
-            getUserFavoriteProductsUseCase = GetUserFavoriteProductsUseCase(repository = repository)
+            getProductDetailUseCase = GetProductDetailUseCase(repository = repository),
+            getUserFavoriteProductsUseCase = GetUserFavoriteProductsUseCase(repository = repository),
+            removeUserFavProduct = RemoveUserFavProductUseCase(repository = repository)
         )
     }
 }

@@ -34,11 +34,25 @@ class Repository @Inject constructor(
         return remote.getProducts(productQuery = productQuery, token = token)
     }
 
+    suspend fun getProductDetail(
+        productId: String,
+        token: String
+    ): Response<ApiResponseSingleData<Product>> {
+        return remote.getProductDetail(productId = productId, token = token)
+    }
+
     fun getUserFavoriteProducts(
         productQuery: Map<String, String>,
         token: String
     ): Flow<PagingData<FavoriteProduct>> {
         return remote.getUserFavoriteProducts(productQuery = productQuery, token = token)
+    }
+
+    suspend fun removeUserFavoriteProduct(
+        token: String,
+        favoriteProductId: String
+    ): Response<ApiResponseSingleData<Unit>> {
+        return remote.removeUserFavoriteProduct(token = token, favoriteProductId = favoriteProductId)
     }
 
 

@@ -1,13 +1,15 @@
 package com.khue.joliecafejp.presentation.screens.profile
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -29,8 +31,16 @@ fun ProfileScreen(
     loginViewModel: LoginViewModel
 ) {
 
+    val userLoginResponse = loginViewModel.userLoginResponse.collectAsState()
+    val userToken by loginViewModel.userToken.collectAsState(initial = "")
+
     val profileBottomNavItem =
         ProfileSubScreen::class.sealedSubclasses.mapNotNull { it.objectInstance }
+
+
+    LaunchedEffect(key1 = true) {
+        if(userLoginResponse.value.data == null) loginViewModel.getUserInfos(token = userToken)
+    }
 
     Column(
         modifier = Modifier
@@ -39,10 +49,13 @@ fun ProfileScreen(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        CustomImage()
+
+        CustomImage(
+            image = userLoginResponse.value.data?.thumbnail ?: FirebaseAuth.getInstance().currentUser?.photoUrl.toString()
+        )
 
         Text(
-            text = stringResource(R.string.sweet_latte),
+            text = userLoginResponse.value.data?.fullName ?: stringResource(R.string.sweet_latte),
             modifier = Modifier.padding(top = LARGE_PADDING, bottom = LARGE_PADDING),
             fontSize = MaterialTheme.typography.body1.fontSize,
             fontFamily = ralewayMedium,

@@ -3,8 +3,10 @@ package com.khue.joliecafejp.navigation.nav_graph
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.khue.joliecafejp.presentation.screens.detail.DetailScreen
 import com.khue.joliecafejp.presentation.viewmodels.LoginViewModel
 
@@ -37,9 +39,10 @@ fun SetupNavGraph(
         )
 
         composable(
-            route = "detail"
-        ) {
-            DetailScreen(navController = navController)
+            route = "detail/{productId}",
+            arguments = listOf(navArgument("productId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            DetailScreen(navController = navController, productId =  backStackEntry.arguments?.getString("productId"))
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.khue.joliecafejp.presentation.screens.detail
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -11,10 +12,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -23,34 +21,42 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
 import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
 import com.khue.joliecafejp.R
+import com.khue.joliecafejp.domain.model.Product
 import com.khue.joliecafejp.presentation.common.ButtonCustom
 import com.khue.joliecafejp.presentation.common.CommentBottomSheet
 import com.khue.joliecafejp.presentation.common.VerticalProductItem
 import com.khue.joliecafejp.presentation.components.CommentItem
+import com.khue.joliecafejp.presentation.viewmodels.ProductDetailViewModel
 import com.khue.joliecafejp.ui.theme.*
+import com.khue.joliecafejp.utils.ApiResult
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun DetailScreen(
-    navController: NavController
+    navController: NavController,
+    productDetailViewModel: ProductDetailViewModel = hiltViewModel(),
+    productId: String?
 ) {
 
     val state = rememberLazyListState()
-    var density = LocalDensity.current.density
+    val context = LocalContext.current
 
     val (selectedRating, onSelectedRating) = remember {
         mutableStateOf(R.string.all)
@@ -61,6 +67,31 @@ fun DetailScreen(
     )
     val coroutineScope = rememberCoroutineScope()
 
+    val userToken by productDetailViewModel.userToken.collectAsState(initial = "")
+    val getProductDetailResponse by productDetailViewModel.getProductDetailResponse.collectAsState()
+
+    var product by remember {
+        mutableStateOf<Product?>(null)
+    }
+
+    LaunchedEffect(key1 = getProductDetailResponse) {
+        when(getProductDetailResponse) {
+            is ApiResult.Loading -> {
+
+            }
+            is ApiResult.Error -> {
+                Toast.makeText(context, getProductDetailResponse.message, Toast.LENGTH_SHORT).show()
+            }
+            is ApiResult.Success -> {
+                product = getProductDetailResponse.data
+            }
+            else -> {}
+        }
+    }
+
+    LaunchedEffect(key1 = true) {
+        productDetailViewModel.getProductDetail(token = userToken, productId = productId!!)
+    }
 
     ModalBottomSheetLayout(
         sheetState = bottomSheetState,
@@ -77,47 +108,56 @@ fun DetailScreen(
                     .padding(it)
                     .fillMaxSize(),
             ) {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    state = state
-                ) {
+                product?.let { productDetail ->
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        state = state
+                    ) {
 
-                    item {
-                        ProductImageSection(
-                            state = state,
-                        )
-                    }
+                        item {
+                            ProductImageSection(
+                                state = state,
+                                image = productDetail.thumbnail
+                            )
+                        }
 
-                    item {
-                        ProductNameSection() {}
-                    }
+                        item {
+                            ProductNameSection(
+                                name = productDetail.name
+                            ) {}
+                        }
 
-                    item {
-                        PriceAndRatingSection()
-                    }
+                        item {
+                            PriceAndRatingSection(
+                                price = productDetail.originPrice,
+                                rating = productDetail.avgRating
+                            )
+                        }
 
-                    item {
-                        DescriptionSection()
-                    }
+                        item {
+                            DescriptionSection()
+                        }
 
-                    item {
-                        RatingSection(
-                            selectedRating = selectedRating,
-                            onSelectedRating = onSelectedRating,
-                            coroutineScope = coroutineScope,
-                            bottomSheetState = bottomSheetState
-                        )
-                    }
+                        item {
+                            RatingSection(
+                                selectedRating = selectedRating,
+                                onSelectedRating = onSelectedRating,
+                                coroutineScope = coroutineScope,
+                                bottomSheetState = bottomSheetState
+                            )
+                        }
 
-                    item {
-                        CommentSection()
-                    }
+                        item {
+                            CommentSection()
+                        }
 
-                    item {
-                        MoreProductSection()
+                        item {
+                            MoreProductSection()
+                        }
                     }
                 }
+
 
                 DetailScreenTopBar(navController = navController)
 
@@ -162,9 +202,22 @@ fun DetailScreenTopBar(navController: NavController) {
 }
 
 @Composable
-fun ProductImageSection(state: LazyListState) {
+fun ProductImageSection(
+    state: LazyListState,
+    image: String
+) {
     var scrolledY = 0f
     var previousOffset = 0
+
+    val painter = rememberAsyncImagePainter(
+        model = ImageRequest.Builder(LocalContext.current)
+            .data(image)
+            .crossfade(200)
+            .placeholder(R.drawable.image_logo)
+            .error(R.drawable.image_logo)
+            .build()
+    )
+
     Image(
         modifier = Modifier
             .graphicsLayer {
@@ -175,7 +228,8 @@ fun ProductImageSection(state: LazyListState) {
             .fillMaxWidth()
             .height(PRODUCT_IMAGE_HEIGHT),
         contentScale = ContentScale.Crop,
-        painter = painterResource(id = R.drawable.image_logo), contentDescription = ""
+        painter = painter,
+        contentDescription = ""
     )
 }
 
@@ -215,7 +269,7 @@ fun ProductNameSection(
 
 @Composable
 fun PriceAndRatingSection(
-    price: Int = 90000,
+    price: Double = 90000.0,
     rating: Int = 5
 ) {
     Row(
@@ -227,7 +281,7 @@ fun PriceAndRatingSection(
     ) {
         Text(
             modifier = Modifier.weight(1f, fill = false),
-            text = stringResource(id = R.string.product_price, price),
+            text = stringResource(id = R.string.product_price, price.toString()),
             color = MaterialTheme.colors.textColor,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
@@ -522,5 +576,8 @@ fun BottomButtonAction(
 @Preview
 @Composable
 fun DetailScreenPrev() {
-    DetailScreen(navController = rememberNavController())
+    DetailScreen(
+        navController = rememberNavController(),
+        productId = ""
+    )
 }

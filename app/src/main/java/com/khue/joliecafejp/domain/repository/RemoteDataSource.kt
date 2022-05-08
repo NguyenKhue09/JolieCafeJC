@@ -14,5 +14,11 @@ interface RemoteDataSource {
     suspend fun getUserInfos(token: String): Response<ApiResponseSingleData<User>>
 
     fun getProducts(productQuery: Map<String, String>, token: String): Flow<PagingData<Product>>
+    suspend fun getProductDetail(token: String, productId: String): Response<ApiResponseSingleData<Product>>
     fun getUserFavoriteProducts(productQuery: Map<String, String>, token: String): Flow<PagingData<FavoriteProduct>>
+
+    suspend  fun removeUserFavoriteProduct(
+        token: String,
+        favoriteProductId: String,
+    ): Response<ApiResponseSingleData<Unit>>
 }

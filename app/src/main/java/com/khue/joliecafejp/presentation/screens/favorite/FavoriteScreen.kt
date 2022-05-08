@@ -1,5 +1,6 @@
 package com.khue.joliecafejp.presentation.screens.favorite
 
+import android.widget.Toast
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
@@ -11,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.debugInspectorInfo
 import androidx.compose.ui.res.stringResource
@@ -27,6 +29,9 @@ import com.google.accompanist.pager.rememberPagerState
 import com.khue.joliecafejp.R
 import com.khue.joliecafejp.presentation.viewmodels.FavoriteViewModel
 import com.khue.joliecafejp.ui.theme.*
+import com.khue.joliecafejp.utils.ApiResult
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 
@@ -51,7 +56,31 @@ fun FavoriteScreen(
     val coroutineScope = rememberCoroutineScope()
 
     val userToken by favoriteViewModel.userToken.collectAsState(initial = "")
-    val favoriteProducts = favoriteViewModel.favoriteProduct.collectAsLazyPagingItems()
+    var favoriteProducts = favoriteViewModel.favoriteProduct.collectAsLazyPagingItems()
+
+    val removeUserFavProductResponse = favoriteViewModel.removeUserFavProductResponse
+    val context = LocalContext.current
+
+    val deletedFavProductId by remember {
+        mutableStateOf("")
+    }
+
+    LaunchedEffect(key1 = true) {
+        removeUserFavProductResponse.collectLatest { result ->
+            when (result) {
+                is ApiResult.NullDataSuccess -> {
+                    favoriteProducts.refresh()
+                    Toast.makeText(context, "Remove favorite product success!", Toast.LENGTH_SHORT)
+                        .show()
+                }
+                is ApiResult.Error -> {
+                    Toast.makeText(context, result.message, Toast.LENGTH_SHORT).show()
+                }
+                else -> {
+                }
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -62,7 +91,6 @@ fun FavoriteScreen(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start
     ) {
-
         Text(
             text = stringResource(R.string.favorite),
             fontSize = 24.sp,
@@ -91,7 +119,12 @@ fun FavoriteScreen(
                 )
             }
 
-            FavoriteBody(favoriteProducts = favoriteProducts)
+            FavoriteBody(favoriteProducts = favoriteProducts) {
+                favoriteViewModel.removeUserFavoriteProduct(
+                    token = userToken,
+                    favoriteProductId = it
+                )
+            }
         }
     }
 }

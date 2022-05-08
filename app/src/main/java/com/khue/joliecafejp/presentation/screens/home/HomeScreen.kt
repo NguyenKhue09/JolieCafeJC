@@ -1,5 +1,7 @@
 package com.khue.joliecafejp.presentation.screens.home
 
+import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -10,18 +12,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import com.google.accompanist.pager.*
 import com.google.firebase.auth.FirebaseAuth
 import com.khue.joliecafejp.R
 import com.khue.joliecafejp.domain.model.CategoryButtonItem
+import com.khue.joliecafejp.domain.model.FavoriteProduct
+import com.khue.joliecafejp.domain.model.Product
 import com.khue.joliecafejp.navigation.nav_graph.AUTHENTICATION_ROUTE
 import com.khue.joliecafejp.navigation.nav_screen.BottomBarScreen
 import com.khue.joliecafejp.navigation.nav_screen.HomeSubScreen
@@ -52,7 +59,7 @@ fun HomeScreen(
 
 
 
-    val userLoginResponse = loginViewModel.userLoginResponse
+    val userLoginResponse = loginViewModel.userLoginResponse.collectAsState()
     val userToken by loginViewModel.userToken.collectAsState(initial = "")
     val searchTextState by homeViewModel.searchTextState
     val pagerState = rememberPagerState()
@@ -123,6 +130,11 @@ fun HomeScreen(
         }
     }
 
+
+    val isLoading = remember {
+        mutableStateOf(true)
+    }
+
     ModalBottomSheetLayout(
         sheetState = state,
         modifier = Modifier.fillMaxSize(),
@@ -150,95 +162,141 @@ fun HomeScreen(
             backgroundColor = MaterialTheme.colors.greyPrimary
         ) { paddingValues ->
             val padding = paddingValues.calculateBottomPadding()
+            val result = handlePagingResult(bestSellerProducts = bestSellerProducts, isLoading = isLoading)
 
-
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(
-                        start = EXTRA_LARGE_PADDING,
-                        end = EXTRA_LARGE_PADDING,
-                        bottom = padding
-                    ),
-                verticalArrangement = Arrangement.Top,
-                horizontalAlignment = Alignment.Start
-            ) {
-                item {
-                    SearchBar(
-                        text = searchTextState,
-                        onCloseClicked = {
-                            homeViewModel.updateSearchTextState(newValue = "")
-                        },
-                        onSearchClicked = { searchString ->
-
-                        },
-                        onTextChange = { newValue ->
-                            homeViewModel.updateSearchTextState(newValue = newValue)
-                        }
-                    )
-                }
-                item {
-                    ImageSlider(pagerState = pagerState)
-                }
-
-                item {
-                    TextCustom(
-                        modifier = Modifier
-                            .padding(vertical = EXTRA_LARGE_PADDING),
-                        content = stringResource(R.string.categories),
-                        color = MaterialTheme.colors.textColor2,
-                        fontFamily = ralewayMedium
-                    )
-                }
-
-                item {
-                    CategoriesButtonGroup(
-                        categories = categories,
-                        selectedButton = null
-                    ) { category ->
-                        navController.navigate(HomeSubScreen.Categories.passCategory(category = category)) {
-                            launchSingleTop = true
-                        }
-                    }
-                }
-
-                item {
-                    TextCustom(
-                        modifier = Modifier
-                            .padding(vertical = EXTRA_LARGE_PADDING),
-                        content = stringResource(R.string.best_sellers),
-                        color = MaterialTheme.colors.textColor2,
-                        fontFamily = ralewayMedium
-                    )
-                }
-
-                items(
-                    items = bestSellerProducts,
-                    key = { product ->
-                        product.id
-                    }
-                ) { product ->
-                    product?.let {
-                        HorizontalProductItem(
-                            onAdd = {
-                                coroutineScope.launch { state.animateTo(ModalBottomSheetValue.Expanded) }
+            Box(modifier = Modifier.fillMaxSize()) {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(
+                            start = EXTRA_LARGE_PADDING,
+                            end = EXTRA_LARGE_PADDING,
+                            bottom = padding
+                        ),
+                    verticalArrangement = Arrangement.Top,
+                    horizontalAlignment = Alignment.Start
+                ) {
+                    item {
+                        SearchBar(
+                            text = searchTextState,
+                            onCloseClicked = {
+                                homeViewModel.updateSearchTextState(newValue = "")
                             },
-                            onClick = {
-                                navController.navigate("detail")
+                            onSearchClicked = { searchString ->
+
                             },
-                            name = product.name,
-                            type = product.type,
-                            favorites = product.avgRating,
-                            price = product.originPrice,
-                            image = product.thumbnail
+                            onTextChange = { newValue ->
+                                homeViewModel.updateSearchTextState(newValue = newValue)
+                            }
                         )
                     }
-                }
+                    item {
+                        ImageSlider(pagerState = pagerState)
+                    }
 
-                item {
-                    Spacer(modifier = Modifier.height(EXTRA_LARGE_PADDING))
-                }
+                    item {
+                        TextCustom(
+                            modifier = Modifier
+                                .padding(vertical = EXTRA_LARGE_PADDING),
+                            content = stringResource(R.string.categories),
+                            color = MaterialTheme.colors.textColor2,
+                            fontFamily = ralewayMedium
+                        )
+                    }
 
+                    item {
+                        CategoriesButtonGroup(
+                            categories = categories,
+                            selectedButton = null
+                        ) { category ->
+                            navController.navigate(HomeSubScreen.Categories.passCategory(category = category)) {
+                                launchSingleTop = true
+                            }
+                        }
+                    }
+
+                    item {
+                        TextCustom(
+                            modifier = Modifier
+                                .padding(vertical = EXTRA_LARGE_PADDING),
+                            content = stringResource(R.string.best_sellers),
+                            color = MaterialTheme.colors.textColor2,
+                            fontFamily = ralewayMedium
+                        )
+                    }
+
+                    if(result) {
+                        items(
+                            items = bestSellerProducts,
+                            key = { product ->
+                                product.id
+                            }
+                        ) { product ->
+                            product?.let {
+                                HorizontalProductItem(
+                                    onAdd = {
+                                        coroutineScope.launch { state.animateTo(ModalBottomSheetValue.Expanded) }
+                                    },
+                                    onClick = {
+                                        navController.navigate("detail/${it.id}")
+                                    },
+                                    name = product.name,
+                                    type = product.type,
+                                    favorites = product.avgRating,
+                                    price = product.originPrice,
+                                    image = product.thumbnail
+                                )
+                            }
+                        }
+                    }
+
+                    item {
+                        Spacer(modifier = Modifier.height(EXTRA_LARGE_PADDING))
+                    }
+
+                }
+                AnimatedVisibility(visible = isLoading.value,  modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = EXTRA_EXTRA_LARGE_PADDING)) {
+                    CircularProgressIndicator(
+                        color = MaterialTheme.colors.textColor2
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun handlePagingResult(
+    bestSellerProducts: LazyPagingItems<Product>,
+    isLoading: MutableState<Boolean>
+): Boolean {
+    bestSellerProducts.apply {
+        val error = when {
+            loadState.refresh is LoadState.Error -> loadState.refresh as LoadState.Error
+            loadState.prepend is LoadState.Error -> loadState.prepend as LoadState.Error
+            loadState.append is LoadState.Error -> loadState.append as LoadState.Error
+            else -> null
+        }
+
+        return when {
+            loadState.refresh is LoadState.Loading -> {
+                isLoading.value = true
+                false
+            }
+            error != null -> {
+                Toast.makeText(LocalContext.current, error.error.message, Toast.LENGTH_SHORT).show()
+                isLoading.value = false
+                false
+            }
+            bestSellerProducts.itemCount < 1 -> {
+                isLoading.value = false
+                false
+            }
+            else -> {
+                isLoading.value = false
+                true
             }
         }
     }

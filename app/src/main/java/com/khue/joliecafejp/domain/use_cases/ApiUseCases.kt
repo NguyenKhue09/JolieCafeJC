@@ -7,5 +7,7 @@ data class ApiUseCases(
     val userLoginUseCase: UserLoginUseCase,
     val getUserInfosUseCase: GetUserInfosUseCase,
     val getProductsUseCase: GetProductsUseCase,
-    val getUserFavoriteProductsUseCase: GetUserFavoriteProductsUseCase
+    val getProductDetailUseCase: GetProductDetailUseCase,
+    val getUserFavoriteProductsUseCase: GetUserFavoriteProductsUseCase,
+    val removeUserFavProduct: RemoveUserFavProductUseCase,
 )

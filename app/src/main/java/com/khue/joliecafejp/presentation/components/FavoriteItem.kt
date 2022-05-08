@@ -31,7 +31,7 @@ fun FavoriteItem(
     favorites: Int = 0,
     price: Double = 0.0,
     image: String,
-    onFavClick: () -> Unit = {},
+    onFavClick: () -> Unit,
     onClick: () -> Unit = {}
 ) {
 
@@ -143,7 +143,7 @@ fun FavoriteItem(
             }
 
             IconButton(
-                onClick = {},
+                onClick = onFavClick,
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_heart_fill),

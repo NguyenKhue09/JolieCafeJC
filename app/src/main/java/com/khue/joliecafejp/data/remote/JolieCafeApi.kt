@@ -43,6 +43,12 @@ interface JolieCafeApi {
         @Header("Authorization") token: String
     ): ApiResponseMultiData<Product>
 
+    @GET("$API_GATEWAY/product/get-product-detail")
+    suspend fun getProductDetail(
+        @Query("productId") productId: String,
+        @Header("Authorization") token: String
+    ): Response<ApiResponseSingleData<Product>>
+
     @Headers("Content-Type: application/json")
     @GET("$API_GATEWAY/favorite")
     suspend fun getUserFavoriteProduct(

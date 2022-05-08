@@ -43,6 +43,13 @@ class RemoteDataSourceImpl(
         ).flow
     }
 
+    override suspend fun getProductDetail(
+        token: String,
+        productId: String
+    ): Response<ApiResponseSingleData<Product>> {
+        return jolieCafeApi.getProductDetail(productId = productId, token = "Bearer $token")
+    }
+
     override fun getUserFavoriteProducts(
         productQuery: Map<String, String>,
         token: String
@@ -53,6 +60,13 @@ class RemoteDataSourceImpl(
                 FavoriteProductPagingSource(jolieCafeApi, "Bearer $token", productQuery)
             }
         ).flow
+    }
+
+    override suspend fun removeUserFavoriteProduct(
+        token: String,
+        favoriteProductId: String
+    ): Response<ApiResponseSingleData<Unit>> {
+        return jolieCafeApi.removeUserFavoriteProduct(token = "Bearer $token", favoriteProductId = favoriteProductId)
     }
 
 

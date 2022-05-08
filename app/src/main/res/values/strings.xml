@@ -85,4 +85,7 @@
     <string name="avgRating">%d/5</string>
     <string name="all">All</string>
     <string name="buy_now">Buy Now</string>
+    <string name="empty_fav_products">Empty fav products</string>
+    <string name="your_list_is_empty">Your list is empty!</string>
+    <string name="empty_list_sub_title">You haven\'t liked anything yet.</string>
 </resources>
