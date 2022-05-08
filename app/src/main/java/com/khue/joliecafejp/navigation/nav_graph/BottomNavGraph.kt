@@ -39,7 +39,8 @@ fun NavGraphBuilder.bottomNavGraph(
 
         composable(route = BottomBarScreen.Favorite.route) {
             FavoriteScreen(
-                paddingValues = paddingValues
+                paddingValues = paddingValues,
+                navController = navController
             )
         }
         composable(route = BottomBarScreen.Cart.route) {

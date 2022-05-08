@@ -1,6 +1,7 @@
 package com.khue.joliecafejp.presentation.screens.detail
 
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -74,18 +75,26 @@ fun DetailScreen(
         mutableStateOf<Product?>(null)
     }
 
+    var isLoading by remember {
+        mutableStateOf(true)
+    }
+
     LaunchedEffect(key1 = getProductDetailResponse) {
         when(getProductDetailResponse) {
             is ApiResult.Loading -> {
-
+                isLoading = true
             }
             is ApiResult.Error -> {
-                Toast.makeText(context, getProductDetailResponse.message, Toast.LENGTH_SHORT).show()
+                isLoading = false
+                Toast.makeText(context, getProductDetailResponse.message ?: "Unknown error!", Toast.LENGTH_SHORT).show()
             }
             is ApiResult.Success -> {
+                isLoading = false
                 product = getProductDetailResponse.data
             }
-            else -> {}
+            else -> {
+                isLoading = false
+            }
         }
     }
 
@@ -166,6 +175,13 @@ fun DetailScreen(
                     onAddToCardClicked = {},
                     onButNowClicked = {}
                 )
+
+                AnimatedVisibility(visible = isLoading, modifier = Modifier.align(Alignment.Center)) {
+                    CircularProgressIndicator(
+                        color = MaterialTheme.colors.textColor2
+                    )
+                }
+
             }
         }
     }

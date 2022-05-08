@@ -15,22 +15,18 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.paging.LoadState
-import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
-import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import com.khue.joliecafejp.R
 import com.khue.joliecafejp.domain.model.FavoriteProduct
-import com.khue.joliecafejp.domain.model.Product
 import com.khue.joliecafejp.presentation.components.FavoriteItem
-import com.khue.joliecafejp.presentation.viewmodels.FavoriteViewModel
 import com.khue.joliecafejp.ui.theme.*
-import kotlinx.coroutines.flow.Flow
 
 @Composable
 fun FavoriteBody(
     favoriteProducts: LazyPagingItems<FavoriteProduct>,
-    onFavClick: (String) -> Unit
+    onFavClicked: (String) -> Unit,
+    onItemClicked: (String) -> Unit
 ) {
     val result = handlePagingResult(favoriteProducts = favoriteProducts)
 
@@ -51,7 +47,10 @@ fun FavoriteBody(
                         price =  product.product.originPrice,
                         image = product.product.thumbnail,
                         onFavClick = {
-                            onFavClick(product.id)
+                            onFavClicked(product.id)
+                        },
+                        onClick = {
+                            onItemClicked(product.id)
                         }
                     )
                 }

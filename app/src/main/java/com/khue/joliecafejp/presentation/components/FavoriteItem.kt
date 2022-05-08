@@ -51,7 +51,7 @@ fun FavoriteItem(
             end = 0.dp,
             bottom = 0.dp
         ),
-        onClick = {}
+        onClick = onClick
     ) {
         Row(
             modifier = modifier

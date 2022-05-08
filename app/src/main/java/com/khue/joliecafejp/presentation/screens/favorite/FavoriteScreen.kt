@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
@@ -39,7 +40,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun FavoriteScreen(
     paddingValues: PaddingValues,
-    favoriteViewModel: FavoriteViewModel = hiltViewModel()
+    favoriteViewModel: FavoriteViewModel = hiltViewModel(),
+    navController: NavHostController
 ) {
 
     val tabs = listOf(
@@ -119,12 +121,18 @@ fun FavoriteScreen(
                 )
             }
 
-            FavoriteBody(favoriteProducts = favoriteProducts) {
-                favoriteViewModel.removeUserFavoriteProduct(
-                    token = userToken,
-                    favoriteProductId = it
-                )
-            }
+            FavoriteBody(
+                favoriteProducts = favoriteProducts,
+                onFavClicked = {
+                    favoriteViewModel.removeUserFavoriteProduct(
+                        token = userToken,
+                        favoriteProductId = it
+                    )
+                },
+                onItemClicked = {
+                    navController.navigate("detail/${it}")
+                }
+            )
         }
     }
 }
