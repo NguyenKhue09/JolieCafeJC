@@ -64,7 +64,7 @@ fun HomeScreen(
     val searchTextState by homeViewModel.searchTextState
     val pagerState = rememberPagerState()
 
-    val bestSellerProducts = homeViewModel.getProducts(productQuery = mapOf("type" to "Coffee"), token = userToken).collectAsLazyPagingItems()
+    val bestSellerProducts = homeViewModel.getProducts(productQuery = mapOf("type" to "All"), token = userToken).collectAsLazyPagingItems()
 
     LaunchedEffect(userToken) {
         if (userToken.isEmpty()) {

@@ -3,27 +3,30 @@ package com.khue.joliecafejp.presentation.screens.home.sub_screens
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.items
 import com.khue.joliecafejp.R
 import com.khue.joliecafejp.domain.model.CategoryButtonItem
 import com.khue.joliecafejp.navigation.nav_screen.HomeSubScreen
-import com.khue.joliecafejp.navigation.nav_screen.ProfileSubScreen
 import com.khue.joliecafejp.presentation.common.CategoriesButtonGroup
 import com.khue.joliecafejp.presentation.common.SearchBar
 import com.khue.joliecafejp.presentation.common.TopBar
 import com.khue.joliecafejp.presentation.common.VerticalProductItem
+import com.khue.joliecafejp.presentation.components.FavoriteItem
 import com.khue.joliecafejp.presentation.viewmodels.CategoryViewModel
 import com.khue.joliecafejp.ui.theme.EXTRA_LARGE_PADDING
-import com.khue.joliecafejp.ui.theme.SMALL_PADDING
 import com.khue.joliecafejp.ui.theme.greyPrimary
+import com.khue.joliecafejp.utils.extensions.items
 
 @Composable
 fun CategoriesScreen(
@@ -33,6 +36,10 @@ fun CategoriesScreen(
 
     val searchTextState by categoryViewModel.searchTextState
     val selectedCategory by categoryViewModel.selectedCategory
+
+    val userToken by categoryViewModel.userToken.collectAsState(initial = "")
+
+    val categoryProducts = categoryViewModel.categoryProduct.collectAsLazyPagingItems()
 
     val categories = listOf(
         CategoryButtonItem(
@@ -101,9 +108,11 @@ fun CategoriesScreen(
                 categories = categories,
                 selectedButton = selectedCategory
             ) { category ->
+                categoryViewModel.getCategoriesProducts(productQuery = mapOf("type" to category), token = userToken)
                 categoryViewModel.updateSelectedCategory(newValue = category)
             }
             Spacer(modifier = Modifier.height(EXTRA_LARGE_PADDING))
+
             LazyVerticalGrid(
                 modifier = Modifier.weight(1f),
                 columns = GridCells.Fixed(2),
@@ -111,8 +120,11 @@ fun CategoriesScreen(
                 horizontalArrangement = Arrangement.spacedBy(EXTRA_LARGE_PADDING),
                 contentPadding = PaddingValues(bottom = EXTRA_LARGE_PADDING)
             ) {
-                repeat(20) {
-                    item {
+
+                items(
+                    lazyPagingItems = categoryProducts
+                ) { product ->
+                    product?.let {
                         VerticalProductItem(
                             onItemClicked = {},
                             onFavClicked = {}

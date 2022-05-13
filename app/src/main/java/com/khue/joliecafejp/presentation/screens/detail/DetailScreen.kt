@@ -117,64 +117,68 @@ fun DetailScreen(
                     .padding(it)
                     .fillMaxSize(),
             ) {
-                product?.let { productDetail ->
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize(),
-                        state = state
-                    ) {
 
-                        item {
-                            ProductImageSection(
-                                state = state,
-                                image = productDetail.thumbnail
-                            )
-                        }
+                AnimatedVisibility(visible = product != null, modifier = Modifier.fillMaxSize(),) {
+                    product?.let { productDetail ->
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxSize(),
+                            state = state
+                        ) {
 
-                        item {
-                            ProductNameSection(
-                                name = productDetail.name
-                            ) {}
-                        }
+                            item {
+                                ProductImageSection(
+                                    state = state,
+                                    image = productDetail.thumbnail
+                                )
+                            }
 
-                        item {
-                            PriceAndRatingSection(
-                                price = productDetail.originPrice,
-                                rating = productDetail.avgRating
-                            )
-                        }
+                            item {
+                                ProductNameSection(
+                                    name = productDetail.name
+                                ) {}
+                            }
 
-                        item {
-                            DescriptionSection()
-                        }
+                            item {
+                                PriceAndRatingSection(
+                                    price = productDetail.originPrice,
+                                    rating = productDetail.avgRating
+                                )
+                            }
 
-                        item {
-                            RatingSection(
-                                selectedRating = selectedRating,
-                                onSelectedRating = onSelectedRating,
-                                coroutineScope = coroutineScope,
-                                bottomSheetState = bottomSheetState
-                            )
-                        }
+                            item {
+                                DescriptionSection()
+                            }
 
-                        item {
-                            CommentSection()
-                        }
+                            item {
+                                RatingSection(
+                                    selectedRating = selectedRating,
+                                    onSelectedRating = onSelectedRating,
+                                    coroutineScope = coroutineScope,
+                                    bottomSheetState = bottomSheetState
+                                )
+                            }
 
-                        item {
-                            MoreProductSection()
+                            item {
+                                CommentSection()
+                            }
+
+                            item {
+                                MoreProductSection()
+                            }
                         }
                     }
                 }
 
-
                 DetailScreenTopBar(navController = navController)
 
-                BottomButtonAction(
-                    modifier = Modifier.align(Alignment.BottomCenter),
-                    onAddToCardClicked = {},
-                    onButNowClicked = {}
-                )
+                AnimatedVisibility(visible = product != null, modifier = Modifier.align(Alignment.BottomCenter),) {
+                    BottomButtonAction(
+                        modifier = Modifier,
+                        onAddToCardClicked = {},
+                        onButNowClicked = {}
+                    )
+                }
 
                 AnimatedVisibility(visible = isLoading, modifier = Modifier.align(Alignment.Center)) {
                     CircularProgressIndicator(

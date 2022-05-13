@@ -50,7 +50,7 @@ fun FavoriteBody(
                             onFavClicked(product.id)
                         },
                         onClick = {
-                            onItemClicked(product.id)
+                            onItemClicked(product.product.id)
                         }
                     )
                 }

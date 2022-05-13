@@ -1,5 +1,6 @@
 package com.khue.joliecafejp.data.paging_source
 
+import android.util.Log
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.khue.joliecafejp.data.remote.JolieCafeApi
@@ -34,6 +35,8 @@ class ProductPagingSource(
 
             try {
                 val response = jolieCafeApi.getProducts(productQuery = query, token = token)
+
+                Log.d("Bug", response.data.isNullOrEmpty().toString())
 
                 return if(response.success) {
                     LoadResult.Page(

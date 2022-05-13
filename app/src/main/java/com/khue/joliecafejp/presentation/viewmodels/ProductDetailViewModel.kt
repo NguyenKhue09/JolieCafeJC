@@ -41,6 +41,7 @@ class ProductDetailViewModel @Inject constructor(
     }
 
     private fun <T> handleApiResponse(response: Response<ApiResponseSingleData<T>>): ApiResult<T> {
+        println(response)
         val result = response.body()
         return when {
             response.message().toString().contains("timeout") -> {
