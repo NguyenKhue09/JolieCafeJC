@@ -6,11 +6,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
+import com.khue.joliecafejp.domain.model.ApiResponseMultiData
+import com.khue.joliecafejp.domain.model.FavProductId
 import com.khue.joliecafejp.domain.use_cases.ApiUseCases
 import com.khue.joliecafejp.domain.use_cases.DataStoreUseCases
+import com.khue.joliecafejp.utils.ApiResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import retrofit2.Response
 import javax.inject.Inject
 
 @HiltViewModel
@@ -22,6 +27,8 @@ class HomeViewModel @Inject constructor(
         mutableStateOf(value = "")
     val searchTextState: State<String> = _searchTextState
 
+    private val _favProductsId = MutableStateFlow<ApiResult<List<String>>>(ApiResult.Loading())
+    val favProductsId: StateFlow<ApiResult<List<String>>> = _favProductsId
 
     fun updateSearchTextState(newValue: String) {
         _searchTextState.value = newValue
@@ -33,4 +40,37 @@ class HomeViewModel @Inject constructor(
         token: String
     ) = apiUseCases.getProductsUseCase(productQuery = productQuery, token = token).cachedIn(viewModelScope)
 
+    fun getUserFavProductsId(
+        token: String
+    )  = viewModelScope.launch {
+        _favProductsId.value = ApiResult.Loading()
+        try {
+            val response = apiUseCases.getUserFavoriteProductsIdUseCase(token = token)
+            _favProductsId.value = handleApiResponse(response = response)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            _favProductsId.value = ApiResult.Error(e.message)
+        }
+    }
+
+    private fun handleApiResponse(response: Response<ApiResponseMultiData<FavProductId>>): ApiResult<List<String>> {
+        val result = response.body()
+        return when {
+            response.message().toString().contains("timeout") -> {
+                ApiResult.Error("Timeout")
+            }
+            response.code() == 500 -> {
+                ApiResult.Error(response.message())
+            }
+            response.isSuccessful -> {
+                val listId = result!!.data!!.map {
+                    it.productId
+                }
+                ApiResult.Success(listId)
+            }
+            else -> {
+                ApiResult.Error(response.message())
+            }
+        }
+    }
 }

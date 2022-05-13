@@ -56,6 +56,7 @@ fun DetailScreen(
     productId: String?
 ) {
 
+
     val state = rememberLazyListState()
     val context = LocalContext.current
 
@@ -69,6 +70,7 @@ fun DetailScreen(
     val coroutineScope = rememberCoroutineScope()
 
     val userToken by productDetailViewModel.userToken.collectAsState(initial = "")
+    val isFav by productDetailViewModel.isFav
     val getProductDetailResponse by productDetailViewModel.getProductDetailResponse.collectAsState()
 
     var product by remember {
@@ -135,8 +137,11 @@ fun DetailScreen(
 
                             item {
                                 ProductNameSection(
-                                    name = productDetail.name
-                                ) {}
+                                    name = productDetail.name,
+                                    isFav = isFav
+                                ) {
+                                    productDetailViewModel.setFavProductState(isFav = !isFav)
+                                }
                             }
 
                             item {
@@ -256,7 +261,8 @@ fun ProductImageSection(
 @Composable
 fun ProductNameSection(
     name: String = "Sweet Cappuccino",
-    onFavClicked: () -> Unit
+    isFav: Boolean,
+    onFavClicked: () -> Unit,
 ) {
     Row(
         modifier = Modifier
@@ -277,7 +283,7 @@ fun ProductNameSection(
         )
         IconButton(onClick = onFavClicked) {
             Icon(
-                painter = painterResource(id = R.drawable.ic_favorite),
+                painter = painterResource(id = if(isFav) R.drawable.ic_heart_fill else R.drawable.ic_favorite),
                 contentDescription = stringResource(
                     id = R.string.favorite
                 ),

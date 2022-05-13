@@ -130,7 +130,7 @@ fun FavoriteScreen(
                     )
                 },
                 onItemClicked = {
-                    navController.navigate("detail/${it}")
+                    navController.navigate("detail/${it}?isFav=${true}")
                 }
             )
         }

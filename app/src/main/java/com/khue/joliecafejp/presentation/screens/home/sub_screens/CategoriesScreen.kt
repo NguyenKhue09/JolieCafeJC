@@ -38,10 +38,12 @@ fun CategoriesScreen(
     val selectedCategory by categoryViewModel.selectedCategory
 
     val userToken by categoryViewModel.userToken.collectAsState(initial = "")
+    val userFavProductsId by categoryViewModel.favProductsId.collectAsState()
 
     val categoryProducts = categoryViewModel.categoryProduct.collectAsLazyPagingItems()
 
     categoryViewModel.initData(token = userToken)
+    categoryViewModel.getUserFavProductsId(token = userToken)
 
     val categories = listOf(
         CategoryButtonItem(
@@ -130,10 +132,17 @@ fun CategoriesScreen(
                         lazyPagingItems = categoryProducts
                     ) { product ->
                         product?.let {
+                            var isFav = false
+
+                            userFavProductsId.data?.let { ids ->
+                                isFav = ids.contains(product.id)
+                            }
+
                             VerticalProductItem(
                                 product = product,
+                                isFav = isFav,
                                 onItemClicked = { productId ->
-                                    navController.navigate("detail/${productId}")
+                                    navController.navigate("detail/${productId}?isFav=${isFav}")
                                 },
                                 onFavClicked = {}
                             )

@@ -65,6 +65,9 @@ fun HomeScreen(
     val pagerState = rememberPagerState()
 
     val bestSellerProducts = homeViewModel.getProducts(productQuery = mapOf("type" to "All"), token = userToken).collectAsLazyPagingItems()
+    val userFavProductsId by homeViewModel.favProductsId.collectAsState()
+
+    homeViewModel.getUserFavProductsId(token = userToken)
 
     LaunchedEffect(userToken) {
         if (userToken.isEmpty()) {
@@ -233,12 +236,18 @@ fun HomeScreen(
                             }
                         ) { product ->
                             product?.let {
+                                var isFav = false
+
+                                userFavProductsId.data?.let { ids ->
+                                    isFav = ids.contains(product.id)
+                                }
+
                                 HorizontalProductItem(
                                     onAdd = {
                                         coroutineScope.launch { state.animateTo(ModalBottomSheetValue.Expanded) }
                                     },
                                     onClick = {
-                                        navController.navigate("detail/${it.id}")
+                                        navController.navigate("detail/${it.id}?isFav=${isFav}")
                                     },
                                     name = product.name,
                                     type = product.type,

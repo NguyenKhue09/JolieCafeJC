@@ -6,10 +6,7 @@ import androidx.paging.PagingData
 import com.khue.joliecafejp.data.paging_source.FavoriteProductPagingSource
 import com.khue.joliecafejp.data.paging_source.ProductPagingSource
 import com.khue.joliecafejp.data.remote.JolieCafeApi
-import com.khue.joliecafejp.domain.model.ApiResponseSingleData
-import com.khue.joliecafejp.domain.model.FavoriteProduct
-import com.khue.joliecafejp.domain.model.Product
-import com.khue.joliecafejp.domain.model.User
+import com.khue.joliecafejp.domain.model.*
 import com.khue.joliecafejp.domain.repository.RemoteDataSource
 import com.khue.joliecafejp.utils.Constants.Companion.PAGE_SIZE
 import kotlinx.coroutines.flow.Flow
@@ -60,6 +57,17 @@ class RemoteDataSourceImpl(
                 FavoriteProductPagingSource(jolieCafeApi, "Bearer $token", productQuery)
             }
         ).flow
+    }
+
+    override suspend fun getUserFavoriteProductsId(token: String): Response<ApiResponseMultiData<FavProductId>> {
+        return jolieCafeApi.getUserFavoriteProductsId(token = "Bearer $token")
+    }
+
+    override suspend fun addUserFavoriteProduct(
+        token: String,
+        productId: String
+    ): Response<ApiResponseSingleData<Unit>> {
+        return jolieCafeApi.addUserFavoriteProduct(token = "Bearer $token", productId = productId)
     }
 
     override suspend fun removeUserFavoriteProduct(

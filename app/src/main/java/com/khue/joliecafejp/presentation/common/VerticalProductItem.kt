@@ -31,6 +31,7 @@ import com.khue.joliecafejp.ui.theme.*
 @Composable
 fun VerticalProductItem(
     product: Product,
+    isFav: Boolean,
     onItemClicked: (String) -> Unit,
     onFavClicked: (String) -> Unit
 ) {
@@ -95,7 +96,7 @@ fun VerticalProductItem(
                 },
             ) {
                 Icon(
-                    painter = painterResource(id = R.drawable.ic_favorite),
+                    painter = painterResource(id = if (isFav) R.drawable.ic_heart_fill else R.drawable.ic_favorite),
                     contentDescription = stringResource(id = R.string.favorite),
                     tint = MaterialTheme.colors.titleTextColor
                 )

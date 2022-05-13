@@ -56,12 +56,22 @@ interface JolieCafeApi {
         @Header("Authorization") token: String
     ): ApiResponseMultiData<FavoriteProduct>
 
+    @GET("$API_GATEWAY/favorite/list-id")
+    suspend fun getUserFavoriteProductsId(
+        @Header("Authorization") token: String
+    ):  Response<ApiResponseMultiData<FavProductId>>
+
     @DELETE("$API_GATEWAY/favorite/remove")
     suspend fun removeUserFavoriteProduct(
         @Header("Authorization") token: String,
         @Query("favoriteProductId") favoriteProductId: String,
     ): Response<ApiResponseSingleData<Unit>>
 
+    @DELETE("$API_GATEWAY/favorite/add")
+    suspend fun addUserFavoriteProduct(
+        @Header("Authorization") token: String,
+        @Query("productId") productId: String,
+    ): Response<ApiResponseSingleData<Unit>>
 
     @Headers("Content-Type: application/json")
     @POST("$API_GATEWAY/address/add")
@@ -100,7 +110,6 @@ interface JolieCafeApi {
     ): Response<ApiResponseSingleData<Address>>
 
     // Cart API
-
     @Headers("Content-Type: application/json")
     @GET("$API_GATEWAY/cart")
     suspend fun getCartItems(

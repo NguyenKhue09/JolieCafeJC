@@ -1,10 +1,7 @@
 package com.khue.joliecafejp.data.repository
 
 import androidx.paging.PagingData
-import com.khue.joliecafejp.domain.model.ApiResponseSingleData
-import com.khue.joliecafejp.domain.model.FavoriteProduct
-import com.khue.joliecafejp.domain.model.Product
-import com.khue.joliecafejp.domain.model.User
+import com.khue.joliecafejp.domain.model.*
 import com.khue.joliecafejp.domain.repository.DataStoreOperations
 import com.khue.joliecafejp.domain.repository.RemoteDataSource
 import kotlinx.coroutines.flow.Flow
@@ -46,6 +43,19 @@ class Repository @Inject constructor(
         token: String
     ): Flow<PagingData<FavoriteProduct>> {
         return remote.getUserFavoriteProducts(productQuery = productQuery, token = token)
+    }
+
+    suspend fun getUserFavoriteProductsId(
+        token: String
+    ): Response<ApiResponseMultiData<FavProductId>> {
+        return remote.getUserFavoriteProductsId(token = token)
+    }
+
+    suspend fun addUserFavoriteProduct(
+       token: String,
+       productId: String
+    ): Response<ApiResponseSingleData<Unit>> {
+        return remote.addUserFavoriteProduct(token = token, productId = productId)
     }
 
     suspend fun removeUserFavoriteProduct(

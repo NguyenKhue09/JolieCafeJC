@@ -9,6 +9,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.khue.joliecafejp.presentation.screens.detail.DetailScreen
 import com.khue.joliecafejp.presentation.viewmodels.LoginViewModel
+import com.khue.joliecafejp.utils.Constants.Companion.IS_FAV
+import com.khue.joliecafejp.utils.Constants.Companion.PRODUCT_ID
 
 const val BOTTOM_ROUTE = "bottom"
 const val AUTHENTICATION_ROUTE = "authentication"
@@ -39,10 +41,16 @@ fun SetupNavGraph(
         )
 
         composable(
-            route = "detail/{productId}",
-            arguments = listOf(navArgument("productId") { type = NavType.StringType })
+            route = "detail/{productId}?isFav={isFav}",
+            arguments = listOf(
+                navArgument(PRODUCT_ID) { type = NavType.StringType },
+                navArgument(IS_FAV) { defaultValue = false }
+            )
         ) { backStackEntry ->
-            DetailScreen(navController = navController, productId =  backStackEntry.arguments?.getString("productId"))
+            DetailScreen(
+                navController = navController,
+                productId = backStackEntry.arguments?.getString(PRODUCT_ID)
+            )
         }
     }
 }
