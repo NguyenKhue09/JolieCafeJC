@@ -19,6 +19,7 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.items
 import com.khue.joliecafejp.R
 import com.khue.joliecafejp.domain.model.FavoriteProduct
+import com.khue.joliecafejp.presentation.common.LoadingBody
 import com.khue.joliecafejp.presentation.components.FavoriteItem
 import com.khue.joliecafejp.ui.theme.*
 
@@ -124,18 +125,7 @@ fun EmptyFavBody() {
     }
 }
 
-@Composable
-fun LoadingBody() {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        CircularProgressIndicator(
-            color = MaterialTheme.colors.textColor2
-        )
-    }
-}
+
 
 @Preview
 @Composable

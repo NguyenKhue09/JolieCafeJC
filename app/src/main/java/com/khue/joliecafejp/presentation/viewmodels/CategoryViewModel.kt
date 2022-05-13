@@ -27,6 +27,8 @@ class CategoryViewModel @Inject constructor(
     private val dataStoreUseCases: DataStoreUseCases
 ) : ViewModel() {
 
+    private lateinit var category: String
+
     private val _categoryProduct = MutableStateFlow<PagingData<Product>>(PagingData.empty())
     val categoryProduct: StateFlow<PagingData<Product>> = _categoryProduct
 
@@ -41,8 +43,12 @@ class CategoryViewModel @Inject constructor(
     val selectedCategory: State<String> = _selectedCategory
 
     init {
-        val category = savedStateHandle.get<String>(CATEGORY)
-        updateSelectedCategory(category ?: "All")
+        category = savedStateHandle.get<String>(CATEGORY) ?: "All"
+        updateSelectedCategory(category)
+    }
+
+    fun initData(token: String) {
+        getCategoriesProducts(productQuery = mapOf("type" to category), token = token)
     }
 
     fun updateSearchTextState(newValue: String) {

@@ -390,7 +390,7 @@ fun MoreProductSection() {
         ) {
             repeat(10) {
                 item {
-                    VerticalProductItem(onItemClicked = {}, onFavClicked = {})
+                    //VerticalProductItem(onItemClicked = {}, onFavClicked = {})
                 }
             }
         }
