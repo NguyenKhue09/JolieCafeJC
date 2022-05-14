@@ -7,9 +7,8 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -26,6 +25,7 @@ import com.khue.joliecafejp.presentation.common.*
 import com.khue.joliecafejp.presentation.viewmodels.CategoryViewModel
 import com.khue.joliecafejp.ui.theme.EXTRA_LARGE_PADDING
 import com.khue.joliecafejp.ui.theme.greyPrimary
+import com.khue.joliecafejp.utils.ApiResult
 import com.khue.joliecafejp.utils.extensions.items
 
 @Composable
@@ -42,8 +42,10 @@ fun CategoriesScreen(
 
     val categoryProducts = categoryViewModel.categoryProduct.collectAsLazyPagingItems()
 
-    categoryViewModel.initData(token = userToken)
-    categoryViewModel.getUserFavProductsId(token = userToken)
+    LaunchedEffect(key1 = true) {
+        categoryViewModel.initData(token = userToken)
+        categoryViewModel.getUserFavProductsId(token = userToken)
+    }
 
     val categories = listOf(
         CategoryButtonItem(
@@ -75,6 +77,7 @@ fun CategoriesScreen(
             iconId = R.drawable.ic_coffee
         ),
     )
+
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -132,6 +135,7 @@ fun CategoriesScreen(
                         lazyPagingItems = categoryProducts
                     ) { product ->
                         product?.let {
+
                             var isFav = false
 
                             userFavProductsId.data?.let { ids ->
@@ -144,7 +148,9 @@ fun CategoriesScreen(
                                 onItemClicked = { productId ->
                                     navController.navigate("detail/${productId}?isFav=${isFav}")
                                 },
-                                onFavClicked = {}
+                                onFavClicked = {
+                                    println(isFav)
+                                }
                             )
                         }
                     }

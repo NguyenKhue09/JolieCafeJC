@@ -101,6 +101,38 @@ fun DetailScreen(
     }
 
     LaunchedEffect(key1 = true) {
+        productDetailViewModel.removeUserFavResponse.collect { result ->
+            when(result) {
+                is ApiResult.NullDataSuccess -> {
+                    Toast.makeText(context, "Remove ${product?.name} from favorite success", Toast.LENGTH_SHORT).show()
+                }
+                is ApiResult.Error -> {
+                    println(result.message)
+                    productDetailViewModel.setFavProductState(isFav = true)
+                    Toast.makeText(context, "Remove ${product?.name} from favorite failed!", Toast.LENGTH_SHORT).show()
+                }
+                else -> {}
+            }
+        }
+    }
+
+    LaunchedEffect(key1 = true) {
+        productDetailViewModel.addUserFavResponse.collect { result ->
+            when(result) {
+                is ApiResult.NullDataSuccess -> {
+                    Toast.makeText(context, "Add ${product?.name} to favorite success", Toast.LENGTH_SHORT).show()
+                }
+                is ApiResult.Error -> {
+                    println(result.message)
+                    productDetailViewModel.setFavProductState(isFav = false)
+                    Toast.makeText(context, "Add ${product?.name} to favorite failed!", Toast.LENGTH_SHORT).show()
+                }
+                else -> {}
+            }
+        }
+    }
+
+    LaunchedEffect(key1 = true) {
         productDetailViewModel.getProductDetail(token = userToken, productId = productId!!)
     }
 
@@ -140,7 +172,19 @@ fun DetailScreen(
                                     name = productDetail.name,
                                     isFav = isFav
                                 ) {
-                                    productDetailViewModel.setFavProductState(isFav = !isFav)
+                                    if(isFav) {
+                                        productDetailViewModel.setFavProductState(isFav = false)
+                                        productDetailViewModel.removeUserFavProduct(
+                                            token = userToken,
+                                            productId = productDetail.id
+                                        )
+                                    } else {
+                                        productDetailViewModel.setFavProductState(isFav = true)
+                                        productDetailViewModel.addUserFavProduct(
+                                            token = userToken,
+                                            productId = productDetail.id
+                                        )
+                                    }
                                 }
                             }
 

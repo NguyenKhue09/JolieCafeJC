@@ -20,6 +20,14 @@ private val button_text_color = Color(0xFF4E341B)
 private val error_text_color = Color(0xFFF24E1E)
 private val selected_color = Color(0x99BC834B)
 
+private val shimmer_medium_gray = Color(0xFFE3E3E3)
+private val shimmer_dark_gray = Color(0xFF1D1D1D)
+
+val Colors.ShimmerMediumGray
+    get() = shimmer_medium_gray
+
+val Colors.ShimmerDarkGray
+    get() = shimmer_dark_gray
 
 val Colors.selectedColor
     get() = selected_color

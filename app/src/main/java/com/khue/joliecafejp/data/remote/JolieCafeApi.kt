@@ -67,7 +67,13 @@ interface JolieCafeApi {
         @Query("favoriteProductId") favoriteProductId: String,
     ): Response<ApiResponseSingleData<Unit>>
 
-    @DELETE("$API_GATEWAY/favorite/add")
+    @DELETE("$API_GATEWAY/favorite//remove-by-productId")
+    suspend fun removeUserFavoriteProductByProductId(
+        @Header("Authorization") token: String,
+        @Query("productId") productId: String,
+    ): Response<ApiResponseSingleData<Unit>>
+
+    @POST("$API_GATEWAY/favorite/add")
     suspend fun addUserFavoriteProduct(
         @Header("Authorization") token: String,
         @Query("productId") productId: String,

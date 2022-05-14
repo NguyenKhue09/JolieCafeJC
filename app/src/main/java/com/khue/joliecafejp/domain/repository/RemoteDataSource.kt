@@ -27,4 +27,9 @@ interface RemoteDataSource {
         token: String,
         favoriteProductId: String,
     ): Response<ApiResponseSingleData<Unit>>
+
+    suspend  fun removeUserFavoriteProductByProductId(
+        token: String,
+        productId: String,
+    ): Response<ApiResponseSingleData<Unit>>
 }

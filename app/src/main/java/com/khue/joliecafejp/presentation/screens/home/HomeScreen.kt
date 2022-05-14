@@ -2,6 +2,7 @@ package com.khue.joliecafejp.presentation.screens.home
 
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -57,9 +58,7 @@ fun HomeScreen(
     homeViewModel: HomeViewModel = hiltViewModel()
 ) {
 
-
-
-    val userLoginResponse = loginViewModel.userLoginResponse.collectAsState()
+    val userLoginResponse by loginViewModel.userLoginResponse.collectAsState()
     val userToken by loginViewModel.userToken.collectAsState(initial = "")
     val searchTextState by homeViewModel.searchTextState
     val pagerState = rememberPagerState()
@@ -67,7 +66,6 @@ fun HomeScreen(
     val bestSellerProducts = homeViewModel.getProducts(productQuery = mapOf("type" to "All"), token = userToken).collectAsLazyPagingItems()
     val userFavProductsId by homeViewModel.favProductsId.collectAsState()
 
-    homeViewModel.getUserFavProductsId(token = userToken)
 
     LaunchedEffect(userToken) {
         if (userToken.isEmpty()) {
@@ -82,7 +80,11 @@ fun HomeScreen(
     }
 
     LaunchedEffect(key1 = true) {
-        if(userLoginResponse.value.data == null) loginViewModel.getUserInfos(token = userToken)
+        if(userLoginResponse.data == null) loginViewModel.getUserInfos(token = userToken)
+    }
+
+    LaunchedEffect(key1 = true) {
+        homeViewModel.getUserFavProductsId(token = userToken)
     }
 
 
@@ -153,9 +155,7 @@ fun HomeScreen(
             modifier = Modifier.padding(paddingValues),
             topBar = {
                 HomeTopBar(
-                    userName = userLoginResponse.value.data?.fullName ?: "You",
-                    userImage = userLoginResponse.value.data?.thumbnail ?: FirebaseAuth.getInstance().currentUser?.photoUrl.toString(),
-                    userCoins = 300
+                    userLoginResponse = userLoginResponse,
                 ) {
                     navController.navigate(HomeSubScreen.Notifications.route) {
                         launchSingleTop = true

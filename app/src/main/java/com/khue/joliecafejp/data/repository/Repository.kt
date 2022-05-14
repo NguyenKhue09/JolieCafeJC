@@ -65,6 +65,13 @@ class Repository @Inject constructor(
         return remote.removeUserFavoriteProduct(token = token, favoriteProductId = favoriteProductId)
     }
 
+    suspend fun removeUserFavoriteProductByProductId(
+        token: String,
+        productId: String
+    ): Response<ApiResponseSingleData<Unit>> {
+        return remote.removeUserFavoriteProductByProductId(token = token, productId = productId)
+    }
+
 
     suspend fun saveUserToken(userToken: String) {
         dataStore.saveUserToken(userToken = userToken)

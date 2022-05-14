@@ -39,6 +39,14 @@ class ProductDetailViewModel @Inject constructor(
         MutableStateFlow<ApiResult<Product>>(ApiResult.Loading())
     val getProductDetailResponse: StateFlow<ApiResult<Product>> = _getProductDetailResponse
 
+    private val _addUserFavResponse =
+        MutableStateFlow<ApiResult<Unit>>(ApiResult.Loading())
+    val addUserFavResponse: StateFlow<ApiResult<Unit>> = _addUserFavResponse
+
+    private val _removeUserFavResponse =
+        MutableStateFlow<ApiResult<Unit>>(ApiResult.Loading())
+    val removeUserFavResponse: StateFlow<ApiResult<Unit>> = _removeUserFavResponse
+
     fun getProductDetail(token: String, productId: String) {
         viewModelScope.launch {
             _getProductDetailResponse.value = ApiResult.Loading()
@@ -53,12 +61,39 @@ class ProductDetailViewModel @Inject constructor(
         }
     }
 
+    fun addUserFavProduct(token: String, productId: String) {
+        viewModelScope.launch {
+            _addUserFavResponse.value = ApiResult.Loading()
+            try {
+                val response =
+                    apiUseCases.addUserFavoriteProductUseCase(token = token, productId = productId)
+                _addUserFavResponse.value = handleNulDataApiResponse(response = response)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                _addUserFavResponse.value = ApiResult.Error(e.message)
+            }
+        }
+    }
+
+    fun removeUserFavProduct(token: String, productId: String) {
+        viewModelScope.launch {
+            _removeUserFavResponse.value = ApiResult.Loading()
+            try {
+                val response =
+                    apiUseCases.removeUserFavProductByProductId(token = token, productId = productId)
+                _removeUserFavResponse.value = handleNulDataApiResponse(response = response)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                _removeUserFavResponse.value = ApiResult.Error(e.message)
+            }
+        }
+    }
+
     fun setFavProductState(isFav: Boolean) {
         _isFav.value = isFav
     }
 
     private fun <T> handleApiResponse(response: Response<ApiResponseSingleData<T>>): ApiResult<T> {
-        println(response)
         val result = response.body()
         return when {
             response.message().toString().contains("timeout") -> {
@@ -69,6 +104,23 @@ class ProductDetailViewModel @Inject constructor(
             }
             response.isSuccessful -> {
                 ApiResult.Success(result?.data!!)
+            }
+            else -> {
+                ApiResult.Error(response.message())
+            }
+        }
+    }
+
+    private fun <T> handleNulDataApiResponse(response: Response<ApiResponseSingleData<T>>): ApiResult<T> {
+        return when {
+            response.message().toString().contains("timeout") -> {
+                ApiResult.Error("Timeout")
+            }
+            response.code() == 500 -> {
+                ApiResult.Error(response.message())
+            }
+            response.isSuccessful -> {
+                ApiResult.NullDataSuccess()
             }
             else -> {
                 ApiResult.Error(response.message())

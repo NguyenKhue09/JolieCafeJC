@@ -77,5 +77,12 @@ class RemoteDataSourceImpl(
         return jolieCafeApi.removeUserFavoriteProduct(token = "Bearer $token", favoriteProductId = favoriteProductId)
     }
 
-
+    override suspend fun removeUserFavoriteProductByProductId(
+        token: String,
+        productId: String
+    ): Response<ApiResponseSingleData<Unit>> {
+        return jolieCafeApi.removeUserFavoriteProductByProductId(
+            token = "Bearer $token", productId = productId
+        )
+    }
 }

@@ -1,11 +1,14 @@
 package com.khue.joliecafejp.presentation.screens.cart
 
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.*
@@ -28,6 +31,19 @@ fun CardScreen(
     var boxHigh by remember {
         mutableStateOf(0.dp)
     }
+
+    val transition = rememberInfiniteTransition()
+    val alphaAnim by transition.animateFloat(
+        initialValue = 1f,
+        targetValue = 0f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(
+                durationMillis = 500,
+                easing = FastOutLinearInEasing
+            ),
+            repeatMode = RepeatMode.Reverse
+        )
+    )
 
     Column(
         modifier = Modifier.fillMaxSize().onGloballyPositioned {
@@ -65,6 +81,16 @@ fun CardScreen(
             }
         }
 
+        println(alphaAnim)
+        Surface(
+            modifier = Modifier
+                .alpha(alpha = alphaAnim)
+                .fillMaxWidth(0.4f)
+                .height(20.dp),
+            color = if (isSystemInDarkTheme())
+                MaterialTheme.colors.ShimmerDarkGray else MaterialTheme.colors.ShimmerMediumGray,
+            shape = MaterialTheme.shapes.medium
+        ) {}
 
         Text(text = "Column high $columnHigh", color = MaterialTheme.colors.textColor)
         Text(text = "Box high $boxHigh", color = MaterialTheme.colors.textColor)

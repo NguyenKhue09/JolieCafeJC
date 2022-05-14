@@ -43,7 +43,6 @@ class HomeViewModel @Inject constructor(
     fun getUserFavProductsId(
         token: String
     )  = viewModelScope.launch {
-        _favProductsId.value = ApiResult.Loading()
         try {
             val response = apiUseCases.getUserFavoriteProductsIdUseCase(token = token)
             _favProductsId.value = handleApiResponse(response = response)

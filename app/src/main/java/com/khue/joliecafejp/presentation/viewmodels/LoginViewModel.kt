@@ -31,9 +31,6 @@ class LoginViewModel @Inject constructor(
     private val dataStoreUseCases: DataStoreUseCases
 ): ViewModel() {
 
-//    private val _user: MutableStateFlow<User?> = MutableStateFlow(null)
-//    val user: StateFlow<User?> = _user
-
     private val _userLoginResponse = MutableStateFlow<ApiResult<User>>(ApiResult.Loading())
     val userLoginResponse: StateFlow<ApiResult<User>> = _userLoginResponse
 
@@ -46,7 +43,6 @@ class LoginViewModel @Inject constructor(
 
     fun userLogin(userId: String) =
         viewModelScope.launch {
-            _userLoginResponse.value = ApiResult.Loading()
             try {
                 val response = apiUseCases.userLoginUseCase(userId = userId)
                 _userLoginResponse.value = handleApiResponse(response = response)
@@ -58,7 +54,6 @@ class LoginViewModel @Inject constructor(
 
     fun createUser(userData: Map<String, String>) =
         viewModelScope.launch {
-            _userLoginResponse.value = ApiResult.Loading()
             try {
                 val response = apiUseCases.createUserUseCase(data = userData)
                 _userLoginResponse.value = handleApiResponse(response = response)
@@ -71,7 +66,6 @@ class LoginViewModel @Inject constructor(
 
     fun getUserInfos(token: String) =
         viewModelScope.launch {
-            _userLoginResponse.value = ApiResult.Loading()
             try {
                 val response = apiUseCases.getUserInfosUseCase(token = token)
                 _userLoginResponse.value = handleApiResponse(response = response)
