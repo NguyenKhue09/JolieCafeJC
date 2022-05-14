@@ -44,6 +44,7 @@ import com.khue.joliecafejp.presentation.viewmodels.HomeViewModel
 import com.khue.joliecafejp.ui.theme.*
 import com.khue.joliecafejp.utils.ApiResult
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.yield
 import kotlin.math.absoluteValue
@@ -59,32 +60,38 @@ fun HomeScreen(
 ) {
 
     val userLoginResponse by loginViewModel.userLoginResponse.collectAsState()
-    val userToken by loginViewModel.userToken.collectAsState(initial = "")
+    var userToken by remember {
+        mutableStateOf("")
+    }
     val searchTextState by homeViewModel.searchTextState
     val pagerState = rememberPagerState()
 
-    val bestSellerProducts = homeViewModel.getProducts(productQuery = mapOf("type" to "All"), token = userToken).collectAsLazyPagingItems()
+    val bestSellerProducts = homeViewModel.bestSellerProduct.collectAsLazyPagingItems()
     val userFavProductsId by homeViewModel.favProductsId.collectAsState()
 
 
-    LaunchedEffect(userToken) {
-        if (userToken.isEmpty()) {
-            navController.navigate(AUTHENTICATION_ROUTE) {
-                popUpTo(BottomBarScreen.Home.route) {
-                    inclusive = true
+    LaunchedEffect(key1 = true) {
+        loginViewModel.userToken.collectLatest { token ->
+            userToken = token
+            if (userToken.isEmpty()) {
+                navController.navigate(AUTHENTICATION_ROUTE) {
+                    popUpTo(BottomBarScreen.Home.route) {
+                        inclusive = true
+                    }
+                    launchSingleTop = true
                 }
-                launchSingleTop = true
+
             }
-
+            launch {
+                homeViewModel.getProducts(productQuery = mapOf("type" to "All"), token = userToken)
+            }
+            launch {
+                if (userLoginResponse.data == null) loginViewModel.getUserInfos(token = userToken)
+            }
+            launch {
+                homeViewModel.getUserFavProductsId(token = userToken)
+            }
         }
-    }
-
-    LaunchedEffect(key1 = true) {
-        if(userLoginResponse.data == null) loginViewModel.getUserInfos(token = userToken)
-    }
-
-    LaunchedEffect(key1 = true) {
-        homeViewModel.getUserFavProductsId(token = userToken)
     }
 
 
@@ -165,7 +172,8 @@ fun HomeScreen(
             backgroundColor = MaterialTheme.colors.greyPrimary
         ) { paddingValues ->
             val padding = paddingValues.calculateBottomPadding()
-            val result = handlePagingResult(bestSellerProducts = bestSellerProducts, isLoading = isLoading)
+            val result =
+                handlePagingResult(bestSellerProducts = bestSellerProducts, isLoading = isLoading)
 
             Box(modifier = Modifier.fillMaxSize()) {
                 LazyColumn(
@@ -228,7 +236,7 @@ fun HomeScreen(
                         )
                     }
 
-                    if(result) {
+                    if (result) {
                         items(
                             items = bestSellerProducts,
                             key = { product ->
@@ -244,7 +252,11 @@ fun HomeScreen(
 
                                 HorizontalProductItem(
                                     onAdd = {
-                                        coroutineScope.launch { state.animateTo(ModalBottomSheetValue.Expanded) }
+                                        coroutineScope.launch {
+                                            state.animateTo(
+                                                ModalBottomSheetValue.Expanded
+                                            )
+                                        }
                                     },
                                     onClick = {
                                         navController.navigate("detail/${it.id}?isFav=${isFav}")
@@ -264,9 +276,11 @@ fun HomeScreen(
                     }
 
                 }
-                AnimatedVisibility(visible = isLoading.value,  modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = EXTRA_EXTRA_LARGE_PADDING)) {
+                AnimatedVisibility(
+                    visible = isLoading.value, modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = EXTRA_EXTRA_LARGE_PADDING)
+                ) {
                     CircularProgressIndicator(
                         color = MaterialTheme.colors.textColor2
                     )

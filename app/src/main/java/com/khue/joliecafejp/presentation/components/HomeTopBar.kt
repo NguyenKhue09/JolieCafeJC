@@ -44,17 +44,21 @@ fun HomeTopBar(
             ),
             height = IMAGE_USER_HOME_SIZE,
             width = IMAGE_USER_HOME_SIZE,
-            image = userLoginResponse.data?.thumbnail ?: FirebaseAuth.getInstance().currentUser?.photoUrl.toString()
+            image = userLoginResponse.data?.thumbnail
+                ?: FirebaseAuth.getInstance().currentUser?.photoUrl.toString()
         )
 
-        AnimatedVisibility(visible = userLoginResponse !is ApiResult.Loading,  modifier = Modifier.weight(1f)) {
+        if (userLoginResponse !is ApiResult.Loading) {
             Column(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.Start
             ) {
                 TextCustom(
-                    content = stringResource(R.string.user_name, userLoginResponse.data?.fullName ?: "You"),
+                    content = stringResource(
+                        R.string.user_name,
+                        userLoginResponse.data?.fullName ?: "You"
+                    ),
                     modifier = Modifier,
                     color = MaterialTheme.colors.textColor2,
                     fontFamily = ralewayMedium
@@ -70,7 +74,7 @@ fun HomeTopBar(
             }
         }
 
-        if(userLoginResponse is ApiResult.Loading) {
+        if (userLoginResponse is ApiResult.Loading) {
             ShimmerEffectProfile(modifier = Modifier.weight(1f))
         }
 
@@ -86,7 +90,6 @@ fun HomeTopBar(
         }
     }
 }
-
 
 
 @Composable
@@ -115,8 +118,7 @@ fun ShimmerEffectProfile(modifier: Modifier) {
                 .alpha(alpha = alphaAnim)
                 .fillMaxWidth(0.4f)
                 .height(20.dp),
-            color = if (isSystemInDarkTheme())
-                MaterialTheme.colors.ShimmerDarkGray else MaterialTheme.colors.ShimmerMediumGray,
+            color = MaterialTheme.colors.ShimmerMediumGray,
             shape = MaterialTheme.shapes.medium
         ) {}
         Spacer(modifier = Modifier.height(EXTRA_EXTRA_SMALL_PADDING))
@@ -125,8 +127,7 @@ fun ShimmerEffectProfile(modifier: Modifier) {
                 .alpha(alpha = alphaAnim)
                 .fillMaxWidth(0.3f)
                 .height(17.dp),
-            color = if (isSystemInDarkTheme())
-                MaterialTheme.colors.ShimmerDarkGray else MaterialTheme.colors.ShimmerMediumGray,
+            color = MaterialTheme.colors.ShimmerMediumGray,
             shape = MaterialTheme.shapes.medium
         ) {}
     }
