@@ -31,6 +31,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.google.firebase.auth.FirebaseAuth
 import com.khue.joliecafejp.R
@@ -38,7 +39,9 @@ import com.khue.joliecafejp.navigation.nav_screen.ProfileSubScreen
 import com.khue.joliecafejp.presentation.common.*
 import com.khue.joliecafejp.presentation.components.*
 import com.khue.joliecafejp.presentation.viewmodels.LoginViewModel
+import com.khue.joliecafejp.presentation.viewmodels.ProfileDetailViewModel
 import com.khue.joliecafejp.ui.theme.*
+import com.khue.joliecafejp.utils.ProfileUpdateFormEvent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -47,10 +50,13 @@ import kotlinx.coroutines.launch
 @Composable
 fun ProfileDetail(
     navController: NavHostController,
-    loginViewModel: LoginViewModel
+    loginViewModel: LoginViewModel,
+    profileDetailViewModel: ProfileDetailViewModel = hiltViewModel()
 ) {
 
     val focusManager = LocalFocusManager.current
+
+    val validateState by profileDetailViewModel.state.collectAsState()
 
     val isEdit = remember {
         mutableStateOf(false)
@@ -65,16 +71,6 @@ fun ProfileDetail(
     val passwordVisible = rememberSaveable { mutableStateOf(false) }
     val (passwordTextState, onPasswordChange) = remember { mutableStateOf("password") }
 
-
-    val (userNameTextState, onUserNameChange) = remember { mutableStateOf("Sweet Latte") }
-    val userNameError = remember {
-        mutableStateOf("")
-    }
-
-    val (userPhoneNumberState, onUserPhoneNumberChange) = remember { mutableStateOf("0123548655") }
-    val userPhoneNumberError = remember {
-        mutableStateOf("")
-    }
 
     val createNewPassword = rememberSaveable { mutableStateOf(false) }
 
@@ -108,16 +104,37 @@ fun ProfileDetail(
 
 
     FirebaseAuth.getInstance().currentUser?.getIdToken(false)?.addOnCompleteListener {
-        if(it.isSuccessful) {
+        if (it.isSuccessful) {
             val result = it.result.signInProvider
-            if(result.equals("password")) {
+            if (result.equals("password")) {
                 isGGorFaceLogin = false
             }
         }
     }
 
     LaunchedEffect(key1 = true) {
-        if(userLoginResponse.value.data == null) loginViewModel.getUserInfos(token = userToken)
+        if (userLoginResponse.value.data == null) {
+            loginViewModel.getUserInfos(token = userToken)
+        } else {
+            profileDetailViewModel.onPhoneAndNameChangeEvent(
+                ProfileUpdateFormEvent.UserNameChanged(username = userLoginResponse.value.data!!.fullName)
+            )
+            profileDetailViewModel.onPhoneAndNameChangeEvent(
+                ProfileUpdateFormEvent.UserPhoneNumberChanged(userPhoneNumber = userLoginResponse.value.data!!.phone ?: "You don't have phone number")
+            )
+        }
+    }
+
+    val context = LocalContext.current
+    LaunchedEffect(key1 = context) {
+        profileDetailViewModel.validationEvents.collect { event ->
+            when (event) {
+                is ProfileDetailViewModel.ValidationEvent.PhoneAndNameSuccess -> {
+                    isEdit.value = false
+                    Toast.makeText(context, "Update Success", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
     }
 
 
@@ -154,7 +171,8 @@ fun ProfileDetail(
                     coroutineScope = coroutineScope,
                     state = state,
                     isGGorFaceLogin = isGGorFaceLogin,
-                    image = userLoginResponse.value.data?.thumbnail ?: FirebaseAuth.getInstance().currentUser?.photoUrl.toString()
+                    image = userLoginResponse.value.data?.thumbnail
+                        ?: FirebaseAuth.getInstance().currentUser?.photoUrl.toString()
                 )
 
                 CardUserEmail(
@@ -163,12 +181,28 @@ fun ProfileDetail(
 
                 CardUserNameAndPhone(
                     isEdit = isEdit,
-                    userNameTextState = userNameTextState,
-                    userNameError = userNameError,
-                    userPhoneNumberState = userPhoneNumberState,
-                    userPhoneNumberError = userPhoneNumberError,
-                    onUserNameChange = onUserNameChange,
-                    onUserPhoneNumberChange = onUserPhoneNumberChange
+                    userNameTextState = validateState.userName,
+                    userNameError = validateState.userNameError,
+                    userPhoneNumberState = validateState.userPhoneNumber,
+                    userPhoneNumberError = validateState.userPhoneNumberError,
+                    onUserNameChange = { userName ->
+                        profileDetailViewModel.onPhoneAndNameChangeEvent(
+                            ProfileUpdateFormEvent.UserNameChanged(
+                                username = userName
+                            )
+                        )
+                    },
+                    onUserPhoneNumberChange = { phoneNumber ->
+                        profileDetailViewModel.onPhoneAndNameChangeEvent(
+                            ProfileUpdateFormEvent.UserPhoneNumberChanged(
+                                userPhoneNumber = phoneNumber
+                            )
+                        )
+                    },
+                    onSaveUserData = {
+                        if(isEdit.value) profileDetailViewModel.onPhoneAndNameChangeEvent(ProfileUpdateFormEvent.PhoneAndNameSubmit)
+                        isEdit.value = true
+                    }
                 )
 
                 AnimatedVisibility(
@@ -201,7 +235,6 @@ fun ProfileDetail(
                         onNewConfirmPasswordChange = onNewConfirmPasswordChange
                     )
                 }
-
             }
         }
     }
@@ -230,8 +263,12 @@ fun BoxUserImage(
                 .clip(CircleShape)
                 .background(color = MaterialTheme.colors.greySecondary),
             onClick = {
-                if(isGGorFaceLogin) {
-                    Toast.makeText(context, "Only login by Email and Password can change avatar", Toast.LENGTH_SHORT).show()
+                if (isGGorFaceLogin) {
+                    Toast.makeText(
+                        context,
+                        "Only login by Email and Password can change avatar",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 } else {
                     coroutineScope.launch { state.show() }
                 }
@@ -282,11 +319,12 @@ fun CardUserEmail(
 fun CardUserNameAndPhone(
     isEdit: MutableState<Boolean>,
     userNameTextState: String,
-    userNameError: MutableState<String>,
+    userNameError: String,
     userPhoneNumberState: String,
-    userPhoneNumberError: MutableState<String>,
+    userPhoneNumberError: String,
     onUserNameChange: (String) -> Unit,
     onUserPhoneNumberChange: (String) -> Unit,
+    onSaveUserData: () -> Unit
 ) {
     CardCustom(onClick = {}) {
         Column(
@@ -313,7 +351,7 @@ fun CardUserNameAndPhone(
                         indication = null,
                         interactionSource = remember { MutableInteractionSource() }
                     ) {
-                        isEdit.value = !isEdit.value
+                        onSaveUserData()
                     },
                     text = if (isEdit.value) stringResource(R.string.save) else stringResource(
                         R.string.edit
@@ -333,7 +371,7 @@ fun CardUserNameAndPhone(
                 },
                 keyBoardType = KeyboardType.Text,
                 trailingIcon = {
-                    if (userNameError.value.isNotEmpty()) Icon(
+                    if (userNameError.isNotEmpty()) Icon(
                         Icons.Filled.Error,
                         stringResource(R.string.error),
                         tint = MaterialTheme.colors.error
@@ -341,7 +379,7 @@ fun CardUserNameAndPhone(
                 },
                 placeHolder = "Sweet Latte",
                 visualTransformation = VisualTransformation.None,
-                error = userNameError.value,
+                error = userNameError,
                 padding = 0.dp,
                 enabled = isEdit.value
             )
@@ -361,9 +399,9 @@ fun CardUserNameAndPhone(
                 onTextChange = {
                     onUserPhoneNumberChange(it)
                 },
-                keyBoardType = KeyboardType.Text,
+                keyBoardType = KeyboardType.Phone,
                 trailingIcon = {
-                    if (userPhoneNumberError.value.isNotEmpty()) Icon(
+                    if (userPhoneNumberError.isNotEmpty()) Icon(
                         Icons.Filled.Error,
                         stringResource(R.string.error),
                         tint = MaterialTheme.colors.error
@@ -371,7 +409,7 @@ fun CardUserNameAndPhone(
                 },
                 placeHolder = "Sweet Latte",
                 visualTransformation = VisualTransformation.None,
-                error = userPhoneNumberError.value,
+                error = userPhoneNumberError,
                 padding = 0.dp,
                 enabled = isEdit.value
             )
@@ -427,8 +465,12 @@ fun CardChangePassword(
                             indication = null,
                             interactionSource = remember { MutableInteractionSource() }
                         ) {
-                            if(isGGorFaceLogin) {
-                                Toast.makeText(context, "Only login by Email and Password can change password", Toast.LENGTH_SHORT).show()
+                            if (isGGorFaceLogin) {
+                                Toast.makeText(
+                                    context,
+                                    "Only login by Email and Password can change password",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             } else {
                                 isChangePassword.value = true
                                 onPasswordChange("")

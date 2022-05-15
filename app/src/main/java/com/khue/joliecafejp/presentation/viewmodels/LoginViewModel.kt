@@ -144,18 +144,3 @@ class LoginViewModel @Inject constructor(
         object Success: ValidationEvent()
     }
 }
-
-//    init {
-//        if (FirebaseAuth.getInstance().currentUser != null) {
-//            _user.value = User(
-//                email = FirebaseAuth.getInstance().currentUser?.email!!,
-//                displayName = FirebaseAuth.getInstance().currentUser?.displayName!!
-//            )
-//        }
-//    }
-
-//    fun signIn(email: String, displayName: String){
-//        _user.value = User(email, displayName)
-//        println(user.value)
-//    }
-//

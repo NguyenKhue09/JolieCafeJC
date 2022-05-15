@@ -31,7 +31,7 @@ fun HomeTopBar(
     userLoginResponse: ApiResult<User>,
     onNotificationClick: () -> Unit,
 ) {
-
+    println("Topbar")
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,

@@ -10,10 +10,7 @@ import com.khue.joliecafejp.domain.use_cases.ValidationUseCases
 import com.khue.joliecafejp.domain.use_cases.api.*
 import com.khue.joliecafejp.domain.use_cases.data_store.ReadUserTokenUseCase
 import com.khue.joliecafejp.domain.use_cases.data_store.SaveUserTokenUseCase
-import com.khue.joliecafejp.domain.use_cases.validation_form.ValidateConfirmPasswordUseCase
-import com.khue.joliecafejp.domain.use_cases.validation_form.ValidateEmailUseCase
-import com.khue.joliecafejp.domain.use_cases.validation_form.ValidatePasswordUseCase
-import com.khue.joliecafejp.domain.use_cases.validation_form.ValidateUserNameUseCase
+import com.khue.joliecafejp.domain.use_cases.validation_form.*
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -41,7 +38,8 @@ object RepositoryModule {
             validationUserNameUseCaseUseCase = ValidateUserNameUseCase(),
             validationEmailUseCaseUseCase = ValidateEmailUseCase(),
             validationPasswordUseCase = ValidatePasswordUseCase(),
-            validationConfirmPasswordUseCase = ValidateConfirmPasswordUseCase()
+            validationConfirmPasswordUseCase = ValidateConfirmPasswordUseCase(),
+            validateUserPhoneNumberUseCase = ValidateUserPhoneNumberUseCase()
         )
     }
 
