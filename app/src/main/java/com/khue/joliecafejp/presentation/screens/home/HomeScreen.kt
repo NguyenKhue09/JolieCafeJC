@@ -2,7 +2,6 @@ package com.khue.joliecafejp.presentation.screens.home
 
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -25,10 +24,8 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import com.google.accompanist.pager.*
-import com.google.firebase.auth.FirebaseAuth
 import com.khue.joliecafejp.R
 import com.khue.joliecafejp.domain.model.CategoryButtonItem
-import com.khue.joliecafejp.domain.model.FavoriteProduct
 import com.khue.joliecafejp.domain.model.Product
 import com.khue.joliecafejp.navigation.nav_graph.AUTHENTICATION_ROUTE
 import com.khue.joliecafejp.navigation.nav_screen.BottomBarScreen
@@ -39,10 +36,9 @@ import com.khue.joliecafejp.presentation.common.SearchBar
 import com.khue.joliecafejp.presentation.common.TextCustom
 import com.khue.joliecafejp.presentation.components.HomeTopBar
 import com.khue.joliecafejp.presentation.components.HorizontalProductItem
-import com.khue.joliecafejp.presentation.viewmodels.LoginViewModel
+import com.khue.joliecafejp.presentation.viewmodels.UserSharedViewModel
 import com.khue.joliecafejp.presentation.viewmodels.HomeViewModel
 import com.khue.joliecafejp.ui.theme.*
-import com.khue.joliecafejp.utils.ApiResult
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -54,12 +50,12 @@ import kotlin.math.absoluteValue
 @Composable
 fun HomeScreen(
     navController: NavHostController,
-    loginViewModel: LoginViewModel,
+    userSharedViewModel: UserSharedViewModel,
     paddingValues: PaddingValues,
     homeViewModel: HomeViewModel = hiltViewModel()
 ) {
 
-    val userLoginResponse by loginViewModel.userLoginResponse.collectAsState()
+    val userLoginResponse by userSharedViewModel.userInfos.collectAsState()
     var userToken by remember {
         mutableStateOf("")
     }
@@ -71,7 +67,7 @@ fun HomeScreen(
 
 
     LaunchedEffect(key1 = true) {
-        loginViewModel.userToken.collectLatest { token ->
+        userSharedViewModel.userToken.collectLatest { token ->
             userToken = token
             if (userToken.isEmpty()) {
                 navController.navigate(AUTHENTICATION_ROUTE) {
@@ -86,7 +82,7 @@ fun HomeScreen(
                 homeViewModel.getProducts(productQuery = mapOf("type" to "All"), token = userToken)
             }
             launch {
-                if (userLoginResponse.data == null) loginViewModel.getUserInfos(token = userToken)
+                if (userLoginResponse.data == null) userSharedViewModel.getUserInfos(token = userToken)
             }
             launch {
                 homeViewModel.getUserFavProductsId(token = userToken)
@@ -251,6 +247,7 @@ fun HomeScreen(
                                 }
 
                                 HorizontalProductItem(
+                                    product = product,
                                     onAdd = {
                                         coroutineScope.launch {
                                             state.animateTo(
@@ -260,12 +257,7 @@ fun HomeScreen(
                                     },
                                     onClick = {
                                         navController.navigate("detail/${it.id}?isFav=${isFav}")
-                                    },
-                                    name = product.name,
-                                    type = product.type,
-                                    favorites = product.avgRating,
-                                    price = product.originPrice,
-                                    image = product.thumbnail
+                                    }
                                 )
                             }
                         }

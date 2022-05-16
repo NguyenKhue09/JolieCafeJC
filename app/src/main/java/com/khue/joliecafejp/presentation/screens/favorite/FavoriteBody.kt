@@ -4,7 +4,6 @@ import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
@@ -41,19 +40,15 @@ fun FavoriteBody(
                     product.id
                 }
             ) { product ->
-                product?.let {
+                product?.let { productFav ->
                     FavoriteItem(
-                        name = product.product.name,
-                        favorites =  product.product.avgRating,
-                        price =  product.product.originPrice,
-                        image = product.product.thumbnail,
+                        productFav = productFav,
                         onFavClick = {
                             onFavClicked(product.id)
-                        },
-                        onClick = {
-                            onItemClicked(product.product.id)
                         }
-                    )
+                    ) {
+                        onItemClicked(product.product.id)
+                    }
                 }
             }
 

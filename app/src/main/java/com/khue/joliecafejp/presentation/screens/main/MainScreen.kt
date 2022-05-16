@@ -24,13 +24,13 @@ import com.khue.joliecafejp.navigation.nav_graph.SetupNavGraph
 import com.khue.joliecafejp.navigation.nav_screen.AuthScreen
 import com.khue.joliecafejp.navigation.nav_screen.HomeSubScreen
 import com.khue.joliecafejp.navigation.nav_screen.ProfileSubScreen
-import com.khue.joliecafejp.presentation.viewmodels.LoginViewModel
+import com.khue.joliecafejp.presentation.viewmodels.UserSharedViewModel
 import com.khue.joliecafejp.ui.theme.*
 
 
 @Composable
 fun MainScreen(
-    loginViewModel: LoginViewModel = hiltViewModel()
+    userSharedViewModel: UserSharedViewModel = hiltViewModel()
 ) {
     val navController = rememberNavController()
     Scaffold(
@@ -41,7 +41,7 @@ fun MainScreen(
     ) {
         SetupNavGraph(
             navController = navController,
-            loginViewModel = loginViewModel,
+            userSharedViewModel = userSharedViewModel,
             paddingValues = it
         )
     }

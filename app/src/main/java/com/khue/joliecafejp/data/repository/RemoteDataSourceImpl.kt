@@ -28,6 +28,13 @@ class RemoteDataSourceImpl(
         return jolieCafeApi.getUserInfos(token = "Bearer $token")
     }
 
+    override suspend fun updateUserInfos(
+        token: String,
+        userInfos: Map<String, String>
+    ): Response<ApiResponseSingleData<User>> {
+        return  jolieCafeApi.updateUserInfos(token = "Bearer $token", body = userInfos)
+    }
+
     override fun getProducts(
         productQuery: Map<String, String>,
         token: String

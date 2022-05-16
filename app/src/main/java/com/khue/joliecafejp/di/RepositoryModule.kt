@@ -59,6 +59,7 @@ object RepositoryModule {
             createUserUseCase = CreateUserUseCase(repository = repository),
             userLoginUseCase = UserLoginUseCase(repository = repository),
             getUserInfosUseCase = GetUserInfosUseCase(repository = repository),
+            updateUserInfosUseCase = UpdateUserInfosUseCase(repository = repository),
             getProductsUseCase = GetProductsUseCase(repository = repository),
             getProductDetailUseCase = GetProductDetailUseCase(repository = repository),
             getUserFavoriteProductsUseCase = GetUserFavoriteProductsUseCase(repository = repository),

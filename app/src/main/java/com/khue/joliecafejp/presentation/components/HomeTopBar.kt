@@ -31,7 +31,6 @@ fun HomeTopBar(
     userLoginResponse: ApiResult<User>,
     onNotificationClick: () -> Unit,
 ) {
-    println("Topbar")
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -48,9 +47,13 @@ fun HomeTopBar(
                 ?: FirebaseAuth.getInstance().currentUser?.photoUrl.toString()
         )
 
-        if (userLoginResponse !is ApiResult.Loading) {
+        if (userLoginResponse is ApiResult.Loading) {
+            ShimmerEffectProfile(modifier = Modifier.weight(1f))
+        }
+
+        AnimatedVisibility(userLoginResponse !is ApiResult.Loading, modifier = Modifier.weight(1f)) {
             Column(
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.Start
             ) {
@@ -72,10 +75,6 @@ fun HomeTopBar(
                     overflow = TextOverflow.Ellipsis
                 )
             }
-        }
-
-        if (userLoginResponse is ApiResult.Loading) {
-            ShimmerEffectProfile(modifier = Modifier.weight(1f))
         }
 
         IconButton(

@@ -12,7 +12,6 @@ import com.facebook.login.LoginManager
 import com.facebook.login.LoginResult
 import com.google.firebase.auth.FacebookAuthProvider
 import com.google.firebase.auth.FirebaseAuth
-import com.khue.joliecafejp.presentation.viewmodels.LoginViewModel
 
 
 class FirebaseFacebookLogin {

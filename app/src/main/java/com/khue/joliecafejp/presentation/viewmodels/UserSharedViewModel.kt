@@ -1,8 +1,5 @@
 package com.khue.joliecafejp.presentation.viewmodels
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.khue.joliecafejp.domain.model.ApiResponseSingleData
@@ -25,14 +22,20 @@ import javax.inject.Inject
 
 
 @HiltViewModel
-class LoginViewModel @Inject constructor(
+class UserSharedViewModel @Inject constructor(
     private val validationUseCases: ValidationUseCases,
     private val apiUseCases: ApiUseCases,
     private val dataStoreUseCases: DataStoreUseCases
 ): ViewModel() {
 
+    private val _userInfos = MutableStateFlow<ApiResult<User>>(ApiResult.Loading())
+    val userInfos: StateFlow<ApiResult<User>> = _userInfos
+
     private val _userLoginResponse = MutableStateFlow<ApiResult<User>>(ApiResult.Loading())
     val userLoginResponse: StateFlow<ApiResult<User>> = _userLoginResponse
+
+    private val _updateUserInfosResponse = MutableStateFlow<ApiResult<Unit>>(ApiResult.Loading())
+    val updateUserInfosResponse: StateFlow<ApiResult<Unit>> = _updateUserInfosResponse
 
     val userToken  = dataStoreUseCases.readUserTokenUseCase()
 
@@ -61,20 +64,31 @@ class LoginViewModel @Inject constructor(
                 e.printStackTrace()
                 _userLoginResponse.value = ApiResult.Error(e.message)
             }
-
         }
 
     fun getUserInfos(token: String) =
         viewModelScope.launch {
             try {
                 val response = apiUseCases.getUserInfosUseCase(token = token)
-                _userLoginResponse.value = handleApiResponse(response = response)
+                _userInfos.value = handleApiResponse(response = response)
             } catch (e: Exception) {
                 e.printStackTrace()
-                _userLoginResponse.value = ApiResult.Error(e.message)
+                _userInfos.value = ApiResult.Error(e.message)
+            }
+        }
+
+    fun updateUserInfos(token: String, userInfos: Map<String, String>) {
+        viewModelScope.launch {
+            try {
+                val response = apiUseCases.updateUserInfosUseCase(token = token, userInfos = userInfos)
+                _updateUserInfosResponse.value = handleUpdateUserInfosApiResponse(response = response)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                _updateUserInfosResponse.value = ApiResult.Error(e.message)
             }
 
         }
+    }
 
     private fun handleApiResponse(response: Response<ApiResponseSingleData<User>>): ApiResult<User> {
         val result = response.body()
@@ -87,12 +101,44 @@ class LoginViewModel @Inject constructor(
             }
             response.isSuccessful -> {
                 saveUserToken(result!!.data!!.token)
-                ApiResult.Success(result.data!!)
+                updateUserResponse(result.data!!)
+                ApiResult.Success(result.data)
             }
             else -> {
                 ApiResult.Error(response.message())
             }
         }
+    }
+
+    private fun handleUpdateUserInfosApiResponse(response: Response<ApiResponseSingleData<User>>): ApiResult<Unit> {
+        val result = response.body()
+        return when {
+            response.message().toString().contains("timeout") -> {
+                ApiResult.Error("Timeout")
+            }
+            response.code() == 500 -> {
+                ApiResult.Error(response.message())
+            }
+            response.isSuccessful -> {
+                updateUserResponse(result?.data!!)
+                ApiResult.NullDataSuccess()
+            }
+            else -> {
+                ApiResult.Error(response.message())
+            }
+        }
+    }
+
+    private fun updateUserResponse(user: User){
+        _userInfos.value = ApiResult.Success(user)
+    }
+
+    fun cleanUpdateUserInfosResponse() {
+        _updateUserInfosResponse.value = ApiResult.Loading()
+    }
+
+    fun cleanUserLoginResponse() {
+        _userLoginResponse.value = ApiResult.Loading()
     }
 
     fun signOut() {

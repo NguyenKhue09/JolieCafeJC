@@ -6,17 +6,17 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import com.khue.joliecafejp.navigation.nav_screen.BottomBarScreen
-import com.khue.joliecafejp.presentation.screens.cart.CardScreen
+import com.khue.joliecafejp.presentation.screens.cart.CartScreen
 import com.khue.joliecafejp.presentation.screens.favorite.FavoriteScreen
 import com.khue.joliecafejp.presentation.screens.home.HomeScreen
-import com.khue.joliecafejp.presentation.viewmodels.LoginViewModel
+import com.khue.joliecafejp.presentation.viewmodels.UserSharedViewModel
 import com.khue.joliecafejp.presentation.screens.profile.ProfileScreen
 
 
 
 fun NavGraphBuilder.bottomNavGraph(
     navController: NavHostController,
-    loginViewModel: LoginViewModel,
+    userSharedViewModel: UserSharedViewModel,
     paddingValues: PaddingValues
 ) {
     navigation(
@@ -30,7 +30,7 @@ fun NavGraphBuilder.bottomNavGraph(
             composable(route = BottomBarScreen.Home.route) {
                 HomeScreen(
                     navController = navController,
-                    loginViewModel = loginViewModel,
+                    userSharedViewModel = userSharedViewModel,
                     paddingValues = paddingValues
                 )
             }
@@ -44,7 +44,7 @@ fun NavGraphBuilder.bottomNavGraph(
             )
         }
         composable(route = BottomBarScreen.Cart.route) {
-            CardScreen()
+            CartScreen( userSharedViewModel = userSharedViewModel)
         }
 
         navigation(
@@ -54,12 +54,12 @@ fun NavGraphBuilder.bottomNavGraph(
             composable(route = BottomBarScreen.Profile.route) {
                 ProfileScreen(
                     navController = navController,
-                    loginViewModel = loginViewModel
+                    userSharedViewModel = userSharedViewModel
                 )
             }
             profileNavGraph(
                 navController = navController,
-                loginViewModel = loginViewModel
+                userSharedViewModel = userSharedViewModel
             )
         }
     }

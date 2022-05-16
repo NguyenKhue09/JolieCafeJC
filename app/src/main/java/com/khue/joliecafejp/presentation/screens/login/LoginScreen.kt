@@ -2,7 +2,6 @@ package com.khue.joliecafejp.presentation.screens.login
 
 import android.app.Activity
 import android.content.Context
-import android.util.Patterns
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -42,22 +41,20 @@ import com.khue.joliecafejp.navigation.nav_screen.AuthScreen
 import com.khue.joliecafejp.presentation.common.FaceOrGoogleLogin
 import com.khue.joliecafejp.presentation.common.TextCustom
 import com.khue.joliecafejp.presentation.common.TextFieldCustom
-import com.khue.joliecafejp.presentation.viewmodels.LoginViewModel
-import com.khue.joliecafejp.presentation.viewmodels.SignUpViewModel
+import com.khue.joliecafejp.presentation.viewmodels.UserSharedViewModel
 import com.khue.joliecafejp.ui.theme.*
 import com.khue.joliecafejp.utils.ApiResult
 import com.khue.joliecafejp.utils.RegistrationFormEvent
-import kotlin.math.log
+import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun LoginScreen(
     navController: NavHostController,
-    loginViewModel: LoginViewModel
+    userSharedViewModel: UserSharedViewModel
 ) {
 
-    val userToken by loginViewModel.userToken.collectAsState(initial = "")
-    val state by loginViewModel.state.collectAsState()
-    val userLoginResponse by loginViewModel.userLoginResponse.collectAsState(initial = ApiResult.Loading())
+    val userToken by userSharedViewModel.userToken.collectAsState(initial = "")
+    val state by userSharedViewModel.state.collectAsState()
 
     LaunchedEffect(userToken) {
         if (userToken.isNotEmpty()) {
@@ -113,10 +110,10 @@ fun LoginScreen(
                                     )
                                     isNewUser?.let {
                                         if (it) {
-                                            loginViewModel.createUser(userData = data)
+                                            userSharedViewModel.createUser(userData = data)
                                         } else {
 
-                                            loginViewModel.userLogin(userId = user.uid)
+                                            userSharedViewModel.userLogin(userId = user.uid)
 
                                         }
                                     }
@@ -140,30 +137,38 @@ fun LoginScreen(
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(key1 = context) {
-        loginViewModel.validationEvents.collect { event ->
+        userSharedViewModel.validationEvents.collect { event ->
             when (event) {
-                is LoginViewModel.ValidationEvent.Success -> {
+                is UserSharedViewModel.ValidationEvent.Success -> {
                     FirebaseGmailPasswordAuth().loginUser(
                         email = state.email,
                         password = state.password,
                         context = context
                     ) { userId ->
-                        loginViewModel.userLogin(userId = userId)
+                        userSharedViewModel.userLogin(userId = userId)
                     }
                 }
             }
         }
     }
 
-    LaunchedEffect(key1 = userLoginResponse) {
-        when(userLoginResponse) {
-            is ApiResult.Error -> {
-                Toast.makeText(context, userLoginResponse.message, Toast.LENGTH_SHORT).show()
+    LaunchedEffect(key1 = Unit) {
+        userSharedViewModel.userLoginResponse.collectLatest { response ->
+            when(response) {
+                is ApiResult.Error -> {
+                    Toast.makeText(context, response.message, Toast.LENGTH_SHORT).show()
+                }
+                is ApiResult.Success -> {
+                    Toast.makeText(context, "Get your info success", Toast.LENGTH_SHORT).show()
+                }
+                else -> {}
             }
-            is ApiResult.Success -> {
-                Toast.makeText(context, "Get your info success", Toast.LENGTH_SHORT).show()
-            }
-            else -> {}
+        }
+    }
+
+    DisposableEffect(key1 = Unit) {
+        onDispose {
+            userSharedViewModel.cleanUserLoginResponse()
         }
     }
 
@@ -205,7 +210,7 @@ fun LoginScreen(
             modifier = Modifier.align(alignment = Alignment.Start),
             textFieldValue = state.email,
             onTextChange = {
-                loginViewModel.onEvent(RegistrationFormEvent.EmailChanged(it))
+                userSharedViewModel.onEvent(RegistrationFormEvent.EmailChanged(it))
             },
             keyBoardType = KeyboardType.Text,
             trailingIcon = {
@@ -233,7 +238,7 @@ fun LoginScreen(
             modifier = Modifier.align(alignment = Alignment.Start),
             textFieldValue = state.password,
             onTextChange = {
-                loginViewModel.onEvent(RegistrationFormEvent.PasswordChanged(it))
+                userSharedViewModel.onEvent(RegistrationFormEvent.PasswordChanged(it))
             },
             keyBoardType = KeyboardType.Password,
             trailingIcon = {
@@ -287,7 +292,7 @@ fun LoginScreen(
         Button(
             modifier = Modifier.padding(top = 32.dp),
             onClick = {
-                loginViewModel.onEvent(RegistrationFormEvent.Submit)
+                userSharedViewModel.onEvent(RegistrationFormEvent.Submit)
             },
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = MaterialTheme.colors.greyPrimaryVariant
@@ -320,7 +325,7 @@ fun LoginScreen(
             },
             faceAction = {
                 facebookLogin.facebookLogin(context, callbackManager, mAuth) {
-                    loginViewModel.userLogin(userId = it)
+                    userSharedViewModel.userLogin(userId = it)
                 }
             }
         )

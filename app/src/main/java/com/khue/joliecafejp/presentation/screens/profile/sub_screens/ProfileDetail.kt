@@ -35,12 +35,14 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.google.firebase.auth.FirebaseAuth
 import com.khue.joliecafejp.R
+import com.khue.joliecafejp.domain.model.ProfileUpdateFormState
 import com.khue.joliecafejp.navigation.nav_screen.ProfileSubScreen
 import com.khue.joliecafejp.presentation.common.*
 import com.khue.joliecafejp.presentation.components.*
-import com.khue.joliecafejp.presentation.viewmodels.LoginViewModel
+import com.khue.joliecafejp.presentation.viewmodels.UserSharedViewModel
 import com.khue.joliecafejp.presentation.viewmodels.ProfileDetailViewModel
 import com.khue.joliecafejp.ui.theme.*
+import com.khue.joliecafejp.utils.ApiResult
 import com.khue.joliecafejp.utils.ProfileUpdateFormEvent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -50,13 +52,16 @@ import kotlinx.coroutines.launch
 @Composable
 fun ProfileDetail(
     navController: NavHostController,
-    loginViewModel: LoginViewModel,
+    userSharedViewModel: UserSharedViewModel,
     profileDetailViewModel: ProfileDetailViewModel = hiltViewModel()
 ) {
 
     val focusManager = LocalFocusManager.current
 
     val validateState by profileDetailViewModel.state.collectAsState()
+
+    val userLoginResponse by userSharedViewModel.userInfos.collectAsState()
+    val userToken by userSharedViewModel.userToken.collectAsState(initial = "")
 
     val isEdit = remember {
         mutableStateOf(false)
@@ -65,25 +70,9 @@ fun ProfileDetail(
         mutableStateOf(false)
     }
 
-    val passwordError = remember {
-        mutableStateOf("")
-    }
     val passwordVisible = rememberSaveable { mutableStateOf(false) }
-    val (passwordTextState, onPasswordChange) = remember { mutableStateOf("password") }
-
-
-    val createNewPassword = rememberSaveable { mutableStateOf(false) }
-
-    val (newPasswordTextState, onNewPasswordChange) = remember { mutableStateOf("") }
-    val newPasswordError = remember {
-        mutableStateOf("")
-    }
+    var createNewPassword  by rememberSaveable { mutableStateOf(false) }
     val newPasswordVisible = rememberSaveable { mutableStateOf(false) }
-
-    val (confirmNewPasswordState, onNewConfirmPasswordChange) = remember { mutableStateOf("") }
-    val confirmNewPasswordError = remember {
-        mutableStateOf("")
-    }
     val confirmNewPasswordVisible = rememberSaveable { mutableStateOf(false) }
 
 
@@ -99,9 +88,6 @@ fun ProfileDetail(
         mutableStateOf(true)
     }
 
-    val userLoginResponse = loginViewModel.userLoginResponse.collectAsState()
-    val userToken by loginViewModel.userToken.collectAsState(initial = "")
-
 
     FirebaseAuth.getInstance().currentUser?.getIdToken(false)?.addOnCompleteListener {
         if (it.isSuccessful) {
@@ -113,30 +99,80 @@ fun ProfileDetail(
     }
 
     LaunchedEffect(key1 = true) {
-        if (userLoginResponse.value.data == null) {
-            loginViewModel.getUserInfos(token = userToken)
+        if (userLoginResponse.data == null) {
+            userSharedViewModel.getUserInfos(token = userToken)
         } else {
             profileDetailViewModel.onPhoneAndNameChangeEvent(
-                ProfileUpdateFormEvent.UserNameChanged(username = userLoginResponse.value.data!!.fullName)
+                ProfileUpdateFormEvent.UserNameChanged(username = userLoginResponse.data!!.fullName)
             )
             profileDetailViewModel.onPhoneAndNameChangeEvent(
-                ProfileUpdateFormEvent.UserPhoneNumberChanged(userPhoneNumber = userLoginResponse.value.data!!.phone ?: "You don't have phone number")
+                ProfileUpdateFormEvent.UserPhoneNumberChanged(userPhoneNumber = userLoginResponse.data!!.phone ?: "You don't have phone number")
             )
         }
     }
 
     val context = LocalContext.current
+
     LaunchedEffect(key1 = context) {
         profileDetailViewModel.validationEvents.collect { event ->
             when (event) {
                 is ProfileDetailViewModel.ValidationEvent.PhoneAndNameSuccess -> {
-                    isEdit.value = false
-                    Toast.makeText(context, "Update Success", Toast.LENGTH_SHORT).show()
+                    userSharedViewModel.updateUserInfos(
+                        token = userToken,
+                        userInfos = mapOf(
+                            "fullname" to validateState.userName,
+                            "phone" to validateState.userPhoneNumber
+                        )
+                    )
+                }
+                is ProfileDetailViewModel.ValidationEvent.CurrentPasswordValid -> {
+                    profileDetailViewModel.reAuthentication(password = validateState.currentPassword)
+                }
+                is ProfileDetailViewModel.ValidationEvent.ReAuthenticationSuccess -> {
+                    isChangePassword.value = false
+                    createNewPassword = true
+                    profileDetailViewModel.onCurrentPasswordChangeEvent(event = ProfileUpdateFormEvent.CurrentPasswordChanged(currentPassword = "password"))
+                }
+                is ProfileDetailViewModel.ValidationEvent.NewPasswordValid -> {
+                    profileDetailViewModel.updateNewPassword(password = validateState.newPassword)
+                }
+                is ProfileDetailViewModel.ValidationEvent.ChangePasswordSuccess -> {
+                    createNewPassword = false
+                    cleanChangePasswordFormState(
+                        focusManager = focusManager,
+                        profileDetailViewModel = profileDetailViewModel
+                    )
+                }
+                is ProfileDetailViewModel.ValidationEvent.ChangePasswordFailed -> {
+                    createNewPassword = true
+                    Toast.makeText(context, "Change password failed!", Toast.LENGTH_SHORT).show()
                 }
             }
         }
     }
 
+    LaunchedEffect(key1 = true) {
+        userSharedViewModel.updateUserInfosResponse.collect { result ->
+            when(result) {
+                is ApiResult.NullDataSuccess -> {
+                    isEdit.value = false
+                    Toast.makeText(context, "Update phone and name success", Toast.LENGTH_SHORT).show()
+                }
+                is ApiResult.Error -> {
+                    isEdit.value = true
+                    Toast.makeText(context, result.message, Toast.LENGTH_SHORT).show()
+                }
+                else -> {}
+            }
+        }
+    }
+
+
+    DisposableEffect(key1 = Unit) {
+        onDispose {
+            userSharedViewModel.cleanUpdateUserInfosResponse()
+        }
+    }
 
     ModalBottomSheetLayout(
         sheetState = state,
@@ -171,20 +207,17 @@ fun ProfileDetail(
                     coroutineScope = coroutineScope,
                     state = state,
                     isGGorFaceLogin = isGGorFaceLogin,
-                    image = userLoginResponse.value.data?.thumbnail
+                    image = userLoginResponse.data?.thumbnail
                         ?: FirebaseAuth.getInstance().currentUser?.photoUrl.toString()
                 )
 
                 CardUserEmail(
-                    userEmail = userLoginResponse.value.data?.email ?: "Can't load your email"
+                    userEmail = userLoginResponse.data?.email ?: "Can't load your email"
                 )
 
                 CardUserNameAndPhone(
                     isEdit = isEdit,
-                    userNameTextState = validateState.userName,
-                    userNameError = validateState.userNameError,
-                    userPhoneNumberState = validateState.userPhoneNumber,
-                    userPhoneNumberError = validateState.userPhoneNumberError,
+                    validateState = validateState,
                     onUserNameChange = { userName ->
                         profileDetailViewModel.onPhoneAndNameChangeEvent(
                             ProfileUpdateFormEvent.UserNameChanged(
@@ -206,38 +239,60 @@ fun ProfileDetail(
                 )
 
                 AnimatedVisibility(
-                    visible = !createNewPassword.value,
+                    visible = !createNewPassword,
                 ) {
                     CardChangePassword(
+                        validateState = validateState,
                         isGGorFaceLogin = isGGorFaceLogin,
-                        createNewPassword = createNewPassword,
                         isChangePassword = isChangePassword,
-                        passwordTextState = passwordTextState,
-                        passwordError = passwordError,
                         passwordVisible = passwordVisible,
-                        onPasswordChange = onPasswordChange
+                        onPasswordChange = { currentPassword ->
+                            profileDetailViewModel.onCurrentPasswordChangeEvent(event = ProfileUpdateFormEvent.CurrentPasswordChanged(currentPassword = currentPassword))
+                        },
+                        onConfirmCurrentPassword = {
+                            profileDetailViewModel.onCurrentPasswordChangeEvent(event = ProfileUpdateFormEvent.CurrentPasswordSubmit)
+                        }
                     )
                 }
 
                 AnimatedVisibility(
-                    visible = createNewPassword.value,
+                    visible = createNewPassword,
                 ) {
                     CardNewPassword(
                         createNewPassword = createNewPassword,
-                        newPasswordTextState = newPasswordTextState,
-                        newPasswordError = newPasswordError,
+                        validateState = validateState,
                         newPasswordVisible = newPasswordVisible,
-                        confirmNewPasswordState = confirmNewPasswordState,
-                        confirmNewPasswordError = confirmNewPasswordError,
                         confirmNewPasswordVisible = confirmNewPasswordVisible,
-                        focusManager = focusManager,
-                        onNewPasswordChange = onNewPasswordChange,
-                        onNewConfirmPasswordChange = onNewConfirmPasswordChange
+                        onNewPasswordChange = { newPassword ->
+                            profileDetailViewModel.onCreateNewPasswordChangeEvent(event = ProfileUpdateFormEvent.NewPasswordChanged(newPassword = newPassword))
+                        },
+                        onNewConfirmPasswordChange = { confirmPassword ->
+                            profileDetailViewModel.onCreateNewPasswordChangeEvent(event = ProfileUpdateFormEvent.ConfirmPasswordChanged(confirmPassword = confirmPassword))
+                        },
+                        onSubmitNewPassword = {
+                            profileDetailViewModel.onPhoneAndNameChangeEvent(event = ProfileUpdateFormEvent.ChangeNewPasswordSubmit)
+                        },
+                        onCancelChangeNewPassword = {
+                            createNewPassword = false
+                            cleanChangePasswordFormState(
+                                focusManager = focusManager,
+                                profileDetailViewModel = profileDetailViewModel
+                            )
+                        }
                     )
                 }
             }
         }
     }
+}
+
+fun cleanChangePasswordFormState(
+    focusManager: FocusManager,
+    profileDetailViewModel: ProfileDetailViewModel
+) {
+    focusManager.clearFocus()
+    profileDetailViewModel.onCreateNewPasswordChangeEvent(event = ProfileUpdateFormEvent.NewPasswordChanged(newPassword = ""))
+    profileDetailViewModel.onCreateNewPasswordChangeEvent(event = ProfileUpdateFormEvent.ConfirmPasswordChanged(confirmPassword = ""))
 }
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -318,10 +373,7 @@ fun CardUserEmail(
 @Composable
 fun CardUserNameAndPhone(
     isEdit: MutableState<Boolean>,
-    userNameTextState: String,
-    userNameError: String,
-    userPhoneNumberState: String,
-    userPhoneNumberError: String,
+    validateState: ProfileUpdateFormState,
     onUserNameChange: (String) -> Unit,
     onUserPhoneNumberChange: (String) -> Unit,
     onSaveUserData: () -> Unit
@@ -365,13 +417,13 @@ fun CardUserNameAndPhone(
 
             TextFieldCustom(
                 modifier = Modifier.align(alignment = Alignment.Start),
-                textFieldValue = userNameTextState,
+                textFieldValue = validateState.userName,
                 onTextChange = {
                     onUserNameChange(it)
                 },
                 keyBoardType = KeyboardType.Text,
                 trailingIcon = {
-                    if (userNameError.isNotEmpty()) Icon(
+                    if (validateState.userNameError.isNotEmpty()) Icon(
                         Icons.Filled.Error,
                         stringResource(R.string.error),
                         tint = MaterialTheme.colors.error
@@ -379,7 +431,7 @@ fun CardUserNameAndPhone(
                 },
                 placeHolder = "Sweet Latte",
                 visualTransformation = VisualTransformation.None,
-                error = userNameError,
+                error = validateState.userNameError,
                 padding = 0.dp,
                 enabled = isEdit.value
             )
@@ -395,13 +447,13 @@ fun CardUserNameAndPhone(
 
             TextFieldCustom(
                 modifier = Modifier.align(alignment = Alignment.Start),
-                textFieldValue = userPhoneNumberState,
+                textFieldValue = validateState.userPhoneNumber,
                 onTextChange = {
                     onUserPhoneNumberChange(it)
                 },
                 keyBoardType = KeyboardType.Phone,
                 trailingIcon = {
-                    if (userPhoneNumberError.isNotEmpty()) Icon(
+                    if (validateState.userPhoneNumberError.isNotEmpty()) Icon(
                         Icons.Filled.Error,
                         stringResource(R.string.error),
                         tint = MaterialTheme.colors.error
@@ -409,7 +461,7 @@ fun CardUserNameAndPhone(
                 },
                 placeHolder = "Sweet Latte",
                 visualTransformation = VisualTransformation.None,
-                error = userPhoneNumberError,
+                error = validateState.userPhoneNumberError,
                 padding = 0.dp,
                 enabled = isEdit.value
             )
@@ -420,13 +472,12 @@ fun CardUserNameAndPhone(
 
 @Composable
 fun CardChangePassword(
-    createNewPassword: MutableState<Boolean>,
+    validateState: ProfileUpdateFormState,
+    isGGorFaceLogin: Boolean,
     isChangePassword: MutableState<Boolean>,
-    passwordTextState: String,
-    passwordError: MutableState<String>,
     passwordVisible: MutableState<Boolean>,
     onPasswordChange: (String) -> Unit,
-    isGGorFaceLogin: Boolean
+    onConfirmCurrentPassword: () -> Unit,
 ) {
 
     val context = LocalContext.current
@@ -487,13 +538,13 @@ fun CardChangePassword(
 
             TextFieldCustom(
                 modifier = Modifier.align(alignment = Alignment.Start),
-                textFieldValue = passwordTextState,
+                textFieldValue = validateState.currentPassword,
                 onTextChange = {
                     onPasswordChange(it)
                 },
                 keyBoardType = KeyboardType.Password,
                 trailingIcon = {
-                    if (passwordError.value.isEmpty()) {
+                    if (validateState.currentPasswordError.isEmpty()) {
                         val image = if (passwordVisible.value)
                             Icons.Filled.Visibility
                         else Icons.Filled.VisibilityOff
@@ -522,7 +573,7 @@ fun CardChangePassword(
                 },
                 placeHolder = stringResource(R.string.password_placeholder),
                 visualTransformation = if (passwordVisible.value) VisualTransformation.None else PasswordVisualTransformation(),
-                error = passwordError.value,
+                error = validateState.currentPasswordError,
                 enabled = isChangePassword.value,
                 padding = 0.dp,
             )
@@ -558,9 +609,7 @@ fun CardChangePassword(
                         backgroundColor = MaterialTheme.colors.titleTextColor,
                         textColor = MaterialTheme.colors.textColor,
                         onClick = {
-                            isChangePassword.value = false
-                            onPasswordChange("password")
-                            createNewPassword.value = true
+                            onConfirmCurrentPassword()
                         },
                         paddingValues = PaddingValues(
                             start = EXTRA_LARGE_PADDING,
@@ -580,16 +629,14 @@ fun CardChangePassword(
 
 @Composable
 fun CardNewPassword(
-    createNewPassword: MutableState<Boolean>,
-    newPasswordTextState: String,
-    newPasswordError: MutableState<String>,
+    createNewPassword: Boolean,
+    validateState: ProfileUpdateFormState,
     newPasswordVisible: MutableState<Boolean>,
-    confirmNewPasswordState: String,
-    confirmNewPasswordError: MutableState<String>,
     confirmNewPasswordVisible: MutableState<Boolean>,
-    focusManager: FocusManager,
     onNewPasswordChange: (String) -> Unit,
-    onNewConfirmPasswordChange: (String) -> Unit
+    onNewConfirmPasswordChange: (String) -> Unit,
+    onSubmitNewPassword: () -> Unit,
+    onCancelChangeNewPassword: () -> Unit
 ) {
     CardCustom(
         onClick = {},
@@ -616,13 +663,13 @@ fun CardNewPassword(
 
             TextFieldCustom(
                 modifier = Modifier.align(alignment = Alignment.Start),
-                textFieldValue = newPasswordTextState,
+                textFieldValue = validateState.newPassword,
                 onTextChange = {
                     onNewPasswordChange(it)
                 },
                 keyBoardType = KeyboardType.Password,
                 trailingIcon = {
-                    if (newPasswordError.value.isEmpty()) {
+                    if (validateState.newPasswordError.isEmpty()) {
                         val image = if (newPasswordVisible.value)
                             Icons.Filled.Visibility
                         else Icons.Filled.VisibilityOff
@@ -647,9 +694,9 @@ fun CardNewPassword(
                 },
                 placeHolder = stringResource(R.string.enter_your_new_password),
                 visualTransformation = if (newPasswordVisible.value) VisualTransformation.None else PasswordVisualTransformation(),
-                error = newPasswordError.value,
+                error = validateState.newPasswordError,
                 padding = 0.dp,
-                enabled = createNewPassword.value
+                enabled = createNewPassword
             )
 
             Text(
@@ -663,13 +710,13 @@ fun CardNewPassword(
 
             TextFieldCustom(
                 modifier = Modifier.align(alignment = Alignment.Start),
-                textFieldValue = confirmNewPasswordState,
+                textFieldValue = validateState.confirmPassword,
                 onTextChange = {
                     onNewConfirmPasswordChange(it)
                 },
                 keyBoardType = KeyboardType.Password,
                 trailingIcon = {
-                    if (confirmNewPasswordError.value.isEmpty()) {
+                    if (validateState.confirmPasswordError.isEmpty()) {
                         val image = if (confirmNewPasswordVisible.value)
                             Icons.Filled.Visibility
                         else Icons.Filled.VisibilityOff
@@ -694,9 +741,9 @@ fun CardNewPassword(
                 },
                 placeHolder = stringResource(id = R.string.confirm_password_placeholder),
                 visualTransformation = if (confirmNewPasswordVisible.value) VisualTransformation.None else PasswordVisualTransformation(),
-                error = confirmNewPasswordError.value,
+                error = validateState.confirmPasswordError,
                 padding = 0.dp,
-                enabled = createNewPassword.value
+                enabled = createNewPassword
             )
 
             Row(
@@ -709,10 +756,7 @@ fun CardNewPassword(
                     backgroundColor = Color.Transparent,
                     textColor = MaterialTheme.colors.textColor,
                     onClick = {
-                        focusManager.clearFocus()
-                        onNewPasswordChange("")
-                        onNewConfirmPasswordChange("")
-                        createNewPassword.value = false
+                        onCancelChangeNewPassword()
                     },
                     paddingValues = PaddingValues(top = EXTRA_LARGE_PADDING),
                     contentPadding = PaddingValues(
@@ -729,10 +773,7 @@ fun CardNewPassword(
                     backgroundColor = MaterialTheme.colors.titleTextColor,
                     textColor = MaterialTheme.colors.textColor,
                     onClick = {
-                        focusManager.clearFocus()
-                        onNewPasswordChange("")
-                        onNewConfirmPasswordChange("")
-                        createNewPassword.value = false
+                        onSubmitNewPassword()
                     },
                     paddingValues = PaddingValues(
                         start = EXTRA_LARGE_PADDING,

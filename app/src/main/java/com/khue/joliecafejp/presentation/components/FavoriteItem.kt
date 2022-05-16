@@ -21,16 +21,14 @@ import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.khue.joliecafejp.R
+import com.khue.joliecafejp.domain.model.FavoriteProduct
 import com.khue.joliecafejp.presentation.common.CardCustom
 import com.khue.joliecafejp.ui.theme.*
 
 @Composable
 fun FavoriteItem(
     modifier: Modifier = Modifier,
-    name: String = "Khueeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-    favorites: Int = 0,
-    price: Double = 0.0,
-    image: String,
+    productFav: FavoriteProduct,
     onFavClick: () -> Unit,
     onClick: () -> Unit = {}
 ) {
@@ -39,7 +37,7 @@ fun FavoriteItem(
         model = ImageRequest.Builder(LocalContext.current)
             .placeholder(R.drawable.image_logo)
             .error(R.drawable.image_logo)
-            .data(image)
+            .data(productFav.product.thumbnail)
             .crossfade(true)
             .build()
     )
@@ -90,7 +88,7 @@ fun FavoriteItem(
                         modifier = modifier
                             .wrapContentSize(align = Alignment.CenterStart)
                             .weight(1f, false),
-                        text = name,
+                        text = productFav.product.name,
                         fontFamily = raleway,
                         color = MaterialTheme.colors.textColor,
                         fontSize = MaterialTheme.typography.subtitle1.fontSize,
@@ -110,7 +108,7 @@ fun FavoriteItem(
                     Text(
                         modifier = modifier
                             .wrapContentSize(align = Alignment.CenterStart),
-                        text = favorites.toString(),
+                        text = productFav.product.avgRating.toString(),
                         fontFamily = montserratFontFamily,
                         color = MaterialTheme.colors.textColor,
                         fontSize = MaterialTheme.typography.subtitle1.fontSize,
@@ -132,7 +130,7 @@ fun FavoriteItem(
 
                 Text(
                     modifier = modifier.wrapContentSize(),
-                    text = stringResource(id = R.string.product_price, price.toString()),
+                    text = stringResource(id = R.string.product_price, productFav.product.originPrice.toString()),
                     fontFamily = montserratFontFamily,
                     color = MaterialTheme.colors.textColor,
                     fontSize = MaterialTheme.typography.caption.fontSize,

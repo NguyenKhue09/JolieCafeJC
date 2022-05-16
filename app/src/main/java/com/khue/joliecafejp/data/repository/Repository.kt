@@ -24,6 +24,10 @@ class Repository @Inject constructor(
         return remote.getUserInfos(token = token)
     }
 
+    suspend fun updateUserInfos(token: String, userInfos: Map<String, String>): Response<ApiResponseSingleData<User>> {
+        return remote.updateUserInfos(token = token, userInfos = userInfos)
+    }
+
     fun getProducts(
         productQuery: Map<String, String>,
         token: String

@@ -9,6 +9,7 @@ interface RemoteDataSource {
     suspend fun createUser(data: Map<String, String>): Response<ApiResponseSingleData<User>>
     suspend fun userLogin(userId: String): Response<ApiResponseSingleData<User>>
     suspend fun getUserInfos(token: String): Response<ApiResponseSingleData<User>>
+    suspend fun updateUserInfos(token: String, userInfos: Map<String, String>): Response<ApiResponseSingleData<User>>
 
     fun getProducts(productQuery: Map<String, String>, token: String): Flow<PagingData<Product>>
     suspend fun getProductDetail(token: String, productId: String): Response<ApiResponseSingleData<Product>>

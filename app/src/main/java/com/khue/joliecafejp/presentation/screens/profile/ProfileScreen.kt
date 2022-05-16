@@ -1,6 +1,5 @@
 package com.khue.joliecafejp.presentation.screens.profile
 
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Icon
@@ -9,7 +8,6 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -22,24 +20,24 @@ import com.khue.joliecafejp.navigation.nav_screen.BottomBarScreen
 import com.khue.joliecafejp.navigation.nav_screen.ProfileSubScreen
 import com.khue.joliecafejp.presentation.common.CardCustom
 import com.khue.joliecafejp.presentation.common.CustomImage
-import com.khue.joliecafejp.presentation.viewmodels.LoginViewModel
+import com.khue.joliecafejp.presentation.viewmodels.UserSharedViewModel
 import com.khue.joliecafejp.ui.theme.*
 
 @Composable
 fun ProfileScreen(
     navController: NavHostController,
-    loginViewModel: LoginViewModel
+    userSharedViewModel: UserSharedViewModel
 ) {
 
-    val userLoginResponse = loginViewModel.userLoginResponse.collectAsState()
-    val userToken by loginViewModel.userToken.collectAsState(initial = "")
+    val userLoginResponse = userSharedViewModel.userInfos.collectAsState()
+    val userToken by userSharedViewModel.userToken.collectAsState(initial = "")
 
     val profileBottomNavItem =
         ProfileSubScreen::class.sealedSubclasses.mapNotNull { it.objectInstance }
 
 
     LaunchedEffect(key1 = true) {
-        if(userLoginResponse.value.data == null) loginViewModel.getUserInfos(token = userToken)
+        if(userLoginResponse.value.data == null) userSharedViewModel.getUserInfos(token = userToken)
     }
 
     Column(
@@ -71,7 +69,7 @@ fun ProfileScreen(
                         }
                     } else {
                         FirebaseAuth.getInstance().signOut()
-                        loginViewModel.signOut()
+                        userSharedViewModel.signOut()
                         navController.navigate(AUTHENTICATION_ROUTE) {
                             popUpTo(BottomBarScreen.Home.route) {
                                 inclusive = true

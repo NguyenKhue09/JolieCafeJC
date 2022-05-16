@@ -5,7 +5,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import com.khue.joliecafejp.navigation.nav_screen.ProfileSubScreen
-import com.khue.joliecafejp.presentation.viewmodels.LoginViewModel
+import com.khue.joliecafejp.presentation.viewmodels.UserSharedViewModel
 import com.khue.joliecafejp.presentation.screens.profile.sub_screens.AddressBook
 import com.khue.joliecafejp.presentation.screens.profile.sub_screens.OrderHistory
 import com.khue.joliecafejp.presentation.screens.profile.sub_screens.ProfileDetail
@@ -13,7 +13,7 @@ import com.khue.joliecafejp.presentation.screens.profile.sub_screens.Settings
 
 fun NavGraphBuilder.profileNavGraph(
     navController: NavHostController,
-    loginViewModel: LoginViewModel,
+    userSharedViewModel: UserSharedViewModel,
 ) {
     navigation(
         startDestination = ProfileSubScreen.ProfileDetail.route,
@@ -22,7 +22,7 @@ fun NavGraphBuilder.profileNavGraph(
         composable(
             route = ProfileSubScreen.ProfileDetail.route
         ) {
-            ProfileDetail(navController = navController, loginViewModel = loginViewModel)
+            ProfileDetail(navController = navController, userSharedViewModel = userSharedViewModel)
         }
         composable(
             route = ProfileSubScreen.AddressBook.route

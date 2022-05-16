@@ -38,7 +38,6 @@ import androidx.navigation.NavHostController
 import com.facebook.CallbackManager
 import com.facebook.FacebookSdk.setAdvertiserIDCollectionEnabled
 import com.facebook.FacebookSdk.setAutoLogAppEventsEnabled
-import com.google.android.gms.common.api.Api
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
@@ -53,27 +52,24 @@ import com.khue.joliecafejp.navigation.nav_screen.AuthScreen
 import com.khue.joliecafejp.presentation.common.FaceOrGoogleLogin
 import com.khue.joliecafejp.presentation.common.TextCustom
 import com.khue.joliecafejp.presentation.common.TextFieldCustom
-import com.khue.joliecafejp.presentation.viewmodels.LoginViewModel
+import com.khue.joliecafejp.presentation.viewmodels.UserSharedViewModel
 import com.khue.joliecafejp.presentation.viewmodels.SignUpViewModel
 import com.khue.joliecafejp.ui.theme.*
 import com.khue.joliecafejp.utils.ApiResult
 import com.khue.joliecafejp.utils.RegistrationFormEvent
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun SignUpScreen(
     navController: NavHostController,
-    loginViewModel: LoginViewModel = hiltViewModel(),
+    userSharedViewModel: UserSharedViewModel = hiltViewModel(),
     signUpViewModel: SignUpViewModel = hiltViewModel()
 ) {
 
     val mAuth: FirebaseAuth = FirebaseAuth.getInstance()
     val state = signUpViewModel.state.collectAsState()
-    val userToken by loginViewModel.userToken.collectAsState(initial = "")
-    val userLoginResponse by loginViewModel.userLoginResponse.collectAsState(initial = ApiResult.Loading())
+    val userToken by userSharedViewModel.userToken.collectAsState(initial = "")
 
     val scrollState = rememberScrollState()
     val context = LocalContext.current
@@ -123,9 +119,9 @@ fun SignUpScreen(
                                     )
                                     isNewUser?.let {
                                         if (it) {
-                                            loginViewModel.createUser(userData = data)
+                                            userSharedViewModel.createUser(userData = data)
                                         } else {
-                                            loginViewModel.userLogin(userId = user.uid)
+                                            userSharedViewModel.userLogin(userId = user.uid)
 
                                         }
                                     }
@@ -156,7 +152,7 @@ fun SignUpScreen(
                         name = state.value.userName,
                         context = context,
                     ) {
-                        loginViewModel.createUser(userData = it)
+                        userSharedViewModel.createUser(userData = it)
                     }
                 }
             }
@@ -173,13 +169,23 @@ fun SignUpScreen(
         }
     }
 
-    LaunchedEffect(key1 = userLoginResponse) {
-        when(userLoginResponse) {
-            is ApiResult.Error -> {
-                Toast.makeText(context, userLoginResponse.message, Toast.LENGTH_SHORT).show()
+    LaunchedEffect(key1 = Unit) {
+        userSharedViewModel.userLoginResponse.collectLatest { response ->
+            when(response) {
+                is ApiResult.Error -> {
+                    Toast.makeText(context, response.message, Toast.LENGTH_SHORT).show()
+                }
+                is ApiResult.Success -> {
+                    Toast.makeText(context, "Get your info success", Toast.LENGTH_SHORT).show()
+                }
+                else -> {}
             }
-            else -> {
-            }
+        }
+    }
+
+    DisposableEffect(key1 = Unit) {
+        onDispose {
+            userSharedViewModel.cleanUserLoginResponse()
         }
     }
 
@@ -383,7 +389,7 @@ fun SignUpScreen(
             },
             faceAction = {
                 facebookLogin.facebookLogin(context, callbackManager, auth) {
-                    loginViewModel.userLogin(userId = it)
+                    userSharedViewModel.userLogin(userId = it)
                 }
             }
         )

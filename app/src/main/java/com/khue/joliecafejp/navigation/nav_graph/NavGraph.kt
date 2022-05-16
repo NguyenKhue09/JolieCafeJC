@@ -8,7 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.khue.joliecafejp.presentation.screens.detail.DetailScreen
-import com.khue.joliecafejp.presentation.viewmodels.LoginViewModel
+import com.khue.joliecafejp.presentation.viewmodels.UserSharedViewModel
 import com.khue.joliecafejp.utils.Constants.Companion.IS_FAV
 import com.khue.joliecafejp.utils.Constants.Companion.PRODUCT_ID
 
@@ -22,7 +22,7 @@ const val NONE_ROUTE = "none"
 @Composable
 fun SetupNavGraph(
     navController: NavHostController,
-    loginViewModel: LoginViewModel,
+    userSharedViewModel: UserSharedViewModel,
     paddingValues: PaddingValues
 ) {
     NavHost(
@@ -32,12 +32,12 @@ fun SetupNavGraph(
     ) {
         bottomNavGraph(
             navController = navController,
-            loginViewModel = loginViewModel,
+            userSharedViewModel = userSharedViewModel,
             paddingValues = paddingValues
         )
         authNavGraph(
             navController = navController,
-            loginViewModel = loginViewModel
+            userSharedViewModel = userSharedViewModel
         )
 
         composable(

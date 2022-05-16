@@ -18,17 +18,14 @@ import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.khue.joliecafejp.R
+import com.khue.joliecafejp.domain.model.Product
 import com.khue.joliecafejp.presentation.common.CardCustom
 import com.khue.joliecafejp.ui.theme.*
 
 @Composable
 fun HorizontalProductItem(
     modifier: Modifier = Modifier,
-    name: String = "",
-    type: String = "",
-    favorites: Int = 0,
-    price: Double = 0.0,
-    image: String = "",
+    product: Product,
     onAdd: () -> Unit = {},
     onClick: () -> Unit = {}
 ) {
@@ -37,7 +34,7 @@ fun HorizontalProductItem(
         model = ImageRequest.Builder(LocalContext.current)
             .placeholder(R.drawable.image_logo)
             .error(R.drawable.image_logo)
-            .data(image)
+            .data(product.thumbnail)
             .crossfade(200)
             .build()
     )
@@ -88,7 +85,7 @@ fun HorizontalProductItem(
                         modifier = modifier
                             .wrapContentSize(align = Alignment.CenterStart)
                             .weight(1f, false),
-                        text = name,
+                        text = product.name,
                         fontFamily = raleway,
                         color = MaterialTheme.colors.textColor,
                         fontSize = MaterialTheme.typography.subtitle1.fontSize,
@@ -108,7 +105,7 @@ fun HorizontalProductItem(
                     Text(
                         modifier = modifier
                             .wrapContentSize(align = Alignment.CenterStart),
-                        text = favorites.toString(),
+                        text = product.avgRating.toString(),
                         fontFamily = montserratFontFamily,
                         color = MaterialTheme.colors.textColor,
                         fontSize = MaterialTheme.typography.subtitle1.fontSize,
@@ -132,7 +129,7 @@ fun HorizontalProductItem(
                     modifier = modifier
                         .wrapContentSize()
                         .padding(vertical = EXTRA_EXTRA_SMALL_PADDING),
-                    text = type,
+                    text = product.type,
                     fontFamily = raleway,
                     color = MaterialTheme.colors.textColor,
                     fontSize = MaterialTheme.typography.caption.fontSize,
@@ -143,7 +140,7 @@ fun HorizontalProductItem(
 
                 Text(
                     modifier = modifier.wrapContentSize(),
-                    text = stringResource(id = R.string.product_price, price.toString()),
+                    text = stringResource(id = R.string.product_price, product.originPrice.toString()),
                     fontFamily = montserratFontFamily,
                     color = MaterialTheme.colors.textColor,
                     fontSize = MaterialTheme.typography.caption.fontSize,
@@ -181,5 +178,5 @@ fun HorizontalProductItem(
 @Preview
 @Composable
 fun ProductItemPrev() {
-    HorizontalProductItem()
+    //HorizontalProductItem()
 }
