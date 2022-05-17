@@ -36,6 +36,8 @@ import androidx.navigation.NavHostController
 import com.google.firebase.auth.FirebaseAuth
 import com.khue.joliecafejp.R
 import com.khue.joliecafejp.domain.model.ProfileUpdateFormState
+import com.khue.joliecafejp.navigation.nav_graph.AUTHENTICATION_ROUTE
+import com.khue.joliecafejp.navigation.nav_screen.BottomBarScreen
 import com.khue.joliecafejp.navigation.nav_screen.ProfileSubScreen
 import com.khue.joliecafejp.presentation.common.*
 import com.khue.joliecafejp.presentation.components.*
@@ -138,10 +140,12 @@ fun ProfileDetail(
                 }
                 is ProfileDetailViewModel.ValidationEvent.ChangePasswordSuccess -> {
                     createNewPassword = false
+                    Toast.makeText(context, "Change password success", Toast.LENGTH_SHORT).show()
                     cleanChangePasswordFormState(
                         focusManager = focusManager,
                         profileDetailViewModel = profileDetailViewModel
                     )
+                    logOutUser(userSharedViewModel, navController)
                 }
                 is ProfileDetailViewModel.ValidationEvent.ChangePasswordFailed -> {
                     createNewPassword = true
@@ -270,7 +274,7 @@ fun ProfileDetail(
                             profileDetailViewModel.onCreateNewPasswordChangeEvent(event = ProfileUpdateFormEvent.ConfirmPasswordChanged(confirmPassword = confirmPassword))
                         },
                         onSubmitNewPassword = {
-                            profileDetailViewModel.onPhoneAndNameChangeEvent(event = ProfileUpdateFormEvent.ChangeNewPasswordSubmit)
+                            profileDetailViewModel.onCreateNewPasswordChangeEvent(event = ProfileUpdateFormEvent.ChangeNewPasswordSubmit)
                         },
                         onCancelChangeNewPassword = {
                             createNewPassword = false
@@ -286,6 +290,17 @@ fun ProfileDetail(
     }
 }
 
+fun logOutUser(userSharedViewModel: UserSharedViewModel, navController: NavHostController) {
+    FirebaseAuth.getInstance().signOut()
+    userSharedViewModel.signOut()
+    navController.navigate(AUTHENTICATION_ROUTE) {
+        popUpTo(BottomBarScreen.Home.route) {
+            inclusive = true
+        }
+        launchSingleTop = true
+    }
+}
+
 fun cleanChangePasswordFormState(
     focusManager: FocusManager,
     profileDetailViewModel: ProfileDetailViewModel
@@ -293,6 +308,7 @@ fun cleanChangePasswordFormState(
     focusManager.clearFocus()
     profileDetailViewModel.onCreateNewPasswordChangeEvent(event = ProfileUpdateFormEvent.NewPasswordChanged(newPassword = ""))
     profileDetailViewModel.onCreateNewPasswordChangeEvent(event = ProfileUpdateFormEvent.ConfirmPasswordChanged(confirmPassword = ""))
+    profileDetailViewModel.cleanChangeNewPasswordError()
 }
 
 @OptIn(ExperimentalMaterialApi::class)
