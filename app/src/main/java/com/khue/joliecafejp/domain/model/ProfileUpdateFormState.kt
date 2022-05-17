@@ -3,7 +3,7 @@ package com.khue.joliecafejp.domain.model
 data class ProfileUpdateFormState(
     val password: String = "",
     val passwordError: String = "",
-    val currentPassword: String = "",
+    val currentPassword: String = "password",
     val currentPasswordError: String = "",
     val confirmPassword: String = "",
     val confirmPasswordError: String = "",

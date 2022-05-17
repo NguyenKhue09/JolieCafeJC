@@ -74,7 +74,7 @@ class ProfileDetailViewModel @Inject constructor(
         }
     }
 
-    fun checkCurrentPassword() {
+    private fun checkCurrentPassword() {
         val currentPasswordResult = validationUseCases.validationPasswordUseCase.execute(state.value.currentPassword)
 
         val hasError = currentPasswordResult.successful
@@ -110,10 +110,7 @@ class ProfileDetailViewModel @Inject constructor(
             )
             return
         } else {
-            state.value = state.value.copy(
-                userNameError = "",
-                userPhoneNumberError = "",
-            )
+            cleanNameAndPhoneError()
         }
         viewModelScope.launch {
             validationEventChannel.send(ValidationEvent.PhoneAndNameSuccess)
@@ -136,14 +133,25 @@ class ProfileDetailViewModel @Inject constructor(
             )
             return
         } else {
-            state.value = state.value.copy(
-                newPasswordError = "",
-                confirmPasswordError = "",
-            )
+            cleanChangeNewPasswordError()
         }
         viewModelScope.launch {
             validationEventChannel.send(ValidationEvent.NewPasswordValid)
         }
+    }
+
+    fun cleanChangeNewPasswordError() {
+        state.value = state.value.copy(
+            newPasswordError = "",
+            confirmPasswordError = "",
+        )
+    }
+
+    private fun cleanNameAndPhoneError() {
+        state.value = state.value.copy(
+            userNameError = "",
+            userPhoneNumberError = "",
+        )
     }
 
     fun reAuthentication(password: String) {
@@ -167,7 +175,20 @@ class ProfileDetailViewModel @Inject constructor(
     }
 
     fun updateNewPassword(password: String) {
-
+        println(password)
+        currentUser?.let { firebaseUser ->
+            firebaseUser.updatePassword(password)
+                .addOnSuccessListener {
+                    viewModelScope.launch {
+                        validationEventChannel.send(ValidationEvent.ChangePasswordSuccess)
+                    }
+                }
+                .addOnFailureListener {
+                    viewModelScope.launch {
+                        validationEventChannel.send(ValidationEvent.ChangePasswordFailed)
+                    }
+                }
+        }
     }
 
     sealed class ValidationEvent {
