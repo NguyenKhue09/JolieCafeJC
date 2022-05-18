@@ -1,9 +1,12 @@
 package com.khue.joliecafejp.presentation.screens.favorite
 
 import android.widget.Toast
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.layout.LazyLayout
+import androidx.compose.foundation.lazy.layout.LazyLayoutItemProvider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
@@ -22,6 +25,7 @@ import com.khue.joliecafejp.presentation.common.LoadingBody
 import com.khue.joliecafejp.presentation.components.FavoriteItem
 import com.khue.joliecafejp.ui.theme.*
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun FavoriteBody(
     favoriteProducts: LazyPagingItems<FavoriteProduct>,
