@@ -28,7 +28,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import com.google.firebase.auth.FirebaseAuth
 import com.khue.joliecafejp.R
+import com.khue.joliecafejp.firebase.firebase_storage.FirebaseStorageImpl
 import com.khue.joliecafejp.ui.theme.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -37,19 +39,32 @@ import java.io.IOException
 
 @Composable
 fun ImagePickerBottomSheetContent(
-    onHideImagePickerBottomSheet: () -> Unit
+    onHideImagePickerBottomSheet: () -> Unit,
+    updateUserData: (String) -> Unit
 ) {
 
     val context = LocalContext.current
+
+    val firebaseStorageImpl = FirebaseStorageImpl.getInstance()
 
     val getFile =
         rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
                 // There are no request codes
                 val data: Uri? = result.data?.data
+                val root = FirebaseAuth.getInstance().currentUser?.uid
                 if (data != null) {
                     try {
                         val fileName = getFileName(uri = data, context = context)
+                        root?.let {
+                            firebaseStorageImpl.uploadFile(
+                                file = data,
+                                fileName = fileName,
+                                root = root,
+                                context = context,
+                                updateUserData = updateUserData
+                            )
+                        }
                         Toast.makeText(context, fileName, Toast.LENGTH_SHORT).show()
                     } catch (e: IOException) {
                         e.printStackTrace()
@@ -115,7 +130,6 @@ fun ImagePickerBottomSheetContent(
         }
 
         Divider(color = MaterialTheme.colors.textColor, thickness = 1.dp)
-
 
         Row(
             modifier = Modifier
@@ -203,7 +217,6 @@ fun ImagePickerBottomSheetContent(
             )
         }
     }
-
 
 
 }

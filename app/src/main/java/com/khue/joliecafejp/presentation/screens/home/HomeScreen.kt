@@ -2,9 +2,12 @@ package com.khue.joliecafejp.presentation.screens.home
 
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.layout.LazyLayout
+import androidx.compose.foundation.lazy.layout.LazyLayoutItemProvider
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -46,7 +49,9 @@ import kotlinx.coroutines.yield
 import kotlin.math.absoluteValue
 
 
-@OptIn(ExperimentalPagerApi::class, ExperimentalMaterialApi::class)
+@OptIn(ExperimentalPagerApi::class, ExperimentalMaterialApi::class,
+    ExperimentalFoundationApi::class
+)
 @Composable
 fun HomeScreen(
     navController: NavHostController,
@@ -231,7 +236,7 @@ fun HomeScreen(
                             fontFamily = ralewayMedium
                         )
                     }
-
+                    
                     if (result) {
                         items(
                             items = bestSellerProducts,

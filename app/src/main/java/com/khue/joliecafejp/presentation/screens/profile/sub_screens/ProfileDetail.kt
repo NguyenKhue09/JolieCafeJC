@@ -185,6 +185,14 @@ fun ProfileDetail(
             ImagePickerBottomSheetContent(
                 onHideImagePickerBottomSheet = {
                     coroutineScope.launch { modalBottomSheetState.hide() }
+                },
+                updateUserData = { imageUrl ->
+                    userSharedViewModel.updateUserInfos(
+                        token = userToken,
+                        userInfos = mapOf(
+                            "thumbnail" to imageUrl
+                        )
+                    )
                 }
             )
         }
