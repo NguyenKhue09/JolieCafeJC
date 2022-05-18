@@ -59,6 +59,9 @@ android {
 
 dependencies {
 
+    // MOMO SDK
+    implementation 'com.github.momo-wallet:mobile-sdk:1.0.7'
+
     // Paging 3.0
     implementation 'androidx.paging:paging-compose:1.0.0-alpha14'
 

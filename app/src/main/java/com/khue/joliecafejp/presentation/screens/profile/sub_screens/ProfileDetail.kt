@@ -82,7 +82,7 @@ fun ProfileDetail(
 
     // Bottom Sheet
     val coroutineScope = rememberCoroutineScope()
-    val state = rememberModalBottomSheetState(
+    val modalBottomSheetState = rememberModalBottomSheetState(
         initialValue = ModalBottomSheetValue.Hidden
     )
 
@@ -179,12 +179,13 @@ fun ProfileDetail(
     }
 
     ModalBottomSheetLayout(
-        sheetState = state,
+        sheetState = modalBottomSheetState,
         modifier = Modifier.fillMaxSize(),
         sheetContent = {
             ImagePickerBottomSheetContent(
-                coroutineScope = coroutineScope,
-                modalBottomSheetState = state
+                onHideImagePickerBottomSheet = {
+                    coroutineScope.launch { modalBottomSheetState.hide() }
+                }
             )
         }
     ) {
@@ -209,7 +210,7 @@ fun ProfileDetail(
 
                 BoxUserImage(
                     coroutineScope = coroutineScope,
-                    state = state,
+                    state = modalBottomSheetState,
                     isGGorFaceLogin = isGGorFaceLogin,
                     image = userLoginResponse.data?.thumbnail
                         ?: FirebaseAuth.getInstance().currentUser?.photoUrl.toString()
