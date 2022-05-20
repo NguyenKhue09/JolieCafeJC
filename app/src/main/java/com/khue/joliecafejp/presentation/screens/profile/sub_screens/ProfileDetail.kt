@@ -1,5 +1,6 @@
 package com.khue.joliecafejp.presentation.screens.profile.sub_screens
 
+import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
@@ -8,6 +9,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -50,6 +52,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 
+@SuppressLint("NewApi")
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ProfileDetail(
@@ -195,7 +198,8 @@ fun ProfileDetail(
                     )
                 }
             )
-        }
+        },
+        sheetShape = MaterialTheme.shapes.large.copy(bottomEnd = CornerSize(0), bottomStart = CornerSize(0))
     ) {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
