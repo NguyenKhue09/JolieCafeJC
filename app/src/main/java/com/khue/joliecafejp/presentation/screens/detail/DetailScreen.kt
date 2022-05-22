@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
@@ -32,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
@@ -141,7 +143,8 @@ fun DetailScreen(
         modifier = Modifier.fillMaxSize(),
         sheetContent = {
             CommentBottomSheet()
-        }
+        },
+        sheetShape = MaterialTheme.shapes.large.copy(bottomEnd = CornerSize(0), bottomStart = CornerSize(0))
     ) {
         Scaffold(
             backgroundColor = MaterialTheme.colors.greyPrimary,
@@ -278,16 +281,7 @@ fun ProductImageSection(
     var scrolledY = 0f
     var previousOffset = 0
 
-    val painter = rememberAsyncImagePainter(
-        model = ImageRequest.Builder(LocalContext.current)
-            .data(image)
-            .crossfade(200)
-            .placeholder(R.drawable.image_logo)
-            .error(R.drawable.image_logo)
-            .build()
-    )
-
-    Image(
+    AsyncImage(
         modifier = Modifier
             .graphicsLayer {
                 scrolledY += state.firstVisibleItemScrollOffset - previousOffset
@@ -297,7 +291,12 @@ fun ProductImageSection(
             .fillMaxWidth()
             .height(PRODUCT_IMAGE_HEIGHT),
         contentScale = ContentScale.Crop,
-        painter = painter,
+        model = ImageRequest.Builder(LocalContext.current)
+            .data(image)
+            .crossfade(200)
+            .placeholder(R.drawable.image_logo)
+            .error(R.drawable.image_logo)
+            .build(),
         contentDescription = ""
     )
 }

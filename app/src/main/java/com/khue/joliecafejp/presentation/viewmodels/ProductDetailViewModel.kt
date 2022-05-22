@@ -10,7 +10,6 @@ import com.khue.joliecafejp.domain.model.Product
 import com.khue.joliecafejp.domain.use_cases.ApiUseCases
 import com.khue.joliecafejp.domain.use_cases.DataStoreUseCases
 import com.khue.joliecafejp.utils.ApiResult
-import com.khue.joliecafejp.utils.Constants
 import com.khue.joliecafejp.utils.Constants.Companion.IS_FAV
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -67,7 +66,7 @@ class ProductDetailViewModel @Inject constructor(
             try {
                 val response =
                     apiUseCases.addUserFavoriteProductUseCase(token = token, productId = productId)
-                _addUserFavResponse.value = handleNulDataApiResponse(response = response)
+                _addUserFavResponse.value = handleNullDataApiResponse(response = response)
             } catch (e: Exception) {
                 e.printStackTrace()
                 _addUserFavResponse.value = ApiResult.Error(e.message)
@@ -81,7 +80,7 @@ class ProductDetailViewModel @Inject constructor(
             try {
                 val response =
                     apiUseCases.removeUserFavProductByProductId(token = token, productId = productId)
-                _removeUserFavResponse.value = handleNulDataApiResponse(response = response)
+                _removeUserFavResponse.value = handleNullDataApiResponse(response = response)
             } catch (e: Exception) {
                 e.printStackTrace()
                 _removeUserFavResponse.value = ApiResult.Error(e.message)
@@ -111,7 +110,7 @@ class ProductDetailViewModel @Inject constructor(
         }
     }
 
-    private fun <T> handleNulDataApiResponse(response: Response<ApiResponseSingleData<T>>): ApiResult<T> {
+    private fun <T> handleNullDataApiResponse(response: Response<ApiResponseSingleData<T>>): ApiResult<T> {
         return when {
             response.message().toString().contains("timeout") -> {
                 ApiResult.Error("Timeout")

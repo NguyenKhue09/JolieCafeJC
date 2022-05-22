@@ -7,6 +7,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
 import com.khue.joliecafejp.ui.theme.raleway
 
@@ -15,7 +16,8 @@ fun TextCustom(
     modifier: Modifier,
     content: String,
     color: Color,
-    fontFamily: FontFamily = raleway
+    fontFamily: FontFamily = raleway,
+    fontSize: TextUnit = 16.sp
 ) {
 
     Text(
@@ -23,7 +25,7 @@ fun TextCustom(
         text = content,
         fontFamily = fontFamily,
         color = color,
-        fontSize = 16.sp,
+        fontSize = fontSize,
         textAlign = TextAlign.Left,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis

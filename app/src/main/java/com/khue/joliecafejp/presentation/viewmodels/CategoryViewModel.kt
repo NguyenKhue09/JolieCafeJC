@@ -1,9 +1,7 @@
 package com.khue.joliecafejp.presentation.viewmodels
 
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -34,9 +32,17 @@ class CategoryViewModel @Inject constructor(
     private val _categoryProduct = MutableStateFlow<PagingData<Product>>(PagingData.empty())
     val categoryProduct: StateFlow<PagingData<Product>> = _categoryProduct
 
-    private val _favProductsId = MutableStateFlow<ApiResult<List<String>>>(ApiResult.Loading())
-    val favProductsId: StateFlow<ApiResult<List<String>>> = _favProductsId
-    
+    private val _favProductsId = MutableStateFlow<ApiResult<SnapshotStateList<String>>>(ApiResult.Loading())
+    val favProductsId: StateFlow<ApiResult<SnapshotStateList<String>>> = _favProductsId
+
+    private val _addUserFavResponse =
+        MutableStateFlow<ApiResult<Unit>>(ApiResult.Loading())
+    val addUserFavResponse: StateFlow<ApiResult<Unit>> = _addUserFavResponse
+
+    private val _removeUserFavResponse =
+        MutableStateFlow<ApiResult<Unit>>(ApiResult.Loading())
+    val removeUserFavResponse: StateFlow<ApiResult<Unit>> = _removeUserFavResponse
+
     val userToken  = dataStoreUseCases.readUserTokenUseCase()
 
     private val _searchTextState: MutableState<String> =
@@ -94,7 +100,35 @@ class CategoryViewModel @Inject constructor(
         }
     }
 
-    private fun handleApiResponse(response: Response<ApiResponseMultiData<FavProductId>>): ApiResult<List<String>> {
+    fun addUserFavProduct(token: String, productId: String) {
+        viewModelScope.launch {
+            _addUserFavResponse.value = ApiResult.Loading()
+            try {
+                val response =
+                    apiUseCases.addUserFavoriteProductUseCase(token = token, productId = productId)
+                _addUserFavResponse.value = handleNullDataApiResponse(response = response)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                _addUserFavResponse.value = ApiResult.Error(e.message)
+            }
+        }
+    }
+
+    fun removeUserFavProduct(token: String, productId: String) {
+        viewModelScope.launch {
+            _removeUserFavResponse.value = ApiResult.Loading()
+            try {
+                val response =
+                    apiUseCases.removeUserFavProductByProductId(token = token, productId = productId)
+                _removeUserFavResponse.value = handleNullDataApiResponse(response = response)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                _removeUserFavResponse.value = ApiResult.Error(e.message)
+            }
+        }
+    }
+
+    private fun handleApiResponse(response: Response<ApiResponseMultiData<FavProductId>>): ApiResult<SnapshotStateList<String>> {
         val result = response.body()
         return when {
             response.message().toString().contains("timeout") -> {
@@ -104,10 +138,27 @@ class CategoryViewModel @Inject constructor(
                 ApiResult.Error(response.message())
             }
             response.isSuccessful -> {
-                val listId = result!!.data!!.map {
+                val listId = result!!.data?.map {
                     it.productId
-                }
+                }?.toMutableStateList() ?: mutableStateListOf()
                 ApiResult.Success(listId)
+            }
+            else -> {
+                ApiResult.Error(response.message())
+            }
+        }
+    }
+
+    private fun <T> handleNullDataApiResponse(response: Response<ApiResponseSingleData<T>>): ApiResult<T> {
+        return when {
+            response.message().toString().contains("timeout") -> {
+                ApiResult.Error("Timeout")
+            }
+            response.code() == 500 -> {
+                ApiResult.Error(response.message())
+            }
+            response.isSuccessful -> {
+                ApiResult.NullDataSuccess()
             }
             else -> {
                 ApiResult.Error(response.message())

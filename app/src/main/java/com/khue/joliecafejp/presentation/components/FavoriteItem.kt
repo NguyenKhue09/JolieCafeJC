@@ -18,6 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.khue.joliecafejp.R
@@ -32,15 +33,6 @@ fun FavoriteItem(
     onFavClick: () -> Unit,
     onClick: () -> Unit = {}
 ) {
-
-    val painter = rememberAsyncImagePainter(
-        model = ImageRequest.Builder(LocalContext.current)
-            .placeholder(R.drawable.image_logo)
-            .error(R.drawable.image_logo)
-            .data(productFav.product.thumbnail)
-            .crossfade(true)
-            .build()
-    )
 
     CardCustom(
         paddingValues = PaddingValues(
@@ -61,12 +53,17 @@ fun FavoriteItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
 
-            Image(
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .placeholder(R.drawable.image_logo)
+                    .error(R.drawable.image_logo)
+                    .data(productFav.product.thumbnail)
+                    .crossfade(true)
+                    .build(),
                 modifier = modifier
                     .height(IMAGE_PRODUCT_SIZE)
                     .width(IMAGE_PRODUCT_SIZE)
                     .clip(MaterialTheme.shapes.medium),
-                painter = painter,
                 contentDescription = stringResource(R.string.profile_logo),
                 contentScale = ContentScale.Crop,
             )

@@ -186,6 +186,7 @@ fun ProfileDetail(
         modifier = Modifier.fillMaxSize(),
         sheetContent = {
             ImagePickerBottomSheetContent(
+                modalBottomSheetState = modalBottomSheetState,
                 onHideImagePickerBottomSheet = {
                     coroutineScope.launch { modalBottomSheetState.hide() }
                 },
