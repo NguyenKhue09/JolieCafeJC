@@ -42,11 +42,13 @@ import com.khue.joliecafejp.ui.theme.*
 import java.io.IOException
 
 
+@OptIn(ExperimentalMaterialApi::class)
 @RequiresApi(Build.VERSION_CODES.R)
 @Composable
 fun ImagePickerBottomSheetContent(
+    modalBottomSheetState: ModalBottomSheetState,
     onHideImagePickerBottomSheet: () -> Unit,
-    updateUserData: (String) -> Unit
+    updateUserData: (String) -> Unit,
 ) {
 
     val uri = Uri.parse("package:" + BuildConfig.APPLICATION_ID)
@@ -70,6 +72,15 @@ fun ImagePickerBottomSheetContent(
 
     var isTakePicture by rememberSaveable {
         mutableStateOf(false)
+    }
+
+    LaunchedEffect(Unit) {
+        snapshotFlow { modalBottomSheetState.currentValue }
+            .collect {
+                if(it == ModalBottomSheetValue.Hidden && isTakePicture) {
+                    isTakePicture = false
+                }
+            }
     }
 
     val getFile =
@@ -291,13 +302,23 @@ fun ImagePickerBottomSheetContent(
         AnimatedVisibility(visible = isTakePicture) {
             CameraView(
                 onImageCaptured = { uri: Uri ->
-
+                    val root = FirebaseAuth.getInstance().currentUser?.uid
+                    val fileName = getFileName(uri = uri, context = context)
+                    root?.let {
+                        firebaseStorageImpl.uploadFile(
+                            file = uri,
+                            fileName = fileName,
+                            root = root,
+                            context = context,
+                            updateUserData = updateUserData
+                        )
+                    }
                 },
                 onTurnOffCamera = {
                     isTakePicture = false
                 },
                 onError = {
-
+                    Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
                 }
             )
         }

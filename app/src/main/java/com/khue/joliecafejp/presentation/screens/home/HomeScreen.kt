@@ -212,7 +212,8 @@ fun HomeScreen(
                                 .padding(vertical = EXTRA_LARGE_PADDING),
                             content = stringResource(R.string.categories),
                             color = MaterialTheme.colors.textColor2,
-                            fontFamily = ralewayMedium
+                            fontFamily = ralewayMedium,
+                            fontSize = MaterialTheme.typography.h6.fontSize
                         )
                     }
 
@@ -233,7 +234,8 @@ fun HomeScreen(
                                 .padding(vertical = EXTRA_LARGE_PADDING),
                             content = stringResource(R.string.best_sellers),
                             color = MaterialTheme.colors.textColor2,
-                            fontFamily = ralewayMedium
+                            fontFamily = ralewayMedium,
+                            fontSize = MaterialTheme.typography.h6.fontSize
                         )
                     }
                     

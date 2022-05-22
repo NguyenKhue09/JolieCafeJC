@@ -27,12 +27,17 @@ import com.khue.joliecafejp.ui.theme.EXTRA_LARGE_PADDING
 import com.khue.joliecafejp.ui.theme.greyPrimary
 import com.khue.joliecafejp.utils.ApiResult
 import com.khue.joliecafejp.utils.extensions.items
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @Composable
 fun CategoriesScreen(
     navController: NavHostController,
     categoryViewModel: CategoryViewModel = hiltViewModel()
 ) {
+
+    val context = LocalContext.current
 
     val searchTextState by categoryViewModel.searchTextState
     val selectedCategory by categoryViewModel.selectedCategory
@@ -78,6 +83,65 @@ fun CategoriesScreen(
         ),
     )
 
+    var clickedProduct by remember {
+        mutableStateOf<Product?>(null)
+    }
+
+    LaunchedEffect(key1 = true) {
+        launch(Dispatchers.IO) {
+            categoryViewModel.removeUserFavResponse.collect { result ->
+                when (result) {
+                    is ApiResult.NullDataSuccess -> {
+                        withContext(Dispatchers.Main) {
+                            Toast.makeText(
+                                context,
+                                "Remove ${clickedProduct?.name} from favorite success",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+                    is ApiResult.Error -> {
+                        withContext(Dispatchers.Main) {
+                            Toast.makeText(
+                                context,
+                                "Remove ${clickedProduct?.name} from favorite failed!",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                        userFavProductsId.data?.add(clickedProduct!!.id)
+                    }
+                    else -> {}
+                }
+
+            }
+        }
+        launch(Dispatchers.IO) {
+            categoryViewModel.addUserFavResponse.collect { result ->
+                when (result) {
+                    is ApiResult.NullDataSuccess -> {
+                        withContext(Dispatchers.Main) {
+                            Toast.makeText(
+                                context,
+                                "Add ${clickedProduct?.name} to favorite success",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+                    is ApiResult.Error -> {
+                        withContext(Dispatchers.Main) {
+                            Toast.makeText(
+                                context,
+                                "Add ${clickedProduct?.name} to favorite failed!",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                        userFavProductsId.data?.remove(clickedProduct!!.id)
+                    }
+                    else -> {}
+                }
+            }
+        }
+    }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -115,7 +179,10 @@ fun CategoriesScreen(
                 categories = categories,
                 selectedButton = selectedCategory
             ) { category ->
-                categoryViewModel.getCategoriesProducts(productQuery = mapOf("type" to category), token = userToken)
+                categoryViewModel.getCategoriesProducts(
+                    productQuery = mapOf("type" to category),
+                    token = userToken
+                )
                 categoryViewModel.updateSelectedCategory(newValue = category)
             }
             Spacer(modifier = Modifier.height(EXTRA_LARGE_PADDING))
@@ -148,8 +215,21 @@ fun CategoriesScreen(
                                 onItemClicked = { productId ->
                                     navController.navigate("detail/${productId}?isFav=${isFav}")
                                 },
-                                onFavClicked = {
-                                    println(isFav)
+                                onFavClicked = { id ->
+                                    clickedProduct = product
+                                    if (isFav) {
+                                        userFavProductsId.data?.remove(id)
+                                        categoryViewModel.removeUserFavProduct(
+                                            token = userToken,
+                                            productId = id
+                                        )
+                                    } else {
+                                        userFavProductsId.data?.add(id)
+                                        categoryViewModel.addUserFavProduct(
+                                            token = userToken,
+                                            productId = id
+                                        )
+                                    }
                                 }
                             )
                         }

@@ -11,6 +11,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
+import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import coil.compose.rememberImagePainter
 import coil.request.ImageRequest
@@ -27,23 +28,19 @@ fun CustomImage(
     contentDescription: Int = R.string.profile_logo,
     paddingValues: PaddingValues = PaddingValues(top = EXTRA_EXTRA_LARGE_PADDING)
 ) {
-    val painter = rememberAsyncImagePainter(
+
+    AsyncImage(
         model = ImageRequest.Builder(LocalContext.current)
             .data(image)
             .crossfade(200)
             .placeholder(R.drawable.image_logo)
             .error(R.drawable.image_logo)
-            .build()
-    )
-
-
-    Image(
+            .build(),
         modifier = Modifier
             .padding(paddingValues)
             .height(height)
             .width(width)
             .clip(shape),
-        painter = painter,
         contentDescription = stringResource(contentDescription),
         contentScale = ContentScale.Crop,
     )

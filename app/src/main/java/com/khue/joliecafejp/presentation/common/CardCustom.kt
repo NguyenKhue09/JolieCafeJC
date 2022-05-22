@@ -10,6 +10,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.khue.joliecafejp.ui.theme.EXTRA_LARGE_PADDING
@@ -33,10 +34,8 @@ fun CardCustom(
     Card(
         modifier = modifier
             .padding(paddingValues)
-            .clickable(
-                indication = null,
-                interactionSource = remember { MutableInteractionSource() }
-            ) {
+            .clip(shape = shape)
+            .clickable() {
                 onClick()
             },
         shape = shape,

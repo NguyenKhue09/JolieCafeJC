@@ -23,6 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.khue.joliecafejp.R
@@ -42,15 +43,6 @@ fun VerticalProductItem(
         mutableStateOf(0.dp)
     }
 
-    val painter = rememberAsyncImagePainter(
-        model = ImageRequest.Builder(LocalContext.current)
-            .placeholder(R.drawable.image_logo)
-            .error(R.drawable.image_logo)
-            .data(product.thumbnail)
-            .crossfade(true)
-            .build()
-    )
-
     Column(
         modifier = Modifier
             .clip(shape = MaterialTheme.shapes.large)
@@ -63,15 +55,22 @@ fun VerticalProductItem(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.Start
     ) {
-        Image(
+
+        AsyncImage(
+            model = ImageRequest.Builder(LocalContext.current)
+                .placeholder(R.drawable.image_logo)
+                .error(R.drawable.image_logo)
+                .data(product.thumbnail)
+                .crossfade(true)
+                .build(),
             modifier = Modifier
                 .height(120.dp)
                 .width(maxWith)
                 .clip(MaterialTheme.shapes.medium),
-            painter = painter,
             contentDescription = stringResource(R.string.profile_logo),
             contentScale = ContentScale.Crop,
         )
+
         Spacer(modifier = Modifier.height(SMALL_PADDING))
         Row(
             modifier = Modifier
@@ -93,7 +92,7 @@ fun VerticalProductItem(
             )
             IconButton(
                 onClick = {
-                    onFavClicked("")
+                    onFavClicked(product.id)
                 },
             ) {
                 Icon(

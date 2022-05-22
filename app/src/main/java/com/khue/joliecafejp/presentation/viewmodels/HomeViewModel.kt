@@ -80,9 +80,9 @@ class HomeViewModel @Inject constructor(
                 ApiResult.Error(response.message())
             }
             response.isSuccessful -> {
-                val listId = result!!.data!!.map {
+                val listId = result!!.data?.map {
                     it.productId
-                }
+                } ?: emptyList()
                 ApiResult.Success(listId)
             }
             else -> {
