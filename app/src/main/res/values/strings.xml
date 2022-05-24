@@ -91,4 +91,5 @@
     <string name="switch_camera">Switch camera</string>
     <string name="take_picture">Take picture</string>
     <string name="turn_off_camera">Turn off camera</string>
+    <string name="product_image">Product image</string>
 </resources>

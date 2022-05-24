@@ -7,17 +7,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import com.khue.joliecafejp.domain.model.ApiResponseMultiData
-import com.khue.joliecafejp.domain.model.FavProductId
-import com.khue.joliecafejp.domain.model.FavoriteProduct
-import com.khue.joliecafejp.domain.model.Product
+import com.khue.joliecafejp.domain.model.*
 import com.khue.joliecafejp.domain.use_cases.ApiUseCases
-import com.khue.joliecafejp.domain.use_cases.DataStoreUseCases
+import com.khue.joliecafejp.utils.AddProductToCartEvent
 import com.khue.joliecafejp.utils.ApiResult
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import retrofit2.Response
 import javax.inject.Inject
@@ -37,10 +36,11 @@ class HomeViewModel @Inject constructor(
     private val _favProductsId = MutableStateFlow<ApiResult<List<String>>>(ApiResult.Loading())
     val favProductsId: StateFlow<ApiResult<List<String>>> = _favProductsId
 
+    val addProductToCartState = MutableStateFlow(AddProductToCartState())
+
     fun updateSearchTextState(newValue: String) {
         _searchTextState.value = newValue
     }
-
 
     fun getProducts(
         productQuery: Map<String, String>,
@@ -67,6 +67,35 @@ class HomeViewModel @Inject constructor(
         } catch (e: Exception) {
             e.printStackTrace()
             _favProductsId.value = ApiResult.Error(e.message)
+        }
+    }
+
+    fun onAddProductToCart(event: AddProductToCartEvent) {
+        when(event) {
+            is AddProductToCartEvent.SizeChanged -> {
+                addProductToCartState.value = addProductToCartState.value.copy(size = event.size)
+            }
+            is AddProductToCartEvent.SugarChanged -> {
+                addProductToCartState.value = addProductToCartState.value.copy(sugar = event.sugar)
+            }
+            is AddProductToCartEvent.IceChanged -> {
+                addProductToCartState.value = addProductToCartState.value.copy(ice = event.ice)
+            }
+            is AddProductToCartEvent.AddTopping-> {
+                addProductToCartState.value.addTopping(event.topping)
+            }
+            is AddProductToCartEvent.RemoveTopping-> {
+                addProductToCartState.value.removeTopping(event.topping)
+            }
+            is AddProductToCartEvent.OnNoteChanged -> {
+                addProductToCartState.value = addProductToCartState.value.copy(note = event.note)
+            }
+            is AddProductToCartEvent.AddToCart -> {
+
+            }
+            is AddProductToCartEvent.Purchase -> {
+
+            }
         }
     }
 
