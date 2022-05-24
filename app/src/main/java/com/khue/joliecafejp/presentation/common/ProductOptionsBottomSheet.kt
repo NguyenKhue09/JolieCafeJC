@@ -1,6 +1,5 @@
 package com.khue.joliecafejp.presentation.common
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -13,16 +12,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.khue.joliecafejp.R
+import com.khue.joliecafejp.domain.model.Product
 import com.khue.joliecafejp.domain.model.ProductTopping
+import com.khue.joliecafejp.presentation.viewmodels.HomeViewModel
 import com.khue.joliecafejp.ui.theme.*
+import com.khue.joliecafejp.utils.AddProductToCartEvent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -32,10 +36,14 @@ fun ProductOptionsBottomSheet(
     paddingValues: PaddingValues,
     coroutineScope: CoroutineScope,
     modalBottomSheetState: ModalBottomSheetState,
+    product: Product?,
+    homeViewModel: HomeViewModel,
 ) {
 
+    val addProductToCartState by homeViewModel.addProductToCartState.collectAsState()
+
     val size: List<String> = listOf("S", "M", "L")
-    val percent: List<String> = listOf("0", "25", "50", "100")
+    val percent: List<Int> = listOf(0, 25, 50, 100)
     val topping: List<ProductTopping> = listOf(
         ProductTopping(
             name = "Cream cheese",
@@ -53,11 +61,27 @@ fun ProductOptionsBottomSheet(
             name = "Jelly",
             price = 10000
         ),
+        ProductTopping(
+            name = "Bubble",
+            price = 10000
+        ),
+        ProductTopping(
+            name = "Peach",
+            price = 10000
+        ),
+        ProductTopping(
+            name = "Crunch",
+            price = 15000
+        ),
+        ProductTopping(
+            name = "Lychee",
+            price = 10000
+        ),
     )
 
-    val (selectedOptionSize, onOptionSizeSelected) = remember { mutableStateOf(size[0]) }
-    val (selectedOptionSugar, onOptionSugarSelected) = remember { mutableStateOf(percent[0]) }
-    val (selectedOptionIce, onOptionIceSelected) = remember { mutableStateOf(percent[0]) }
+    //val (selectedOptionSize, onOptionSizeSelected) = remember { mutableStateOf(size[0]) }
+    //val (selectedOptionSugar, onOptionSugarSelected) = remember { mutableStateOf(percent[0]) }
+    //val (selectedOptionIce, onOptionIceSelected) = remember { mutableStateOf(percent[0]) }
     val (selectedToppingOption, onToppingOptionSelected) = remember {
         mutableStateOf<ProductTopping?>(
             null
@@ -83,13 +107,18 @@ fun ProductOptionsBottomSheet(
         ) {
 
 
-            Image(
+            AsyncImage(
                 modifier = Modifier
                     .height(IMAGE_PRODUCT_SIZE)
                     .width(IMAGE_PRODUCT_SIZE)
                     .clip(MaterialTheme.shapes.medium),
-                painter = painterResource(id = R.drawable.image_logo),
-                contentDescription = stringResource(R.string.profile_logo),
+                model = ImageRequest.Builder(LocalContext.current)
+                    .placeholder(R.drawable.image_logo)
+                    .error(R.drawable.image_logo)
+                    .data(product?.thumbnail ?: R.drawable.image_logo)
+                    .crossfade(200)
+                    .build(),
+                contentDescription = stringResource(id = R.string.product_image),
                 contentScale = ContentScale.Crop,
             )
 
@@ -104,25 +133,23 @@ fun ProductOptionsBottomSheet(
                 Text(
                     modifier = Modifier
                         .wrapContentSize(align = Alignment.CenterStart),
-                    text = "Latte",
-                    fontFamily = raleway,
+                    text = product?.name ?: "Unknown",
+                    fontFamily = ralewayMedium,
                     color = MaterialTheme.colors.textColor,
                     fontSize = MaterialTheme.typography.subtitle1.fontSize,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
-                    fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.height(SMALL_PADDING))
                 Text(
                     modifier = Modifier
                         .wrapContentSize(align = Alignment.CenterStart),
-                    text = "Coffee",
-                    fontFamily = raleway,
+                    text = product?.type ?: "Unknown",
+                    fontFamily = ralewayMedium,
                     color = MaterialTheme.colors.textColor,
                     fontSize = MaterialTheme.typography.caption.fontSize,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
-                    fontWeight = FontWeight.Bold
                 )
 
             }
@@ -145,35 +172,58 @@ fun ProductOptionsBottomSheet(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f, fill = true)
+                .weight(1f, fill = false)
                 .verticalScroll(state = rememberScrollState())
         ) {
             ProductOptionSize(
                 size = size,
-                selectedOptionSize = selectedOptionSize,
-                onOptionSizeSelected = onOptionSizeSelected
+                selectedOptionSize = addProductToCartState.size,
+                onOptionSizeSelected = { size ->
+                    homeViewModel.onAddProductToCart(event = AddProductToCartEvent.SizeChanged(size = size))
+                }
             )
             Spacer(modifier = Modifier.height(EXTRA_LARGE_PADDING))
             ProductOptionIngredient(
                 title = stringResource(R.string.sugar),
                 options = percent,
-                selectedOption = selectedOptionSugar,
-                onOptionSelected = onOptionSugarSelected
+                selectedOption = addProductToCartState.sugar,
+                onOptionSelected = { sugar ->
+                    homeViewModel.onAddProductToCart(event = AddProductToCartEvent.SugarChanged(sugar = sugar))
+                }
             )
             Spacer(modifier = Modifier.height(EXTRA_LARGE_PADDING))
             ProductOptionIngredient(
                 title = stringResource(R.string.ice),
                 options = percent,
-                selectedOption = selectedOptionIce,
-                onOptionSelected = onOptionIceSelected
+                selectedOption = addProductToCartState.ice,
+                onOptionSelected = { ice ->
+                    homeViewModel.onAddProductToCart(event = AddProductToCartEvent.IceChanged(ice = ice))
+                }
             )
-            Spacer(modifier = Modifier.height(EXTRA_LARGE_PADDING))
-            ProductToppingOption(
-                title = stringResource(R.string.topping),
-                toppingOptions = topping,
-                selectedToppingOption = selectedToppingOption,
-                onToppingOptionSelected = onToppingOptionSelected
-            )
+            product?.let {
+                if (product.type == "Milk shake" || product.type == "Milk tea") {
+                    Spacer(modifier = Modifier.height(EXTRA_LARGE_PADDING))
+                    ProductToppingOption(
+                        title = stringResource(R.string.topping),
+                        toppingOptions = topping,
+                        selectedToppingOption = addProductToCartState.toppings.toList()
+                    ) { topping, isAdd ->
+                        if (isAdd) {
+                            homeViewModel.onAddProductToCart(
+                                event = AddProductToCartEvent.AddTopping(
+                                    topping = topping
+                                )
+                            )
+                        } else {
+                            homeViewModel.onAddProductToCart(
+                                event = AddProductToCartEvent.RemoveTopping(
+                                    topping = topping
+                                )
+                            )
+                        }
+                    }
+                }
+            }
             Spacer(modifier = Modifier.height(EXTRA_LARGE_PADDING))
             ProductNote(
                 noteTextState = productNoteTextState,
@@ -184,7 +234,7 @@ fun ProductOptionsBottomSheet(
                 text = stringResource(R.string.price),
                 color = MaterialTheme.colors.textColor,
                 fontSize = MaterialTheme.typography.subtitle2.fontSize,
-                fontFamily = raleway
+                fontFamily = ralewayMedium
             )
             Text(
                 text = stringResource(id = R.string.product_price, 90000),
@@ -217,7 +267,7 @@ fun ProductOptionSize(
             text = stringResource(R.string.size),
             color = MaterialTheme.colors.textColor,
             fontSize = MaterialTheme.typography.subtitle2.fontSize,
-            fontFamily = raleway
+            fontFamily = ralewayMedium
         )
         Spacer(modifier = Modifier.height(SMALL_PADDING))
         Row(
@@ -257,9 +307,9 @@ fun ProductOptionSize(
 @Composable
 fun ProductOptionIngredient(
     title: String,
-    options: List<String>,
-    selectedOption: String,
-    onOptionSelected: (String) -> Unit
+    options: List<Int>,
+    selectedOption: Int,
+    onOptionSelected: (Int) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -271,7 +321,7 @@ fun ProductOptionIngredient(
             text = title,
             color = MaterialTheme.colors.textColor,
             fontSize = MaterialTheme.typography.subtitle2.fontSize,
-            fontFamily = raleway
+            fontFamily = ralewayMedium
         )
         Spacer(modifier = Modifier.height(SMALL_PADDING))
         Row(
@@ -311,8 +361,8 @@ fun ProductOptionIngredient(
 fun ProductToppingOption(
     title: String,
     toppingOptions: List<ProductTopping>,
-    selectedToppingOption: ProductTopping?,
-    onToppingOptionSelected: (ProductTopping?) -> Unit
+    selectedToppingOption: List<ProductTopping>,
+    onToppingOptionSelected: (ProductTopping, Boolean) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -324,7 +374,7 @@ fun ProductToppingOption(
             text = title,
             color = MaterialTheme.colors.textColor,
             fontSize = MaterialTheme.typography.subtitle2.fontSize,
-            fontFamily = raleway
+            fontFamily = ralewayMedium
         )
         Spacer(modifier = Modifier.height(SMALL_PADDING))
 
@@ -335,10 +385,10 @@ fun ProductToppingOption(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Checkbox(
-                    checked = option == selectedToppingOption,
+                    checked = selectedToppingOption.contains(option),
                     onCheckedChange = { checked ->
-                        if (checked) onToppingOptionSelected(option)
-                        else onToppingOptionSelected(null)
+                        if (checked) onToppingOptionSelected(option, true)
+                        else onToppingOptionSelected(option, false)
                     },
                     colors = CheckboxDefaults.colors(
                         uncheckedColor = MaterialTheme.colors.textColor,
@@ -384,7 +434,7 @@ fun ProductNote(
             text = "+ Note for mechanism",
             color = MaterialTheme.colors.textColor2,
             fontSize = MaterialTheme.typography.subtitle2.fontSize,
-            fontFamily = raleway
+            fontFamily = ralewayMedium
         )
         Spacer(modifier = Modifier.height(SMALL_PADDING))
         TextFieldCustom(

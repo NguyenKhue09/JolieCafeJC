@@ -67,7 +67,7 @@ interface JolieCafeApi {
         @Query("favoriteProductId") favoriteProductId: String,
     ): Response<ApiResponseSingleData<Unit>>
 
-    @DELETE("$API_GATEWAY/favorite//remove-by-productId")
+    @DELETE("$API_GATEWAY/favorite/remove-by-productId")
     suspend fun removeUserFavoriteProductByProductId(
         @Header("Authorization") token: String,
         @Query("productId") productId: String,
@@ -122,6 +122,27 @@ interface JolieCafeApi {
         @Header("Authorization") token: String,
         @QueryMap cartQuery: Map<String, String>,
     ): ApiResponseMultiData<CartItem>
+
+    @Headers("Content-Type: application/json")
+    @PUT("$API_GATEWAY/cart/update")
+    suspend fun updateCartItem(
+        @Header("Authorization") token: String,
+        @Body body: Map<String, String>,
+    ): Response<ApiResponseSingleData<CartItem>>
+
+    @Headers("Content-Type: application/json")
+    @DELETE("$API_GATEWAY/cart/remove/{productId}")
+    suspend fun deleteCartItem(
+        @Header("Authorization") token: String,
+        @Path("productId") productId: String,
+    ): Response<ApiResponseSingleData<Unit>>
+
+    @Headers("Content-Type: application/json")
+    @POST("$API_GATEWAY/cart/add")
+    suspend fun addCart(
+        @Body body: Map<String, String>,
+        @Header("Authorization") token: String
+    ): Response<ApiResponseSingleData<Unit>>
 
    // https://stackoverflow.com/questions/41078866/retrofit2-authorization-global-interceptor-for-access-token
 

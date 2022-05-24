@@ -50,8 +50,8 @@ fun CategoryButton(
         Text(
             text = title,
             fontSize = MaterialTheme.typography.caption.fontSize,
-            fontFamily = raleway,
-            color = MaterialTheme.colors.textColor
+            fontFamily = ralewayMedium,
+            color = if (isSelected) MaterialTheme.colors.textColor2 else MaterialTheme.colors.textColor
         )
     }
 }

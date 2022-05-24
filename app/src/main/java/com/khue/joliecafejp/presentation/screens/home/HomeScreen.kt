@@ -2,25 +2,26 @@ package com.khue.joliecafejp.presentation.screens.home
 
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.layout.LazyLayout
-import androidx.compose.foundation.lazy.layout.LazyLayoutItemProvider
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.navigation.NavHostController
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
@@ -49,9 +50,7 @@ import kotlinx.coroutines.yield
 import kotlin.math.absoluteValue
 
 
-@OptIn(ExperimentalPagerApi::class, ExperimentalMaterialApi::class,
-    ExperimentalFoundationApi::class
-)
+@OptIn(ExperimentalPagerApi::class, ExperimentalMaterialApi::class)
 @Composable
 fun HomeScreen(
     navController: NavHostController,
@@ -137,26 +136,44 @@ fun HomeScreen(
         ),
     )
 
-    LaunchedEffect(key1 = true) {
-        if (state.isVisible) {
-            state.hide()
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_STOP) {
+                coroutineScope.launch {
+                    state.hide()
+                }
+            }
+        }
+
+        lifecycleOwner.lifecycle.addObserver(observer)
+
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
         }
     }
 
 
-    val isLoading = remember {
+    val isLoading = rememberSaveable {
         mutableStateOf(true)
+    }
+
+    var selectedProduct by remember {
+        mutableStateOf<Product?>(null)
     }
 
     ModalBottomSheetLayout(
         sheetState = state,
         modifier = Modifier.fillMaxSize(),
         sheetContent = {
-            ProductOptionsBottomSheet(
-                paddingValues = paddingValues,
-                coroutineScope = coroutineScope,
-                modalBottomSheetState = state
-            )
+                ProductOptionsBottomSheet(
+                    homeViewModel = homeViewModel,
+                    paddingValues = paddingValues,
+                    product = selectedProduct,
+                    coroutineScope = coroutineScope,
+                    modalBottomSheetState = state
+                )
         }
     ) {
         Scaffold(
@@ -256,6 +273,7 @@ fun HomeScreen(
                                 HorizontalProductItem(
                                     product = product,
                                     onAdd = {
+                                        selectedProduct = product
                                         coroutineScope.launch {
                                             state.animateTo(
                                                 ModalBottomSheetValue.Expanded
