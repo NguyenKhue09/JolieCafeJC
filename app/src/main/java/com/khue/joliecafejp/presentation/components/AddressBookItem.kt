@@ -46,17 +46,17 @@ fun AddressBookItem(
         mutableStateOf(false)
     }
 
-    val (userNameTextState, userNameTextChange) = remember { mutableStateOf("Sweet Latte") }
+    val (userNameTextState, userNameTextChange) = remember { mutableStateOf(name) }
     val userNameError = remember {
         mutableStateOf("")
     }
 
-    val (userPhoneNumberState, userPhoneNumberChange) = remember { mutableStateOf("0123548655") }
+    val (userPhoneNumberState, userPhoneNumberChange) = remember { mutableStateOf(phoneNumber) }
     val userPhoneNumberError = remember {
         mutableStateOf("")
     }
 
-    val (userAddressState, userAddressChange) = remember { mutableStateOf("12 Robusta Street, Frappe District, White City") }
+    val (userAddressState, userAddressChange) = remember { mutableStateOf(address) }
     val userAddressError = remember {
         mutableStateOf("")
     }

@@ -14,4 +14,5 @@ data class ApiUseCases(
     val addUserFavoriteProductUseCase: AddUserFavoriteProductUseCase,
     val removeUserFavProduct: RemoveUserFavProductUseCase,
     val removeUserFavProductByProductId: RemoveUserFavProductByProductIdUseCase,
+    val getAddresses: GetAddressesUseCase
 )

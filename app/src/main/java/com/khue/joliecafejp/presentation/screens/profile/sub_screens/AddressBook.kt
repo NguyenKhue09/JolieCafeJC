@@ -1,5 +1,6 @@
 package com.khue.joliecafejp.presentation.screens.profile.sub_screens
 
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.ScrollableState
@@ -18,6 +19,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInParent
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -26,19 +28,31 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemsIndexed
 import com.khue.joliecafejp.R
+import com.khue.joliecafejp.domain.model.Address
+import com.khue.joliecafejp.domain.model.Product
 import com.khue.joliecafejp.navigation.nav_screen.ProfileSubScreen
 import com.khue.joliecafejp.presentation.common.*
 import com.khue.joliecafejp.presentation.components.*
+import com.khue.joliecafejp.presentation.viewmodels.AddressBookViewModel
 import com.khue.joliecafejp.ui.theme.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @Composable
 fun AddressBook(
-    navController: NavHostController
+    navController: NavHostController,
+    addressBookViewModel: AddressBookViewModel = hiltViewModel()
 ) {
+
+    val userToken by addressBookViewModel.userToken.collectAsState(initial = "")
+
     var showDeleteCustomDialog by remember { mutableStateOf(false) }
 
     val scrollState = rememberScrollState()
@@ -69,6 +83,11 @@ fun AddressBook(
         mutableStateOf("")
     }
 
+    LaunchedEffect(key1 = userToken)  {
+        addressBookViewModel.getProducts(userToken)
+    }
+
+    val addressBooks = addressBookViewModel.addressBooks.collectAsLazyPagingItems()
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -95,46 +114,49 @@ fun AddressBook(
                     .fillMaxSize()
                     .weight(1f),
             ) {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    verticalArrangement = Arrangement.Top,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    repeat(10) {
-                        item {
-                            if (showDeleteCustomDialog) {
-                                CustomDialog(
-                                    title = "Delete address?",
-                                    content = "Do you really want to delete this address?",
-                                    onDismiss = { showDeleteCustomDialog = false },
-                                    onNegativeClick = { showDeleteCustomDialog = false },
-                                    onPositiveClick = { showDeleteCustomDialog = false }
-                                )
+                val result = handlePagingResult(addressBooks = addressBooks)
+
+                if(result) {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        verticalArrangement = Arrangement.Top,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+
+                            itemsIndexed(addressBooks) { index, address ->
+                                if (showDeleteCustomDialog) {
+                                    CustomDialog(
+                                        title = "Delete address?",
+                                        content = "Do you really want to delete this address?",
+                                        onDismiss = { showDeleteCustomDialog = false },
+                                        onNegativeClick = { showDeleteCustomDialog = false },
+                                        onPositiveClick = { showDeleteCustomDialog = false }
+                                    )
+                                }
+                                address?.let {
+                                    AddressBookItem(
+                                        name = address.userName,
+                                        phoneNumber = address.phone,
+                                        address = address.address,
+                                        paddingValues = if(index == addressBooks.itemCount - 1) PaddingValues(
+                                            top = EXTRA_LARGE_PADDING,
+                                            start = EXTRA_LARGE_PADDING,
+                                            end = EXTRA_LARGE_PADDING,
+                                            bottom = EXTRA_LARGE_PADDING
+                                        ) else PaddingValues(
+                                            top = EXTRA_LARGE_PADDING,
+                                            start = EXTRA_LARGE_PADDING,
+                                            end = EXTRA_LARGE_PADDING,
+                                            bottom = 0.dp
+                                        ),
+                                        onDelete = {
+                                            showDeleteCustomDialog = true
+                                        },
+                                        onUpdate = { _, _, _ -> },
+                                    )
+                                }
                             }
-
-                            AddressBookItem(
-                                name = "",
-                                phoneNumber = "",
-                                address = "",
-                                paddingValues = if(it == 9) PaddingValues(
-                                    top = EXTRA_LARGE_PADDING,
-                                    start = EXTRA_LARGE_PADDING,
-                                    end = EXTRA_LARGE_PADDING,
-                                    bottom = EXTRA_LARGE_PADDING
-                                ) else PaddingValues(
-                                    top = EXTRA_LARGE_PADDING,
-                                    start = EXTRA_LARGE_PADDING,
-                                    end = EXTRA_LARGE_PADDING,
-                                    bottom = 0.dp
-                                ),
-                                onDelete = {
-                                    showDeleteCustomDialog = true
-                                },
-                                onUpdate = { _, _, _ -> },
-                            )
-                        }
-
                     }
                 }
 
@@ -414,6 +436,37 @@ fun CardAddNewAddress(
                         )
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+fun handlePagingResult(
+    addressBooks: LazyPagingItems<Address>
+): Boolean {
+    addressBooks.apply {
+        val error = when {
+            loadState.refresh is LoadState.Error -> loadState.refresh as LoadState.Error
+            loadState.prepend is LoadState.Error -> loadState.prepend as LoadState.Error
+            loadState.append is LoadState.Error -> loadState.append as LoadState.Error
+            else -> null
+        }
+
+        return when {
+            loadState.refresh is LoadState.Loading -> {
+                LoadingBody()
+                false
+            }
+            error != null -> {
+                Toast.makeText(LocalContext.current, error.error.message, Toast.LENGTH_SHORT).show()
+                false
+            }
+            addressBooks.itemCount < 1 -> {
+                false
+            }
+            else -> {
+                true
             }
         }
     }

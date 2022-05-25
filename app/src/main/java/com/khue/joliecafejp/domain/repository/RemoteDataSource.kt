@@ -33,4 +33,6 @@ interface RemoteDataSource {
         token: String,
         productId: String,
     ): Response<ApiResponseSingleData<Unit>>
+
+    fun getAddresses(token: String): Flow<PagingData<Address>>
 }

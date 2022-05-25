@@ -85,4 +85,10 @@ class Repository @Inject constructor(
         return dataStore.readUserToken()
     }
 
+    fun getAddresses(
+        token: String
+    ): Flow<PagingData<Address>> {
+        return remote.getAddresses(token = token)
+    }
+
 }
