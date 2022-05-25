@@ -58,14 +58,11 @@ fun FavoriteScreen(
     val coroutineScope = rememberCoroutineScope()
 
     val userToken by favoriteViewModel.userToken.collectAsState(initial = "")
-    var favoriteProducts = favoriteViewModel.favoriteProduct.collectAsLazyPagingItems()
+    val favoriteProducts = favoriteViewModel.favoriteProduct.collectAsLazyPagingItems()
 
     val removeUserFavProductResponse = favoriteViewModel.removeUserFavProductResponse
     val context = LocalContext.current
 
-    val deletedFavProductId by remember {
-        mutableStateOf("")
-    }
 
     LaunchedEffect(key1 = true) {
         removeUserFavProductResponse.collectLatest { result ->

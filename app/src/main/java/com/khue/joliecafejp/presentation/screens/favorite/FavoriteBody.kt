@@ -25,7 +25,6 @@ import com.khue.joliecafejp.presentation.common.LoadingBody
 import com.khue.joliecafejp.presentation.components.FavoriteItem
 import com.khue.joliecafejp.ui.theme.*
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun FavoriteBody(
     favoriteProducts: LazyPagingItems<FavoriteProduct>,

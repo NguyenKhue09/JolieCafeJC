@@ -3,6 +3,7 @@ package com.khue.joliecafejp.data.repository
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import com.khue.joliecafejp.data.paging_source.AddressPagingSource
 import com.khue.joliecafejp.data.paging_source.FavoriteProductPagingSource
 import com.khue.joliecafejp.data.paging_source.ProductPagingSource
 import com.khue.joliecafejp.data.remote.JolieCafeApi
@@ -91,5 +92,42 @@ class RemoteDataSourceImpl(
         return jolieCafeApi.removeUserFavoriteProductByProductId(
             token = "Bearer $token", productId = productId
         )
+    }
+
+    override fun getAddresses(token: String): Flow<PagingData<Address>> {
+        return Pager(
+            config = PagingConfig(pageSize = PAGE_SIZE),
+            pagingSourceFactory = {
+                AddressPagingSource(jolieCafeApi, "Bearer $token")
+            }
+        ).flow
+    }
+
+    override suspend fun updateAddress(
+        newAddressData: Map<String, String>,
+        token: String
+    ): Response<ApiResponseSingleData<Address>> {
+        return jolieCafeApi.updateAddress(body = newAddressData, token = "Bearer $token")
+    }
+
+    override suspend fun deleteAddress(
+        addressId: String,
+        token: String
+    ): Response<ApiResponseSingleData<Address>> {
+       return jolieCafeApi.deleteAddress(addressId = addressId, token = "Bearer $token")
+    }
+
+    override suspend fun addNewDefaultAddress(
+        data: Map<String, String>,
+        token: String
+    ): Response<ApiResponseSingleData<User>> {
+        return jolieCafeApi.addNewDefaultAddress(body = data, token = "Bearer $token")
+    }
+
+    override suspend fun addNewAddress(
+        data: Map<String, String>,
+        token: String
+    ): Response<ApiResponseSingleData<Address>> {
+        return jolieCafeApi.addNewAddress(body = data, token = "Bearer $token")
     }
 }

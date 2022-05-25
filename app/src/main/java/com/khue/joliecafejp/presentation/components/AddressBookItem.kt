@@ -13,11 +13,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.khue.joliecafejp.R
+import com.khue.joliecafejp.domain.model.Address
 import com.khue.joliecafejp.presentation.common.ButtonCustom
 import com.khue.joliecafejp.presentation.common.CardCustom
 import com.khue.joliecafejp.presentation.common.TextFieldCustom
@@ -25,9 +25,7 @@ import com.khue.joliecafejp.ui.theme.*
 
 @Composable
 fun AddressBookItem(
-    name: String,
-    phoneNumber: String,
-    address: String,
+    address: Address,
     paddingValues: PaddingValues = PaddingValues(
         top = EXTRA_LARGE_PADDING,
         start = EXTRA_LARGE_PADDING,
@@ -46,17 +44,17 @@ fun AddressBookItem(
         mutableStateOf(false)
     }
 
-    val (userNameTextState, userNameTextChange) = remember { mutableStateOf("Sweet Latte") }
+    val (userNameTextState, userNameTextChange) = remember { mutableStateOf(address.userName) }
     val userNameError = remember {
         mutableStateOf("")
     }
 
-    val (userPhoneNumberState, userPhoneNumberChange) = remember { mutableStateOf("0123548655") }
+    val (userPhoneNumberState, userPhoneNumberChange) = remember { mutableStateOf(address.phone) }
     val userPhoneNumberError = remember {
         mutableStateOf("")
     }
 
-    val (userAddressState, userAddressChange) = remember { mutableStateOf("12 Robusta Street, Frappe District, White City") }
+    val (userAddressState, userAddressChange) = remember { mutableStateOf(address.address) }
     val userAddressError = remember {
         mutableStateOf("")
     }
@@ -293,11 +291,10 @@ fun AddressBookItem(
 @Preview
 @Composable
 fun AddressBookPrev() {
-    AddressBookItem(
-        name = "",
-        phoneNumber = "",
-        address = "",
-        onDelete = {},
-        onUpdate = { _, _, _ -> },
-    )
+//    AddressBookItem(
+//        name = "",
+//        phoneNumber = "",
+//        address = "",
+//        onDelete = {},
+//    ) { _, _, _ -> }
 }

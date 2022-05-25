@@ -85,4 +85,37 @@ class Repository @Inject constructor(
         return dataStore.readUserToken()
     }
 
+    fun getAddresses(
+        token: String
+    ): Flow<PagingData<Address>> {
+        return remote.getAddresses(token = token)
+    }
+
+    suspend fun updateAddress(
+        newAddressData: Map<String, String>,
+        token: String
+    ): Response<ApiResponseSingleData<Address>> {
+        return remote.updateAddress(newAddressData = newAddressData, token = token)
+    }
+
+    suspend fun deleteAddress(
+        addressId: String,
+        token: String
+    ): Response<ApiResponseSingleData<Address>> {
+        return remote.deleteAddress(addressId = addressId, token = token)
+    }
+
+    suspend fun addNewDefaultAddress(
+        data: Map<String, String>,
+        token: String
+    ): Response<ApiResponseSingleData<User>> {
+        return remote.addNewDefaultAddress(data = data, token = token)
+    }
+
+    suspend fun addNewAddress(
+        data: Map<String, String>,
+        token: String
+    ): Response<ApiResponseSingleData<Address>> {
+        return remote.addNewAddress(data = data, token = token)
+    }
 }

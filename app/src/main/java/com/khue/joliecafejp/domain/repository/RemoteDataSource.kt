@@ -33,4 +33,26 @@ interface RemoteDataSource {
         token: String,
         productId: String,
     ): Response<ApiResponseSingleData<Unit>>
+
+    fun getAddresses(token: String): Flow<PagingData<Address>>
+
+    suspend fun updateAddress(
+        newAddressData: Map<String, String>,
+        token: String
+    ): Response<ApiResponseSingleData<Address>>
+
+    suspend fun deleteAddress(
+        addressId: String,
+        token: String
+    ): Response<ApiResponseSingleData<Address>>
+
+    suspend fun addNewDefaultAddress(
+        data: Map<String, String>,
+        token: String
+    ): Response<ApiResponseSingleData<User>>
+
+    suspend fun addNewAddress(
+        data: Map<String, String>,
+        token: String
+    ): Response<ApiResponseSingleData<Address>>
 }
