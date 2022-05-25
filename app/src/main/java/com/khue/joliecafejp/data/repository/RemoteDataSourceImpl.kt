@@ -102,4 +102,32 @@ class RemoteDataSourceImpl(
             }
         ).flow
     }
+
+    override suspend fun updateAddress(
+        newAddressData: Map<String, String>,
+        token: String
+    ): Response<ApiResponseSingleData<Address>> {
+        return jolieCafeApi.updateAddress(body = newAddressData, token = "Bearer $token")
+    }
+
+    override suspend fun deleteAddress(
+        addressId: String,
+        token: String
+    ): Response<ApiResponseSingleData<Address>> {
+       return jolieCafeApi.deleteAddress(addressId = addressId, token = "Bearer $token")
+    }
+
+    override suspend fun addNewDefaultAddress(
+        data: Map<String, String>,
+        token: String
+    ): Response<ApiResponseSingleData<User>> {
+        return jolieCafeApi.addNewDefaultAddress(body = data, token = "Bearer $token")
+    }
+
+    override suspend fun addNewAddress(
+        data: Map<String, String>,
+        token: String
+    ): Response<ApiResponseSingleData<Address>> {
+        return jolieCafeApi.addNewAddress(body = data, token = "Bearer $token")
+    }
 }

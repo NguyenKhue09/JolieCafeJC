@@ -1,9 +1,6 @@
 package com.khue.joliecafejp.presentation.viewmodels
 
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.khue.joliecafejp.domain.model.RegistrationFormState
@@ -50,7 +47,7 @@ class SignUpViewModel @Inject constructor(
         val emailResult = validationUseCases.validationEmailUseCaseUseCase.execute(state.value.email)
         val passwordResult = validationUseCases.validationPasswordUseCase.execute(state.value.password)
         val confirmPasswordResult = validationUseCases.validationConfirmPasswordUseCase.execute(state.value.password, state.value.confirmPassword)
-        val userNameResult = validationUseCases.validationUserNameUseCaseUseCase.execute(state.value.userName)
+        val userNameResult = validationUseCases.validationUserNameUseCase.execute(state.value.userName)
 
         val hasError = listOf(
             emailResult,

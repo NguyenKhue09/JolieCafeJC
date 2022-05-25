@@ -35,13 +35,17 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemsIndexed
 import com.khue.joliecafejp.R
+import com.khue.joliecafejp.domain.model.AddNewAddressFormState
 import com.khue.joliecafejp.domain.model.Address
-import com.khue.joliecafejp.domain.model.Product
+import com.khue.joliecafejp.firebase.firebase_authentication.gmail_password_authentication.FirebaseGmailPasswordAuth
 import com.khue.joliecafejp.navigation.nav_screen.ProfileSubScreen
 import com.khue.joliecafejp.presentation.common.*
 import com.khue.joliecafejp.presentation.components.*
 import com.khue.joliecafejp.presentation.viewmodels.AddressBookViewModel
+import com.khue.joliecafejp.presentation.viewmodels.UserSharedViewModel
 import com.khue.joliecafejp.ui.theme.*
+import com.khue.joliecafejp.utils.AddNewAddressFormEvent
+import com.khue.joliecafejp.utils.ApiResult
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -55,39 +59,120 @@ fun AddressBook(
 
     var showDeleteCustomDialog by remember { mutableStateOf(false) }
 
-    val scrollState = rememberScrollState()
-    val coroutineScope = rememberCoroutineScope()
-    val scrollToPosition = remember { mutableStateOf(0F) }
 
-    val isAddNewAddress = remember {
+    var isAddNewAddress by remember {
         mutableStateOf(false)
     }
 
-    val isDefaultAddress = remember {
-        mutableStateOf(false)
-    }
+    val addNewAddressFormState by addressBookViewModel.addNewAddressFormState.collectAsState()
 
-    val (newUserNameTextState, onNewUserNameChange) = remember { mutableStateOf("") }
-    val newUserNameError = remember {
-        mutableStateOf("")
-    }
-
-    val (newUserPhoneNumberState, onNewUserPhoneNumberChange) = remember { mutableStateOf("") }
-    val newUserPhoneNumberError = remember {
-        mutableStateOf("")
-    }
-
-    val (newUserAddressState, onNewUserAddressChange) =
-        remember { mutableStateOf("") }
-    val newUserAddressError = remember {
-        mutableStateOf("")
-    }
-
-    LaunchedEffect(key1 = userToken)  {
+    LaunchedEffect(key1 = userToken) {
         addressBookViewModel.getProducts(userToken)
     }
 
     val addressBooks = addressBookViewModel.addressBooks.collectAsLazyPagingItems()
+
+    val context = LocalContext.current
+
+    LaunchedEffect(key1 = context) {
+        addressBookViewModel.validationEvents.collect { event ->
+            when (event) {
+                is AddressBookViewModel.ValidationEvent.Success -> {
+                    val data = mapOf(
+                        "phone" to addNewAddressFormState.phone,
+                        "userName" to addNewAddressFormState.userName,
+                        "address" to addNewAddressFormState.address
+                    )
+                    if (addNewAddressFormState.isDefault) {
+                        addressBookViewModel.addNewDefaultAddress(
+                            data = data,
+                            token = userToken
+                        )
+                    } else {
+                        addressBookViewModel.addNewAddress(
+                            data = data,
+                            token = userToken
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    LaunchedEffect(key1 = Unit) {
+        launch {
+            addressBookViewModel.addNewAddressResponse.collect { result ->
+                when (result) {
+                    is ApiResult.Success -> {
+                        isAddNewAddress = false
+                        addressBooks.refresh()
+                        Toast.makeText(context, "Add new address successfully", Toast.LENGTH_SHORT)
+                            .show()
+                    }
+                    is ApiResult.Error -> {
+                        Toast.makeText(context, "Add new address failed!", Toast.LENGTH_SHORT)
+                            .show()
+                    }
+                    else -> {}
+                }
+            }
+        }
+        launch {
+            addressBookViewModel.addNewDefaultAddressResponse.collect { result ->
+                when (result) {
+                    is ApiResult.Success -> {
+                        isAddNewAddress = false
+                        addressBooks.refresh()
+                        Toast.makeText(
+                            context,
+                            "Add new default address successfully",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                    is ApiResult.Error -> {
+                        Toast.makeText(
+                            context,
+                            "Add new default address failed!",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                    else -> {}
+                }
+
+            }
+        }
+        launch {
+            addressBookViewModel.updateAddressResponse.collect { result ->
+                when (result) {
+                    is ApiResult.Success -> {
+                        Toast.makeText(context, "Update address successfully", Toast.LENGTH_SHORT)
+                            .show()
+                    }
+                    is ApiResult.Error -> {
+                        Toast.makeText(context, "Update address failed!", Toast.LENGTH_SHORT).show()
+                    }
+                    else -> {}
+                }
+
+            }
+        }
+        launch {
+            addressBookViewModel.deleteAddressResponse.collect { result ->
+                when (result) {
+                    is ApiResult.Success -> {
+                        Toast.makeText(context, "Delete address successfully", Toast.LENGTH_SHORT)
+                            .show()
+                        addressBooks.refresh()
+                    }
+                    is ApiResult.Error -> {
+                        Toast.makeText(context, "Delete address failed!", Toast.LENGTH_SHORT).show()
+                    }
+                    else -> {}
+                }
+
+            }
+        }
+    }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -103,8 +188,7 @@ fun AddressBook(
         Column(
             modifier = Modifier
                 .padding(it)
-                .fillMaxSize()
-                .verticalScroll(state = scrollState),
+                .fillMaxSize(),
             verticalArrangement = Arrangement.SpaceBetween,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -116,7 +200,7 @@ fun AddressBook(
             ) {
                 val result = handlePagingResult(addressBooks = addressBooks)
 
-                if(result) {
+                androidx.compose.animation.AnimatedVisibility(result) {
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxWidth(),
@@ -124,39 +208,45 @@ fun AddressBook(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
 
-                            itemsIndexed(addressBooks) { index, address ->
+                        itemsIndexed(addressBooks) { index, address ->
+                            address?.let {
                                 if (showDeleteCustomDialog) {
                                     CustomDialog(
                                         title = "Delete address?",
                                         content = "Do you really want to delete this address?",
                                         onDismiss = { showDeleteCustomDialog = false },
-                                        onNegativeClick = { showDeleteCustomDialog = false },
-                                        onPositiveClick = { showDeleteCustomDialog = false }
-                                    )
-                                }
-                                address?.let {
-                                    AddressBookItem(
-                                        name = address.userName,
-                                        phoneNumber = address.phone,
-                                        address = address.address,
-                                        paddingValues = if(index == addressBooks.itemCount - 1) PaddingValues(
-                                            top = EXTRA_LARGE_PADDING,
-                                            start = EXTRA_LARGE_PADDING,
-                                            end = EXTRA_LARGE_PADDING,
-                                            bottom = EXTRA_LARGE_PADDING
-                                        ) else PaddingValues(
-                                            top = EXTRA_LARGE_PADDING,
-                                            start = EXTRA_LARGE_PADDING,
-                                            end = EXTRA_LARGE_PADDING,
-                                            bottom = 0.dp
-                                        ),
-                                        onDelete = {
-                                            showDeleteCustomDialog = true
+                                        onNegativeClick = {
+                                            showDeleteCustomDialog = false
+                                            addressBookViewModel.deleteAddress(
+                                                addressId = address.id,
+                                                token = userToken
+                                            )
                                         },
-                                        onUpdate = { _, _, _ -> },
+                                        onPositiveClick = {
+                                            showDeleteCustomDialog = false
+                                        }
                                     )
                                 }
+
+                                AddressBookItem(
+                                    address = address,
+                                    paddingValues = if (index == addressBooks.itemCount - 1) PaddingValues(
+                                        top = EXTRA_LARGE_PADDING,
+                                        start = EXTRA_LARGE_PADDING,
+                                        end = EXTRA_LARGE_PADDING,
+                                        bottom = EXTRA_LARGE_PADDING
+                                    ) else PaddingValues(
+                                        top = EXTRA_LARGE_PADDING,
+                                        start = EXTRA_LARGE_PADDING,
+                                        end = EXTRA_LARGE_PADDING,
+                                        bottom = 0.dp
+                                    ),
+                                    onDelete = {
+                                        showDeleteCustomDialog = true
+                                    },
+                                ) { _, _, _ -> }
                             }
+                        }
                     }
                 }
 
@@ -178,20 +268,48 @@ fun AddressBook(
 
             CardAddNewAddress(
                 isAddNewAddress = isAddNewAddress,
-                isDefaultAddress = isDefaultAddress,
-                newUserNameTextState = newUserNameTextState,
-                onNewUserNameChange = onNewUserNameChange,
-                newUserNameError = newUserNameError,
-                newUserPhoneNumberState = newUserPhoneNumberState,
-                onNewUserPhoneNumberChange = onNewUserPhoneNumberChange,
-                newUserPhoneNumberError = newUserPhoneNumberError,
-                newUserAddressState = newUserAddressState,
-                onNewUserAddressChange = onNewUserAddressChange,
-                newUserAddressError = newUserAddressError,
-                scrollState = scrollState,
-                coroutineScope = coroutineScope,
-                scrollToPosition = scrollToPosition,
-                onAddNewAddress = {}
+                addNewAddressFormState = addNewAddressFormState,
+                onNewUserNameChange = { username ->
+                    addressBookViewModel.onEvent(
+                        event = AddNewAddressFormEvent.UserNameChanged(
+                            username = username
+                        )
+                    )
+                },
+                onNewUserPhoneNumberChange = { phone ->
+                    addressBookViewModel.onEvent(
+                        event = AddNewAddressFormEvent.PhoneChanged(
+                            phone = phone
+                        )
+                    )
+                },
+                onNewUserAddressChange = { address ->
+                    addressBookViewModel.onEvent(
+                        event = AddNewAddressFormEvent.AddressChanged(
+                            address = address
+                        )
+                    )
+                },
+                onAddNewAddress = {
+                    addressBookViewModel.onEvent(
+                        event = AddNewAddressFormEvent.Submit
+                    )
+                },
+                onCancel = {
+                    addressBookViewModel.clearErrorAddNewAddressFormState()
+                    addressBookViewModel.clearDataAddNewAddressFormState()
+                    isAddNewAddress = false
+                },
+                onDefaultChange = { isDefault ->
+                    addressBookViewModel.onEvent(
+                        event = AddNewAddressFormEvent.IsDefaultAddressChanged(
+                            isDefault = isDefault
+                        )
+                    )
+                },
+                enableForm = {
+                    isAddNewAddress = true
+                }
             )
 
             Spacer(modifier = Modifier.height(EXTRA_LARGE_PADDING))
@@ -202,27 +320,19 @@ fun AddressBook(
 
 @Composable
 fun CardAddNewAddress(
-    isAddNewAddress: MutableState<Boolean>,
-    isDefaultAddress: MutableState<Boolean>,
-    newUserNameTextState: String,
-    newUserNameError: MutableState<String>,
-    newUserPhoneNumberState: String,
-    newUserPhoneNumberError: MutableState<String>,
-    newUserAddressState: String,
-    newUserAddressError: MutableState<String>,
-    coroutineScope: CoroutineScope,
-    scrollState: ScrollableState,
-    scrollToPosition: MutableState<Float>,
+    isAddNewAddress: Boolean,
+    addNewAddressFormState: AddNewAddressFormState,
     onAddNewAddress: () -> Unit,
+    onCancel: () -> Unit,
     onNewUserNameChange: (String) -> Unit,
     onNewUserPhoneNumberChange: (String) -> Unit,
     onNewUserAddressChange: (String) -> Unit,
+    onDefaultChange: (Boolean) -> Unit,
+    enableForm: () -> Unit
 ) {
 
     CardCustom(
-        modifier = Modifier.onGloballyPositioned { coordinates ->
-            scrollToPosition.value = coordinates.positionInParent().y
-        },
+        modifier = Modifier,
         paddingValues = PaddingValues(
             top = 0.dp,
             start = EXTRA_LARGE_PADDING,
@@ -239,7 +349,7 @@ fun CardAddNewAddress(
             horizontalAlignment = Alignment.Start
         ) {
 
-            AnimatedVisibility(visible = !isAddNewAddress.value) {
+            AnimatedVisibility(visible = !isAddNewAddress) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
@@ -255,10 +365,7 @@ fun CardAddNewAddress(
 
                     IconButton(
                         onClick = {
-                            isAddNewAddress.value = true
-                            coroutineScope.launch {
-                                scrollState.animateScrollBy(scrollToPosition.value)
-                            }
+                            enableForm()
                         }
                     ) {
                         Icon(
@@ -270,7 +377,7 @@ fun CardAddNewAddress(
                 }
             }
 
-            AnimatedVisibility(visible = isAddNewAddress.value) {
+            AnimatedVisibility(visible = isAddNewAddress) {
                 Column(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.Center,
@@ -285,13 +392,13 @@ fun CardAddNewAddress(
                     )
 
                     TextFieldCustom(
-                        textFieldValue = newUserNameTextState,
+                        textFieldValue = addNewAddressFormState.userName,
                         onTextChange = {
                             onNewUserNameChange(it)
                         },
                         keyBoardType = KeyboardType.Text,
                         trailingIcon = {
-                            if (newUserNameError.value.isNotEmpty()) Icon(
+                            if (addNewAddressFormState.userNameError.isNotEmpty()) Icon(
                                 Icons.Filled.Error,
                                 stringResource(R.string.error),
                                 tint = MaterialTheme.colors.error
@@ -299,9 +406,9 @@ fun CardAddNewAddress(
                         },
                         placeHolder = stringResource(R.string.enter_your_new_user_name),
                         visualTransformation = VisualTransformation.None,
-                        error = newUserNameError.value,
+                        error = addNewAddressFormState.userNameError,
                         padding = 0.dp,
-                        enabled = isAddNewAddress.value,
+                        enabled = isAddNewAddress,
                     )
 
                     Text(
@@ -315,13 +422,13 @@ fun CardAddNewAddress(
 
                     TextFieldCustom(
                         modifier = Modifier.align(alignment = Alignment.Start),
-                        textFieldValue = newUserPhoneNumberState,
+                        textFieldValue = addNewAddressFormState.phone,
                         onTextChange = {
                             onNewUserPhoneNumberChange(it)
                         },
-                        keyBoardType = KeyboardType.Text,
+                        keyBoardType = KeyboardType.Number,
                         trailingIcon = {
-                            if (newUserPhoneNumberError.value.isNotEmpty()) Icon(
+                            if (addNewAddressFormState.phoneError.isNotEmpty()) Icon(
                                 Icons.Filled.Error,
                                 stringResource(R.string.error),
                                 tint = MaterialTheme.colors.error
@@ -329,9 +436,9 @@ fun CardAddNewAddress(
                         },
                         placeHolder = stringResource(R.string.enter_your_new_phone_number),
                         visualTransformation = VisualTransformation.None,
-                        error = newUserPhoneNumberError.value,
+                        error = addNewAddressFormState.phoneError,
                         padding = 0.dp,
-                        enabled = isAddNewAddress.value,
+                        enabled = isAddNewAddress,
                     )
 
 
@@ -347,13 +454,13 @@ fun CardAddNewAddress(
 
                     TextFieldCustom(
                         modifier = Modifier.align(alignment = Alignment.Start),
-                        textFieldValue = newUserAddressState,
+                        textFieldValue = addNewAddressFormState.address,
                         onTextChange = {
                             onNewUserAddressChange(it)
                         },
                         keyBoardType = KeyboardType.Text,
                         trailingIcon = {
-                            if (newUserAddressError.value.isNotEmpty()) Icon(
+                            if (addNewAddressFormState.addressError.isNotEmpty()) Icon(
                                 Icons.Filled.Error,
                                 stringResource(R.string.error),
                                 tint = MaterialTheme.colors.error
@@ -361,9 +468,9 @@ fun CardAddNewAddress(
                         },
                         placeHolder = stringResource(R.string.enter_your_new_address),
                         visualTransformation = VisualTransformation.None,
-                        error = newUserAddressError.value,
+                        error = addNewAddressFormState.addressError,
                         padding = 0.dp,
-                        enabled = isAddNewAddress.value,
+                        enabled = isAddNewAddress,
                     )
 
 
@@ -374,9 +481,9 @@ fun CardAddNewAddress(
                         horizontalArrangement = Arrangement.Start
                     ) {
                         Checkbox(
-                            checked = isDefaultAddress.value,
+                            checked = addNewAddressFormState.isDefault,
                             onCheckedChange = { checked ->
-                                isDefaultAddress.value = checked
+                                onDefaultChange(checked)
                             },
                             colors = CheckboxDefaults.colors(
                                 uncheckedColor = MaterialTheme.colors.textColor,
@@ -404,7 +511,7 @@ fun CardAddNewAddress(
                             backgroundColor = Color.Transparent,
                             textColor = MaterialTheme.colors.textColor,
                             onClick = {
-                                isAddNewAddress.value = false
+                                onCancel()
                             },
                             paddingValues = PaddingValues(top = EXTRA_LARGE_PADDING),
                             contentPadding = PaddingValues(
@@ -421,7 +528,6 @@ fun CardAddNewAddress(
                             backgroundColor = MaterialTheme.colors.titleTextColor,
                             textColor = MaterialTheme.colors.textColor,
                             onClick = {
-                                isAddNewAddress.value = false
                                 onAddNewAddress()
                             },
                             paddingValues = PaddingValues(

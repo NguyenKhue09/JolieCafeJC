@@ -63,9 +63,6 @@ fun FavoriteScreen(
     val removeUserFavProductResponse = favoriteViewModel.removeUserFavProductResponse
     val context = LocalContext.current
 
-    val deletedFavProductId by remember {
-        mutableStateOf("")
-    }
 
     LaunchedEffect(key1 = true) {
         removeUserFavProductResponse.collectLatest { result ->

@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.khue.joliecafejp.domain.model.ProfileUpdateFormState
-import com.khue.joliecafejp.domain.use_cases.ApiUseCases
 import com.khue.joliecafejp.domain.use_cases.DataStoreUseCases
 import com.khue.joliecafejp.domain.use_cases.ValidationUseCases
 import com.khue.joliecafejp.utils.ProfileUpdateFormEvent
@@ -18,7 +17,6 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ProfileDetailViewModel @Inject constructor(
-    private val apiUseCases: ApiUseCases,
     private val validationUseCases: ValidationUseCases,
     dataStoreUseCases: DataStoreUseCases
 ) : ViewModel()  {
@@ -95,7 +93,7 @@ class ProfileDetailViewModel @Inject constructor(
     }
 
     private fun phoneAndNameSubmit() {
-        val nameResult = validationUseCases.validationUserNameUseCaseUseCase.execute(state.value.userName)
+        val nameResult = validationUseCases.validationUserNameUseCase.execute(state.value.userName)
         val phoneResult = validationUseCases.validateUserPhoneNumberUseCase.execute(state.value.userPhoneNumber)
 
         val hasError = listOf(

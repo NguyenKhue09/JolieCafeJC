@@ -35,11 +35,12 @@ object RepositoryModule {
     @Singleton
     fun provideValidationUseCase(): ValidationUseCases {
         return ValidationUseCases(
-            validationUserNameUseCaseUseCase = ValidateUserNameUseCase(),
+            validationUserNameUseCase = ValidateUserNameUseCase(),
             validationEmailUseCaseUseCase = ValidateEmailUseCase(),
             validationPasswordUseCase = ValidatePasswordUseCase(),
             validationConfirmPasswordUseCase = ValidateConfirmPasswordUseCase(),
-            validateUserPhoneNumberUseCase = ValidateUserPhoneNumberUseCase()
+            validateUserPhoneNumberUseCase = ValidateUserPhoneNumberUseCase(),
+            validateAddressUseCase = ValidateAddressUseCase()
         )
     }
 
@@ -67,7 +68,11 @@ object RepositoryModule {
             addUserFavoriteProductUseCase = AddUserFavoriteProductUseCase(repository = repository),
             removeUserFavProduct = RemoveUserFavProductUseCase(repository = repository),
             removeUserFavProductByProductId = RemoveUserFavProductByProductIdUseCase(repository = repository),
-            getAddresses = GetAddressesUseCase(repository = repository)
+            getAddresses = GetAddressesUseCase(repository = repository),
+            addNewAddressUseCase = AddNewAddressUseCase(repository = repository),
+            addNewDefaultAddressUseCase = AddNewDefaultAddressUseCase(repository = repository),
+            updateAddressUseCase = UpdateAddressUseCase(repository = repository),
+            deleteAddressUseCase = DeleteAddressUseCase(repository = repository)
         )
     }
 }
