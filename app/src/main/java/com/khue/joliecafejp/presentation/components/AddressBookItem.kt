@@ -1,6 +1,8 @@
 package com.khue.joliecafejp.presentation.components
 
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -9,6 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -16,16 +19,25 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.google.protobuf.Api
 import com.khue.joliecafejp.R
 import com.khue.joliecafejp.domain.model.Address
 import com.khue.joliecafejp.presentation.common.ButtonCustom
 import com.khue.joliecafejp.presentation.common.CardCustom
 import com.khue.joliecafejp.presentation.common.TextFieldCustom
+import com.khue.joliecafejp.presentation.viewmodels.AddressBookViewModel
+import com.khue.joliecafejp.presentation.viewmodels.UserSharedViewModel
 import com.khue.joliecafejp.ui.theme.*
+import com.khue.joliecafejp.utils.ApiResult
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
+import javax.annotation.meta.When
 
 @Composable
 fun AddressBookItem(
     address: Address,
+    isDefaultAddress: Boolean,
+    addressBookViewModel: AddressBookViewModel,
     paddingValues: PaddingValues = PaddingValues(
         top = EXTRA_LARGE_PADDING,
         start = EXTRA_LARGE_PADDING,
@@ -34,34 +46,79 @@ fun AddressBookItem(
     ),
     onDelete: () -> Unit,
     onUpdate: (String, String, String) -> Unit,
+    onUpdateDefaultAddress: () -> Unit,
+    userSharedViewModel: UserSharedViewModel,
 ) {
 
     var isEdit by remember {
         mutableStateOf(false)
     }
-
-    var isDefaultAddress by remember {
+    var startObserverEdit by remember {
         mutableStateOf(false)
     }
 
     val (userNameTextState, userNameTextChange) = remember { mutableStateOf(address.userName) }
-    val userNameError = remember {
+    var userNameError by remember {
         mutableStateOf("")
     }
 
     val (userPhoneNumberState, userPhoneNumberChange) = remember { mutableStateOf(address.phone) }
-    val userPhoneNumberError = remember {
+    var userPhoneNumberError by remember {
         mutableStateOf("")
     }
 
     val (userAddressState, userAddressChange) = remember { mutableStateOf(address.address) }
-    val userAddressError = remember {
+    var userAddressError by remember {
         mutableStateOf("")
     }
 
+    val context = LocalContext.current
+
+    LaunchedEffect(key1 = startObserverEdit) {
+        if(startObserverEdit) {
+            launch {
+                addressBookViewModel.updateAddressResponse.collect { result ->
+                    when (result) {
+                        is ApiResult.Success -> {
+                            Toast.makeText(context, "Update address successfully", Toast.LENGTH_SHORT)
+                                .show()
+                            isEdit = false
+                            startObserverEdit = false
+                        }
+                        is ApiResult.Error -> {
+                            Toast.makeText(context, "Update address failed!", Toast.LENGTH_SHORT).show()
+                        }
+                        else -> {}
+                    }
+
+                }
+            }
+
+            launch {
+                userSharedViewModel.updateUserInfosResponse.collect { updateUserInfosResponse ->
+                    when(updateUserInfosResponse) {
+                        is ApiResult.NullDataSuccess -> {
+                            Toast.makeText(context, "Update default address successfully", Toast.LENGTH_SHORT)
+                                .show()
+                            isEdit = false
+                            startObserverEdit = false
+                        }
+                        is ApiResult.Error -> {
+                            Toast.makeText(context, "Update default address failed!", Toast.LENGTH_SHORT).show()
+                        }
+                        else -> {}
+                    }
+                }
+            }
+        }
+    }
+
+
+
     CardCustom(
         onClick = {},
-        paddingValues = paddingValues
+        paddingValues = paddingValues,
+        haveBorder = isDefaultAddress
     ) {
         Column(
             modifier = Modifier
@@ -99,7 +156,7 @@ fun AddressBookItem(
                         },
                         keyBoardType = KeyboardType.Text,
                         trailingIcon = {
-                            if (userNameError.value.isNotEmpty()) Icon(
+                            if (userNameError.isNotEmpty()) Icon(
                                 Icons.Filled.Error,
                                 stringResource(R.string.error),
                                 tint = MaterialTheme.colors.error
@@ -107,7 +164,7 @@ fun AddressBookItem(
                         },
                         placeHolder = "Sweet Latte",
                         visualTransformation = VisualTransformation.None,
-                        error = userNameError.value,
+                        error = userNameError,
                         padding = 0.dp,
                         enabled = isEdit,
                     )
@@ -161,7 +218,7 @@ fun AddressBookItem(
                 },
                 keyBoardType = KeyboardType.Text,
                 trailingIcon = {
-                    if (userPhoneNumberError.value.isNotEmpty()) Icon(
+                    if (userPhoneNumberError.isNotEmpty()) Icon(
                         Icons.Filled.Error,
                         stringResource(R.string.error),
                         tint = MaterialTheme.colors.error
@@ -169,7 +226,7 @@ fun AddressBookItem(
                 },
                 placeHolder = "Sweet Latte",
                 visualTransformation = VisualTransformation.None,
-                error = userPhoneNumberError.value,
+                error = userPhoneNumberError,
                 padding = 0.dp,
                 enabled = isEdit,
             )
@@ -193,7 +250,7 @@ fun AddressBookItem(
                 },
                 keyBoardType = KeyboardType.Text,
                 trailingIcon = {
-                    if (userAddressError.value.isNotEmpty()) Icon(
+                    if (userAddressError.isNotEmpty()) Icon(
                         Icons.Filled.Error,
                         stringResource(R.string.error),
                         tint = MaterialTheme.colors.error
@@ -201,7 +258,7 @@ fun AddressBookItem(
                 },
                 placeHolder = "Sweet Latte",
                 visualTransformation = VisualTransformation.None,
-                error = userAddressError.value,
+                error = userAddressError,
                 padding = 0.dp,
                 enabled = isEdit,
                 maxLines = 2,
@@ -223,11 +280,16 @@ fun AddressBookItem(
                         Checkbox(
                             checked = isDefaultAddress,
                             onCheckedChange = { checked ->
-                                isDefaultAddress = checked
+                                if(checked) {
+                                    startObserverEdit = true
+                                    onUpdateDefaultAddress()
+                                }
                             },
+                            enabled = !isDefaultAddress,
                             colors = CheckboxDefaults.colors(
                                 uncheckedColor = MaterialTheme.colors.textColor,
-                                checkedColor = MaterialTheme.colors.titleTextColor
+                                checkedColor = MaterialTheme.colors.titleTextColor,
+                                disabledColor = MaterialTheme.colors.titleTextColor
                             )
                         )
 
@@ -252,6 +314,16 @@ fun AddressBookItem(
                             textColor = MaterialTheme.colors.textColor,
                             onClick = {
                                 isEdit = false
+
+                                // clear error
+                                userNameError = ""
+                                userAddressError = ""
+                                userPhoneNumberError = ""
+
+                                // return original state
+                                userNameTextChange(address.userName)
+                                userPhoneNumberChange(address.phone)
+                                userAddressChange(address.address)
                             },
                             paddingValues = PaddingValues(top = EXTRA_LARGE_PADDING),
                             contentPadding = PaddingValues(
@@ -268,7 +340,25 @@ fun AddressBookItem(
                             backgroundColor = MaterialTheme.colors.titleTextColor,
                             textColor = MaterialTheme.colors.textColor,
                             onClick = {
-                                isEdit = false
+                                val listError = addressBookViewModel.validateAddressItem(
+                                    userName = userNameTextState,
+                                    phone = userPhoneNumberState,
+                                    address = userAddressState
+                                )
+
+                                val haveError = listError.any { !it.successful }
+
+                                if(haveError) {
+                                    userNameError = listError[0].errorMessage
+                                    userAddressError = listError[2].errorMessage
+                                    userPhoneNumberError = listError[1].errorMessage
+                                } else {
+                                    startObserverEdit = true
+                                    userNameError = ""
+                                    userAddressError = ""
+                                    userPhoneNumberError = ""
+                                    onUpdate(userNameTextState, userPhoneNumberState, userAddressState)
+                                }
                             },
                             paddingValues = PaddingValues(
                                 start = EXTRA_LARGE_PADDING,

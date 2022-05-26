@@ -9,6 +9,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.khue.joliecafejp.utils.Constants.Companion.PREFERENCES_NAME
 import com.khue.joliecafejp.utils.Constants.Companion.PREFERENCES_USER_TOKEN
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import java.io.IOException
 
@@ -39,5 +40,5 @@ class DataStoreOperationsImpl(context: Context) : DataStoreOperations {
         .map { preferences ->
             val userToken = preferences[PreferenceKeys.userToken] ?: ""
             userToken
-        }
+        }.distinctUntilChanged()
 }
