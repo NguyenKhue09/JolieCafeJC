@@ -27,7 +27,7 @@ fun NavGraphBuilder.profileNavGraph(
         composable(
             route = ProfileSubScreen.AddressBook.route
         ) {
-            AddressBook(navController = navController)
+            AddressBook(navController = navController, userSharedViewModel = userSharedViewModel)
         }
         composable(
             route = ProfileSubScreen.OrderHistory.route

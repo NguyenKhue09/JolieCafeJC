@@ -1,6 +1,8 @@
 package com.khue.joliecafejp.presentation.components
 
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -9,6 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -23,13 +26,17 @@ import com.khue.joliecafejp.presentation.common.ButtonCustom
 import com.khue.joliecafejp.presentation.common.CardCustom
 import com.khue.joliecafejp.presentation.common.TextFieldCustom
 import com.khue.joliecafejp.presentation.viewmodels.AddressBookViewModel
+import com.khue.joliecafejp.presentation.viewmodels.UserSharedViewModel
 import com.khue.joliecafejp.ui.theme.*
 import com.khue.joliecafejp.utils.ApiResult
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
+import javax.annotation.meta.When
 
 @Composable
 fun AddressBookItem(
     address: Address,
+    isDefaultAddress: Boolean,
     addressBookViewModel: AddressBookViewModel,
     paddingValues: PaddingValues = PaddingValues(
         top = EXTRA_LARGE_PADDING,
@@ -39,13 +46,14 @@ fun AddressBookItem(
     ),
     onDelete: () -> Unit,
     onUpdate: (String, String, String) -> Unit,
+    onUpdateDefaultAddress: () -> Unit,
+    userSharedViewModel: UserSharedViewModel,
 ) {
 
     var isEdit by remember {
         mutableStateOf(false)
     }
-
-    var isDefaultAddress by remember {
+    var startObserverEdit by remember {
         mutableStateOf(false)
     }
 
@@ -64,9 +72,53 @@ fun AddressBookItem(
         mutableStateOf("")
     }
 
+    val context = LocalContext.current
+
+    LaunchedEffect(key1 = startObserverEdit) {
+        if(startObserverEdit) {
+            launch {
+                addressBookViewModel.updateAddressResponse.collect { result ->
+                    when (result) {
+                        is ApiResult.Success -> {
+                            Toast.makeText(context, "Update address successfully", Toast.LENGTH_SHORT)
+                                .show()
+                            isEdit = false
+                            startObserverEdit = false
+                        }
+                        is ApiResult.Error -> {
+                            Toast.makeText(context, "Update address failed!", Toast.LENGTH_SHORT).show()
+                        }
+                        else -> {}
+                    }
+
+                }
+            }
+
+            launch {
+                userSharedViewModel.updateUserInfosResponse.collect { updateUserInfosResponse ->
+                    when(updateUserInfosResponse) {
+                        is ApiResult.NullDataSuccess -> {
+                            Toast.makeText(context, "Update default address successfully", Toast.LENGTH_SHORT)
+                                .show()
+                            isEdit = false
+                            startObserverEdit = false
+                        }
+                        is ApiResult.Error -> {
+                            Toast.makeText(context, "Update default address failed!", Toast.LENGTH_SHORT).show()
+                        }
+                        else -> {}
+                    }
+                }
+            }
+        }
+    }
+
+
+
     CardCustom(
         onClick = {},
-        paddingValues = paddingValues
+        paddingValues = paddingValues,
+        haveBorder = isDefaultAddress
     ) {
         Column(
             modifier = Modifier
@@ -228,11 +280,16 @@ fun AddressBookItem(
                         Checkbox(
                             checked = isDefaultAddress,
                             onCheckedChange = { checked ->
-                                isDefaultAddress = checked
+                                if(checked) {
+                                    startObserverEdit = true
+                                    onUpdateDefaultAddress()
+                                }
                             },
+                            enabled = !isDefaultAddress,
                             colors = CheckboxDefaults.colors(
                                 uncheckedColor = MaterialTheme.colors.textColor,
-                                checkedColor = MaterialTheme.colors.titleTextColor
+                                checkedColor = MaterialTheme.colors.titleTextColor,
+                                disabledColor = MaterialTheme.colors.titleTextColor
                             )
                         )
 
@@ -296,7 +353,7 @@ fun AddressBookItem(
                                     userAddressError = listError[2].errorMessage
                                     userPhoneNumberError = listError[1].errorMessage
                                 } else {
-                                    isEdit = false
+                                    startObserverEdit = true
                                     userNameError = ""
                                     userAddressError = ""
                                     userPhoneNumberError = ""

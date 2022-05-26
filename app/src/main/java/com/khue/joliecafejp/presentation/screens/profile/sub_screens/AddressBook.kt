@@ -3,12 +3,8 @@ package com.khue.joliecafejp.presentation.screens.profile.sub_screens
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.ScrollableState
-import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Error
@@ -17,8 +13,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -37,7 +31,6 @@ import androidx.paging.compose.itemsIndexed
 import com.khue.joliecafejp.R
 import com.khue.joliecafejp.domain.model.AddNewAddressFormState
 import com.khue.joliecafejp.domain.model.Address
-import com.khue.joliecafejp.firebase.firebase_authentication.gmail_password_authentication.FirebaseGmailPasswordAuth
 import com.khue.joliecafejp.navigation.nav_screen.ProfileSubScreen
 import com.khue.joliecafejp.presentation.common.*
 import com.khue.joliecafejp.presentation.components.*
@@ -46,16 +39,17 @@ import com.khue.joliecafejp.presentation.viewmodels.UserSharedViewModel
 import com.khue.joliecafejp.ui.theme.*
 import com.khue.joliecafejp.utils.AddNewAddressFormEvent
 import com.khue.joliecafejp.utils.ApiResult
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @Composable
 fun AddressBook(
     navController: NavHostController,
-    addressBookViewModel: AddressBookViewModel = hiltViewModel()
+    addressBookViewModel: AddressBookViewModel = hiltViewModel(),
+    userSharedViewModel: UserSharedViewModel
 ) {
 
     val userToken by addressBookViewModel.userToken.collectAsState(initial = "")
+    val userData by userSharedViewModel.userInfos.collectAsState()
 
     var showDeleteCustomDialog by remember { mutableStateOf(false) }
 
@@ -142,19 +136,7 @@ fun AddressBook(
             }
         }
         launch {
-            addressBookViewModel.updateAddressResponse.collect { result ->
-                when (result) {
-                    is ApiResult.Success -> {
-                        Toast.makeText(context, "Update address successfully", Toast.LENGTH_SHORT)
-                            .show()
-                    }
-                    is ApiResult.Error -> {
-                        Toast.makeText(context, "Update address failed!", Toast.LENGTH_SHORT).show()
-                    }
-                    else -> {}
-                }
 
-            }
         }
         launch {
             addressBookViewModel.deleteAddressResponse.collect { result ->
@@ -230,7 +212,9 @@ fun AddressBook(
 
                                 AddressBookItem(
                                     address = address,
+                                    isDefaultAddress = address.id == userData.data?.defaultAddress,
                                     addressBookViewModel = addressBookViewModel,
+                                    userSharedViewModel = userSharedViewModel,
                                     paddingValues = if (index == addressBooks.itemCount - 1) PaddingValues(
                                         top = EXTRA_LARGE_PADDING,
                                         start = EXTRA_LARGE_PADDING,
@@ -245,15 +229,21 @@ fun AddressBook(
                                     onDelete = {
                                         showDeleteCustomDialog = true
                                     },
-                                ) { name, phone, addressString ->
-                                    val data = mapOf(
-                                        "phone" to phone,
-                                        "userName" to name,
-                                        "address" to addressString,
-                                        "addressId" to address.id
-                                    )
-                                    addressBookViewModel.updateAddress(newAddressData = data, token = userToken)
-                                }
+                                    onUpdateDefaultAddress = {
+                                        userSharedViewModel.updateUserInfos(token = userToken, userInfos = mapOf(
+                                            "defaultAddress" to address.id
+                                        ))
+                                    },
+                                    onUpdate = { name, phone, addressString ->
+                                        val data = mapOf(
+                                            "phone" to phone,
+                                            "userName" to name,
+                                            "address" to addressString,
+                                            //"addressId" to address.id
+                                        )
+                                        addressBookViewModel.updateAddress(newAddressData = data, token = userToken)
+                                    }
+                                )
                             }
                         }
                     }
