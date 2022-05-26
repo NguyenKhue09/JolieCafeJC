@@ -230,6 +230,7 @@ fun AddressBook(
 
                                 AddressBookItem(
                                     address = address,
+                                    addressBookViewModel = addressBookViewModel,
                                     paddingValues = if (index == addressBooks.itemCount - 1) PaddingValues(
                                         top = EXTRA_LARGE_PADDING,
                                         start = EXTRA_LARGE_PADDING,
@@ -244,7 +245,15 @@ fun AddressBook(
                                     onDelete = {
                                         showDeleteCustomDialog = true
                                     },
-                                ) { _, _, _ -> }
+                                ) { name, phone, addressString ->
+                                    val data = mapOf(
+                                        "phone" to phone,
+                                        "userName" to name,
+                                        "address" to addressString,
+                                        "addressId" to address.id
+                                    )
+                                    addressBookViewModel.updateAddress(newAddressData = data, token = userToken)
+                                }
                             }
                         }
                     }

@@ -181,6 +181,18 @@ class AddressBookViewModel @Inject constructor(
         }
     }
 
+    fun validateAddressItem(userName: String, phone: String, address: String): List<ValidationResult> {
+        val userNameResult = validationUseCases.validationUserNameUseCase.execute(userName)
+        val phoneResult = validationUseCases.validateUserPhoneNumberUseCase.execute(phone)
+        val addressResult = validationUseCases.validateAddressUseCase.execute(address)
+
+        return  listOf(
+            userNameResult,
+            phoneResult,
+            addressResult
+        )
+    }
+
     fun clearErrorAddNewAddressFormState() {
         addNewAddressFormState.value = addNewAddressFormState.value.copy(
             userNameError = "",
