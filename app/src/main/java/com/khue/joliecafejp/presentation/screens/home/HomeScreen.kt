@@ -31,19 +31,22 @@ import com.google.accompanist.pager.*
 import com.khue.joliecafejp.R
 import com.khue.joliecafejp.domain.model.CategoryButtonItem
 import com.khue.joliecafejp.domain.model.Product
+import com.khue.joliecafejp.domain.model.SnackBarData
 import com.khue.joliecafejp.navigation.nav_graph.AUTHENTICATION_ROUTE
 import com.khue.joliecafejp.navigation.nav_screen.BottomBarScreen
 import com.khue.joliecafejp.navigation.nav_screen.HomeSubScreen
-import com.khue.joliecafejp.presentation.common.CategoriesButtonGroup
-import com.khue.joliecafejp.presentation.common.ProductOptionsBottomSheet
-import com.khue.joliecafejp.presentation.common.SearchBar
-import com.khue.joliecafejp.presentation.common.TextCustom
+import com.khue.joliecafejp.presentation.common.*
 import com.khue.joliecafejp.presentation.components.HomeTopBar
 import com.khue.joliecafejp.presentation.components.HorizontalProductItem
 import com.khue.joliecafejp.presentation.viewmodels.UserSharedViewModel
 import com.khue.joliecafejp.presentation.viewmodels.HomeViewModel
 import com.khue.joliecafejp.ui.theme.*
+import com.khue.joliecafejp.utils.ApiResult
+import com.khue.joliecafejp.utils.Constants
+import com.khue.joliecafejp.utils.Constants.Companion.SNACK_BAR_STATUS_ERROR
+import com.khue.joliecafejp.utils.Constants.Companion.SNACK_BAR_STATUS_SUCCESS
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.yield
@@ -69,6 +72,22 @@ fun HomeScreen(
     val bestSellerProducts = homeViewModel.bestSellerProduct.collectAsLazyPagingItems()
     val userFavProductsId by homeViewModel.favProductsId.collectAsState()
 
+    val snackbarHostState = remember { SnackbarHostState() }
+    var snackBarData by remember {
+        mutableStateOf(
+            SnackBarData(
+                iconId = R.drawable.ic_success,
+                message = "",
+                snackBarState = Constants.SNACK_BAR_STATUS_SUCCESS,
+            )
+        )
+    }
+
+    // Bottom Sheet
+    val coroutineScope = rememberCoroutineScope()
+    val state = rememberModalBottomSheetState(
+        initialValue = ModalBottomSheetValue.Hidden
+    )
 
     LaunchedEffect(key1 = true) {
         userSharedViewModel.userToken.collectLatest { token ->
@@ -94,12 +113,40 @@ fun HomeScreen(
         }
     }
 
+    LaunchedEffect(key1 = Unit) {
+        homeViewModel.addProductToCartResponse.collect { result ->
+            println(result)
+            when (result) {
+                is ApiResult.Loading -> {
 
-    // Bottom Sheet
-    val coroutineScope = rememberCoroutineScope()
-    val state = rememberModalBottomSheetState(
-        initialValue = ModalBottomSheetValue.Hidden
-    )
+                }
+                is ApiResult.NullDataSuccess -> {
+                    snackBarData = snackBarData.copy(
+                        message = "Add product to cart success",
+                        iconId = R.drawable.ic_success,
+                        snackBarState = SNACK_BAR_STATUS_SUCCESS
+                    )
+                    coroutineScope.launch {
+                        state.hide()
+                        snackbarHostState.showSnackbar("")
+                    }
+                }
+                is ApiResult.Error -> {
+                    snackBarData = snackBarData.copy(
+                        message = "Add product to cart failed",
+                        iconId = R.drawable.ic_error,
+                        snackBarState = SNACK_BAR_STATUS_ERROR
+                    )
+                    coroutineScope.launch {
+                        state.hide()
+                        snackbarHostState.showSnackbar("")
+                    }
+                }
+                else -> {}
+            }
+        }
+    }
+
 
     val categories = listOf(
         CategoryButtonItem(
@@ -119,7 +166,7 @@ fun HomeScreen(
             iconId = R.drawable.ic_watermelon
         ),
         CategoryButtonItem(
-            title = "Pastry",
+            title = "Pasty",
             iconId = R.drawable.ic_croissant_svgrepo_com
         ),
         CategoryButtonItem(
@@ -151,6 +198,7 @@ fun HomeScreen(
 
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(observer)
+            homeViewModel.resetAddProductToCartResponse()
         }
     }
 
@@ -167,13 +215,22 @@ fun HomeScreen(
         sheetState = state,
         modifier = Modifier.fillMaxSize(),
         sheetContent = {
+
                 ProductOptionsBottomSheet(
                     homeViewModel = homeViewModel,
                     paddingValues = paddingValues,
                     product = selectedProduct,
                     coroutineScope = coroutineScope,
-                    modalBottomSheetState = state
+                    modalBottomSheetState = state,
+                    onAddProductToCart = { data ->
+                        homeViewModel.addProductToCart(
+                            data = data,
+                            token = userToken
+                        )
+                    },
+                    onPurchaseProduct = {}
                 )
+
         }
     ) {
         Scaffold(
@@ -187,7 +244,14 @@ fun HomeScreen(
                     }
                 }
             },
-            backgroundColor = MaterialTheme.colors.greyPrimary
+            backgroundColor = MaterialTheme.colors.greyPrimary,
+            snackbarHost = {
+                SnackBar(
+                    modifier = Modifier.padding(MEDIUM_PADDING),
+                    snackbarHostState = snackbarHostState,
+                    snackBarData = snackBarData
+                )
+            }
         ) { paddingValues ->
             val padding = paddingValues.calculateBottomPadding()
             val result =
@@ -255,7 +319,7 @@ fun HomeScreen(
                             fontSize = MaterialTheme.typography.h6.fontSize
                         )
                     }
-                    
+
                     if (result) {
                         items(
                             items = bestSellerProducts,

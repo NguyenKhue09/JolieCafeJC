@@ -36,6 +36,7 @@ class ProductPagingSource(
             try {
                 val response = jolieCafeApi.getProducts(productQuery = query, token = token)
 
+                println(response)
                 Log.d("Bug", response.data.isNullOrEmpty().toString())
 
                 return if(response.success) {

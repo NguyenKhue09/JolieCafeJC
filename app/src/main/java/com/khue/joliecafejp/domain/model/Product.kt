@@ -23,5 +23,6 @@ data class Product(
     val updatedAt: String? = null,
     @SerialName("createdAt")
     val createdAt: String? = null,
-    val isFavorite: Boolean = false
+    val isFavorite: Boolean = false,
+    val __v: Int? = null
 )

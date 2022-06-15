@@ -23,6 +23,7 @@ fun ProductOrderHistoryItem(
     name: String = "Black Tea",
     price: Int = 90000,
     quantities: Int = 5,
+    size: String = "M"
 ) {
 
     Row(
@@ -66,6 +67,15 @@ fun ProductOrderHistoryItem(
             Text(
                 modifier = modifier.wrapContentHeight(),
                 text = "Quantities: $quantities",
+                fontFamily = raleway,
+                color = MaterialTheme.colors.textColor,
+                fontSize = MaterialTheme.typography.caption.fontSize,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Text(
+                modifier = modifier.wrapContentHeight(),
+                text = "Size: $size",
                 fontFamily = raleway,
                 color = MaterialTheme.colors.textColor,
                 fontSize = MaterialTheme.typography.caption.fontSize,

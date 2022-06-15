@@ -45,13 +45,15 @@ fun OrderHistory(
         ) {
             repeat(5) {
                 OrderHistoryItem(
-                    scrollToPosition = scrollToPosition
-                ) {
-                    coroutineScope.launch {
-                        delay(500L)
-                        scrollState.animateScrollBy(scrollToPosition.value)
-                    }
-                }
+                    scrollToPosition = scrollToPosition,
+                    onExpanded = {
+                        coroutineScope.launch {
+                            delay(500L)
+                            scrollState.animateScrollBy(scrollToPosition.value)
+                        }
+                    },
+                    onReviewClicked = {}
+                )
             }
         }
     }

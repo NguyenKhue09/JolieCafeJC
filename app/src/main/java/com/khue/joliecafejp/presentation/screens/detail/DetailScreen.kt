@@ -199,7 +199,7 @@ fun DetailScreen(
                             }
 
                             item {
-                                DescriptionSection()
+                                DescriptionSection(description = productDetail.description)
                             }
 
                             item {

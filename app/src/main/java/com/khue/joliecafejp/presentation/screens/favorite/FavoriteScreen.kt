@@ -28,9 +28,14 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.rememberPagerState
 import com.khue.joliecafejp.R
+import com.khue.joliecafejp.domain.model.SnackBarData
+import com.khue.joliecafejp.navigation.nav_screen.HomeSubScreen
+import com.khue.joliecafejp.presentation.common.SnackBar
+import com.khue.joliecafejp.presentation.common.TopBar
 import com.khue.joliecafejp.presentation.viewmodels.FavoriteViewModel
 import com.khue.joliecafejp.ui.theme.*
 import com.khue.joliecafejp.utils.ApiResult
+import com.khue.joliecafejp.utils.Constants
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
@@ -63,17 +68,36 @@ fun FavoriteScreen(
     val removeUserFavProductResponse = favoriteViewModel.removeUserFavProductResponse
     val context = LocalContext.current
 
+    val snackbarHostState = remember { SnackbarHostState() }
+    var snackBarData by remember {
+        mutableStateOf( SnackBarData(
+            iconId = R.drawable.ic_success,
+            message = "",
+            snackBarState = Constants.SNACK_BAR_STATUS_SUCCESS,
+        )
+        )
+    }
+
 
     LaunchedEffect(key1 = true) {
         removeUserFavProductResponse.collectLatest { result ->
             when (result) {
                 is ApiResult.NullDataSuccess -> {
                     favoriteProducts.refresh()
-                    Toast.makeText(context, "Remove favorite product success!", Toast.LENGTH_SHORT)
-                        .show()
+                    snackBarData = snackBarData.copy(
+                        message = "Remove favorite product success!",
+                        iconId = R.drawable.ic_success,
+                        snackBarState = Constants.SNACK_BAR_STATUS_SUCCESS
+                    )
+                    snackbarHostState.showSnackbar("")
                 }
                 is ApiResult.Error -> {
-                    Toast.makeText(context, result.message, Toast.LENGTH_SHORT).show()
+                    snackBarData = snackBarData.copy(
+                        message = result.message!!,
+                        iconId = R.drawable.ic_error,
+                        snackBarState = Constants.SNACK_BAR_STATUS_ERROR
+                    )
+                    snackbarHostState.showSnackbar("")
                 }
                 else -> {
                 }
@@ -81,57 +105,70 @@ fun FavoriteScreen(
         }
     }
 
-    Column(
-        modifier = Modifier
-            .padding(paddingValues)
-            .fillMaxSize()
-            .background(MaterialTheme.colors.greyPrimary)
-            .padding(start = 20.dp, top = 20.dp, end = 20.dp),
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.Start
-    ) {
-        Text(
-            text = stringResource(R.string.favorite),
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colors.titleTextColor,
-            fontFamily = montserratFontFamily,
-        )
-
-        CustomScrollableTabRow(
-            tabs = tabs,
-            pagerState = pagerState
-        ) { tabIndex ->
-            coroutineScope.launch {
-                pagerState.animateScrollToPage(page = tabIndex)
-            }
-        }
-
-        HorizontalPager(
-            count = tabs.size,
-            state = pagerState,
-        ) {
-            LaunchedEffect(key1 = pagerState.currentPage) {
-                favoriteViewModel.getUserFavoriteProducts(
-                    productQuery = mapOf("type" to tabs[pagerState.currentPage]),
-                    token = userToken
-                )
-            }
-
-            FavoriteBody(
-                favoriteProducts = favoriteProducts,
-                onFavClicked = {
-                    favoriteViewModel.removeUserFavoriteProduct(
-                        token = userToken,
-                        favoriteProductId = it
-                    )
-                },
-                onItemClicked = {
-                    navController.navigate("detail/${it}?isFav=${true}")
-                }
+    Scaffold(
+        modifier = Modifier.fillMaxSize().padding(paddingValues),
+        backgroundColor = MaterialTheme.colors.greyPrimary,
+        snackbarHost = {
+            SnackBar(
+                modifier = Modifier.padding(MEDIUM_PADDING),
+                snackbarHostState = snackbarHostState,
+                snackBarData = snackBarData
             )
         }
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(it)
+                .fillMaxSize()
+                .background(MaterialTheme.colors.greyPrimary)
+                .padding(start = EXTRA_LARGE_PADDING, top = EXTRA_LARGE_PADDING, end = EXTRA_LARGE_PADDING),
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.Start
+        ) {
+            Text(
+                text = stringResource(R.string.favorite),
+                fontSize = MaterialTheme.typography.h5.fontSize,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colors.titleTextColor,
+                fontFamily = montserratFontFamily,
+            )
+
+            CustomScrollableTabRow(
+                tabs = tabs,
+                pagerState = pagerState
+            ) { tabIndex ->
+                coroutineScope.launch {
+                    pagerState.animateScrollToPage(page = tabIndex)
+                }
+            }
+
+            HorizontalPager(
+                count = tabs.size,
+                state = pagerState,
+            ) {
+                LaunchedEffect(key1 = pagerState.currentPage) {
+                    favoriteViewModel.getUserFavoriteProducts(
+                        productQuery = mapOf("type" to tabs[pagerState.currentPage]),
+                        token = userToken
+                    )
+                }
+
+                FavoriteBody(
+                    favoriteProducts = favoriteProducts,
+                    onFavClicked = {
+                        favoriteViewModel.removeUserFavoriteProduct(
+                            token = userToken,
+                            favoriteProductId = it
+                        )
+                    },
+                    onItemClicked = {
+                        navController.navigate("detail/${it}?isFav=${true}")
+                    }
+                )
+            }
+        }
     }
+
 }
 
 

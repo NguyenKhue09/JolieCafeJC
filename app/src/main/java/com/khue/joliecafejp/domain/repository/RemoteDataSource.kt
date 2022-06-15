@@ -55,4 +55,13 @@ interface RemoteDataSource {
         data: Map<String, String>,
         token: String
     ): Response<ApiResponseSingleData<Address>>
+
+    suspend fun addProductToCart(
+        data: Map<String, String>,
+        token: String
+    ): Response<ApiResponseSingleData<Unit>>
+
+    suspend fun getCartItems(
+        token: String
+    ): Response<ApiResponseMultiData<CartItemByCategory>>
 }

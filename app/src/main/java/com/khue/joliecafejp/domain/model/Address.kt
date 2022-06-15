@@ -1,5 +1,6 @@
 package com.khue.joliecafejp.domain.model
 
+import androidx.compose.runtime.Immutable
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 

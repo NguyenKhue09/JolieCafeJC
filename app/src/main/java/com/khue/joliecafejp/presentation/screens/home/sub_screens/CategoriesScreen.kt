@@ -5,8 +5,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
+import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -20,12 +19,14 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import com.khue.joliecafejp.R
 import com.khue.joliecafejp.domain.model.CategoryButtonItem
 import com.khue.joliecafejp.domain.model.Product
+import com.khue.joliecafejp.domain.model.SnackBarData
 import com.khue.joliecafejp.navigation.nav_screen.HomeSubScreen
 import com.khue.joliecafejp.presentation.common.*
 import com.khue.joliecafejp.presentation.viewmodels.CategoryViewModel
-import com.khue.joliecafejp.ui.theme.EXTRA_LARGE_PADDING
-import com.khue.joliecafejp.ui.theme.greyPrimary
+import com.khue.joliecafejp.ui.theme.*
 import com.khue.joliecafejp.utils.ApiResult
+import com.khue.joliecafejp.utils.Constants.Companion.SNACK_BAR_STATUS_ERROR
+import com.khue.joliecafejp.utils.Constants.Companion.SNACK_BAR_STATUS_SUCCESS
 import com.khue.joliecafejp.utils.extensions.items
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -37,7 +38,7 @@ fun CategoriesScreen(
     categoryViewModel: CategoryViewModel = hiltViewModel()
 ) {
 
-    val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
 
     val searchTextState by categoryViewModel.searchTextState
     val selectedCategory by categoryViewModel.selectedCategory
@@ -46,6 +47,14 @@ fun CategoriesScreen(
     val userFavProductsId by categoryViewModel.favProductsId.collectAsState()
 
     val categoryProducts = categoryViewModel.categoryProduct.collectAsLazyPagingItems()
+
+    var snackBarData by remember {
+       mutableStateOf( SnackBarData(
+           iconId = R.drawable.ic_success,
+           message = "",
+           snackBarState = SNACK_BAR_STATUS_SUCCESS,
+       ))
+    }
 
     LaunchedEffect(key1 = true) {
         categoryViewModel.initData(token = userToken)
@@ -70,7 +79,7 @@ fun CategoriesScreen(
             iconId = R.drawable.ic_watermelon
         ),
         CategoryButtonItem(
-            title = "Pastry",
+            title = "Pasty",
             iconId = R.drawable.ic_croissant_svgrepo_com
         ),
         CategoryButtonItem(
@@ -92,22 +101,20 @@ fun CategoriesScreen(
             categoryViewModel.removeUserFavResponse.collect { result ->
                 when (result) {
                     is ApiResult.NullDataSuccess -> {
-                        withContext(Dispatchers.Main) {
-                            Toast.makeText(
-                                context,
-                                "Remove ${clickedProduct?.name} from favorite success",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
+                        snackBarData = snackBarData.copy(
+                            message = "Remove ${clickedProduct?.name} from favorite success",
+                            iconId = R.drawable.ic_success,
+                            snackBarState = SNACK_BAR_STATUS_SUCCESS
+                        )
+                        snackbarHostState.showSnackbar("")
                     }
                     is ApiResult.Error -> {
-                        withContext(Dispatchers.Main) {
-                            Toast.makeText(
-                                context,
-                                "Remove ${clickedProduct?.name} from favorite failed!",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
+                        snackBarData = snackBarData.copy(
+                            message = "Remove ${clickedProduct?.name} from favorite failed!",
+                            iconId = R.drawable.ic_error,
+                            snackBarState = SNACK_BAR_STATUS_ERROR
+                        )
+                        snackbarHostState.showSnackbar("")
                         userFavProductsId.data?.add(clickedProduct!!.id)
                     }
                     else -> {}
@@ -119,22 +126,20 @@ fun CategoriesScreen(
             categoryViewModel.addUserFavResponse.collect { result ->
                 when (result) {
                     is ApiResult.NullDataSuccess -> {
-                        withContext(Dispatchers.Main) {
-                            Toast.makeText(
-                                context,
-                                "Add ${clickedProduct?.name} to favorite success",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
+                        snackBarData = snackBarData.copy(
+                            message = "Add ${clickedProduct?.name} to favorite success",
+                            iconId = R.drawable.ic_success,
+                            snackBarState = SNACK_BAR_STATUS_SUCCESS
+                        )
+                        snackbarHostState.showSnackbar("")
                     }
                     is ApiResult.Error -> {
-                        withContext(Dispatchers.Main) {
-                            Toast.makeText(
-                                context,
-                                "Add ${clickedProduct?.name} to favorite failed!",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
+                        snackBarData = snackBarData.copy(
+                            message = "Add ${clickedProduct?.name} to favorite failed!",
+                            iconId = R.drawable.ic_error,
+                            snackBarState = SNACK_BAR_STATUS_ERROR
+                        )
+                        snackbarHostState.showSnackbar("")
                         userFavProductsId.data?.remove(clickedProduct!!.id)
                     }
                     else -> {}
@@ -152,6 +157,13 @@ fun CategoriesScreen(
                 navController = navController
             )
         },
+        snackbarHost = {
+            SnackBar(
+                modifier = Modifier.padding(MEDIUM_PADDING),
+                snackbarHostState = snackbarHostState,
+                snackBarData = snackBarData
+            )
+        }
     ) {
         Column(
             modifier = Modifier
@@ -203,6 +215,7 @@ fun CategoriesScreen(
                     ) { product ->
                         product?.let {
 
+                            println(product.id)
                             var isFav = false
 
                             userFavProductsId.data?.let { ids ->
@@ -236,6 +249,7 @@ fun CategoriesScreen(
                     }
                 }
             }
+
         }
     }
 }

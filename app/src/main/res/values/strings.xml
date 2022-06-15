@@ -92,4 +92,7 @@
     <string name="take_picture">Take picture</string>
     <string name="turn_off_camera">Turn off camera</string>
     <string name="product_image">Product image</string>
+    <string name="paid">Paid</string>
+    <string name="discount">Discount</string>
+    <string name="total_cart_product_number">My cart (%d items)</string>
 </resources>

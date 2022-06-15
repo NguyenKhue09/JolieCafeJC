@@ -72,7 +72,9 @@ object RepositoryModule {
             addNewAddressUseCase = AddNewAddressUseCase(repository = repository),
             addNewDefaultAddressUseCase = AddNewDefaultAddressUseCase(repository = repository),
             updateAddressUseCase = UpdateAddressUseCase(repository = repository),
-            deleteAddressUseCase = DeleteAddressUseCase(repository = repository)
+            deleteAddressUseCase = DeleteAddressUseCase(repository = repository),
+            addProductToCartUseCase = AddProductToCartUseCase(repository = repository),
+            getCartItemsUseCase = GetCartItemsUseCase(repository = repository),
         )
     }
 }

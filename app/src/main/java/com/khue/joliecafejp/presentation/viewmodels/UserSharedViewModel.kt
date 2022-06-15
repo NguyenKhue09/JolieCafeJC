@@ -28,13 +28,13 @@ class UserSharedViewModel @Inject constructor(
     private val dataStoreUseCases: DataStoreUseCases
 ): ViewModel() {
 
-    private val _userInfos = MutableStateFlow<ApiResult<User>>(ApiResult.Loading())
+    private val _userInfos = MutableStateFlow<ApiResult<User>>(ApiResult.Idle())
     val userInfos: StateFlow<ApiResult<User>> = _userInfos
 
-    private val _userLoginResponse = MutableStateFlow<ApiResult<User>>(ApiResult.Loading())
+    private val _userLoginResponse = MutableStateFlow<ApiResult<User>>(ApiResult.Idle())
     val userLoginResponse: StateFlow<ApiResult<User>> = _userLoginResponse
 
-    private val _updateUserInfosResponse = MutableStateFlow<ApiResult<Unit>>(ApiResult.Loading())
+    private val _updateUserInfosResponse = MutableStateFlow<ApiResult<Unit>>(ApiResult.Idle())
     val updateUserInfosResponse: StateFlow<ApiResult<Unit>> = _updateUserInfosResponse
 
     val userToken  = dataStoreUseCases.readUserTokenUseCase()
@@ -46,6 +46,7 @@ class UserSharedViewModel @Inject constructor(
 
     fun userLogin(userId: String) =
         viewModelScope.launch {
+            _userLoginResponse.value = ApiResult.Loading()
             try {
                 val response = apiUseCases.userLoginUseCase(userId = userId)
                 _userLoginResponse.value = handleApiResponse(response = response)
@@ -57,6 +58,7 @@ class UserSharedViewModel @Inject constructor(
 
     fun createUser(userData: Map<String, String>) =
         viewModelScope.launch {
+            _userInfos.value = ApiResult.Loading()
             try {
                 val response = apiUseCases.createUserUseCase(data = userData)
                 _userLoginResponse.value = handleApiResponse(response = response)
@@ -68,6 +70,7 @@ class UserSharedViewModel @Inject constructor(
 
     fun getUserInfos(token: String) =
         viewModelScope.launch {
+            _userInfos.value = ApiResult.Loading()
             try {
                 val response = apiUseCases.getUserInfosUseCase(token = token)
                 _userInfos.value = handleApiResponse(response = response)
@@ -79,6 +82,7 @@ class UserSharedViewModel @Inject constructor(
 
     fun updateUserInfos(token: String, userInfos: Map<String, String>) {
         viewModelScope.launch {
+            _updateUserInfosResponse.value = ApiResult.Loading()
             try {
                 val response = apiUseCases.updateUserInfosUseCase(token = token, userInfos = userInfos)
                 _updateUserInfosResponse.value = handleUpdateUserInfosApiResponse(response = response)
@@ -129,7 +133,7 @@ class UserSharedViewModel @Inject constructor(
         }
     }
 
-    private fun updateUserResponse(user: User){
+    fun updateUserResponse(user: User){
         _userInfos.value = ApiResult.Success(user)
     }
 
@@ -186,7 +190,14 @@ class UserSharedViewModel @Inject constructor(
         }
     }
 
+    fun resetResponseState() {
+        _userLoginResponse.value = ApiResult.Idle()
+        _userInfos.value = ApiResult.Idle()
+        _updateUserInfosResponse.value = ApiResult.Idle()
+    }
+
     sealed class ValidationEvent {
         object Success: ValidationEvent()
     }
+
 }

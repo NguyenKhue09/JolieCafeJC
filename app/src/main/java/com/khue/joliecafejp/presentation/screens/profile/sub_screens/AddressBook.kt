@@ -1,6 +1,5 @@
 package com.khue.joliecafejp.presentation.screens.profile.sub_screens
 
-import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -31,14 +30,17 @@ import androidx.paging.compose.itemsIndexed
 import com.khue.joliecafejp.R
 import com.khue.joliecafejp.domain.model.AddNewAddressFormState
 import com.khue.joliecafejp.domain.model.Address
+import com.khue.joliecafejp.domain.model.SnackBarData
 import com.khue.joliecafejp.navigation.nav_screen.ProfileSubScreen
 import com.khue.joliecafejp.presentation.common.*
-import com.khue.joliecafejp.presentation.components.*
+import com.khue.joliecafejp.presentation.components.AddressBookItem
 import com.khue.joliecafejp.presentation.viewmodels.AddressBookViewModel
 import com.khue.joliecafejp.presentation.viewmodels.UserSharedViewModel
 import com.khue.joliecafejp.ui.theme.*
 import com.khue.joliecafejp.utils.AddNewAddressFormEvent
 import com.khue.joliecafejp.utils.ApiResult
+import com.khue.joliecafejp.utils.Constants
+import com.khue.joliecafejp.utils.Constants.Companion.SNACK_BAR_STATUS_ERROR
 import kotlinx.coroutines.launch
 
 @Composable
@@ -47,6 +49,19 @@ fun AddressBook(
     addressBookViewModel: AddressBookViewModel = hiltViewModel(),
     userSharedViewModel: UserSharedViewModel
 ) {
+
+    val snackbarHostState = remember { SnackbarHostState() }
+    var snackBarData by remember {
+        mutableStateOf(
+            SnackBarData(
+                iconId = R.drawable.ic_success,
+                message = "",
+                snackBarState = Constants.SNACK_BAR_STATUS_SUCCESS,
+            )
+        )
+    }
+
+    val coroutineScope = rememberCoroutineScope()
 
     val userToken by addressBookViewModel.userToken.collectAsState(initial = "")
     val userData by userSharedViewModel.userInfos.collectAsState()
@@ -100,12 +115,20 @@ fun AddressBook(
                     is ApiResult.Success -> {
                         isAddNewAddress = false
                         addressBooks.refresh()
-                        Toast.makeText(context, "Add new address successfully", Toast.LENGTH_SHORT)
-                            .show()
+                        snackBarData = snackBarData.copy(
+                            message = "Add new address successfully",
+                            iconId = R.drawable.ic_success,
+                            snackBarState = Constants.SNACK_BAR_STATUS_SUCCESS
+                        )
+                        snackbarHostState.showSnackbar("")
                     }
                     is ApiResult.Error -> {
-                        Toast.makeText(context, "Add new address failed!", Toast.LENGTH_SHORT)
-                            .show()
+                        snackBarData = snackBarData.copy(
+                            message = "Add new address failed!",
+                            iconId = R.drawable.ic_error,
+                            snackBarState = Constants.SNACK_BAR_STATUS_ERROR
+                        )
+                        snackbarHostState.showSnackbar("")
                     }
                     else -> {}
                 }
@@ -117,42 +140,61 @@ fun AddressBook(
                     is ApiResult.Success -> {
                         isAddNewAddress = false
                         addressBooks.refresh()
-                        Toast.makeText(
-                            context,
-                            "Add new default address successfully",
-                            Toast.LENGTH_SHORT
-                        ).show()
+
+                        result.data?.let {
+                            userSharedViewModel.updateUserResponse(user = it)
+                        }
+
+                        snackBarData = snackBarData.copy(
+                            message = "Add new default address successfully",
+                            iconId = R.drawable.ic_success,
+                            snackBarState = Constants.SNACK_BAR_STATUS_SUCCESS
+                        )
+                        snackbarHostState.showSnackbar("")
                     }
                     is ApiResult.Error -> {
-                        Toast.makeText(
-                            context,
-                            "Add new default address failed!",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        snackBarData = snackBarData.copy(
+                            message = "Add new default address failed!",
+                            iconId = R.drawable.ic_error,
+                            snackBarState = Constants.SNACK_BAR_STATUS_ERROR
+                        )
+                        snackbarHostState.showSnackbar("")
                     }
                     else -> {}
                 }
 
             }
-        }
-        launch {
-
         }
         launch {
             addressBookViewModel.deleteAddressResponse.collect { result ->
                 when (result) {
                     is ApiResult.Success -> {
-                        Toast.makeText(context, "Delete address successfully", Toast.LENGTH_SHORT)
-                            .show()
+                        snackBarData = snackBarData.copy(
+                            message = "Delete address successfully",
+                            iconId = R.drawable.ic_success,
+                            snackBarState = Constants.SNACK_BAR_STATUS_SUCCESS
+                        )
+                        snackbarHostState.showSnackbar("")
                         addressBooks.refresh()
                     }
                     is ApiResult.Error -> {
-                        Toast.makeText(context, "Delete address failed!", Toast.LENGTH_SHORT).show()
+                        snackBarData = snackBarData.copy(
+                            message = "Delete address failed!",
+                            iconId = R.drawable.ic_error,
+                            snackBarState = Constants.SNACK_BAR_STATUS_ERROR
+                        )
+                        snackbarHostState.showSnackbar("")
                     }
                     else -> {}
                 }
 
             }
+        }
+    }
+
+    DisposableEffect(key1 = Unit) {
+        onDispose {
+            userSharedViewModel.resetResponseState()
         }
     }
 
@@ -165,6 +207,13 @@ fun AddressBook(
                 navController = navController
             )
         },
+        snackbarHost = {
+            SnackBar(
+                modifier = Modifier.padding(MEDIUM_PADDING),
+                snackbarHostState = snackbarHostState,
+                snackBarData = snackBarData
+            )
+        }
     ) {
 
         Column(
@@ -180,7 +229,16 @@ fun AddressBook(
                     .fillMaxSize()
                     .weight(1f),
             ) {
-                val result = handlePagingResult(addressBooks = addressBooks)
+                val result = handlePagingResult(addressBooks = addressBooks) { message, status ->
+                    snackBarData = snackBarData.copy(
+                        message = message,
+                        iconId = R.drawable.ic_error,
+                        snackBarState = status
+                    )
+                    coroutineScope.launch {
+                        snackbarHostState.showSnackbar("")
+                    }
+                }
 
                 androidx.compose.animation.AnimatedVisibility(result) {
                     LazyColumn(
@@ -230,18 +288,33 @@ fun AddressBook(
                                         showDeleteCustomDialog = true
                                     },
                                     onUpdateDefaultAddress = {
-                                        userSharedViewModel.updateUserInfos(token = userToken, userInfos = mapOf(
-                                            "defaultAddress" to address.id
-                                        ))
+                                        userSharedViewModel.updateUserInfos(
+                                            token = userToken, userInfos = mapOf(
+                                                "defaultAddress" to address.id
+                                            )
+                                        )
                                     },
                                     onUpdate = { name, phone, addressString ->
                                         val data = mapOf(
                                             "phone" to phone,
                                             "userName" to name,
                                             "address" to addressString,
-                                            //"addressId" to address.id
+                                            "addressId" to address.id
                                         )
-                                        addressBookViewModel.updateAddress(newAddressData = data, token = userToken)
+                                        addressBookViewModel.updateAddress(
+                                            newAddressData = data,
+                                            token = userToken
+                                        )
+                                    },
+                                    showMessage = { message, status ->
+                                        snackBarData = snackBarData.copy(
+                                            message = message,
+                                            iconId = if(status == Constants.SNACK_BAR_STATUS_SUCCESS) R.drawable.ic_success else R.drawable.ic_error,
+                                            snackBarState = status
+                                        )
+                                        coroutineScope.launch {
+                                            snackbarHostState.showSnackbar("")
+                                        }
                                     }
                                 )
                             }
@@ -548,7 +621,8 @@ fun CardAddNewAddress(
 
 @Composable
 fun handlePagingResult(
-    addressBooks: LazyPagingItems<Address>
+    addressBooks: LazyPagingItems<Address>,
+    showMessage: (String, Int) -> Unit
 ): Boolean {
     addressBooks.apply {
         val error = when {
@@ -564,7 +638,7 @@ fun handlePagingResult(
                 false
             }
             error != null -> {
-                Toast.makeText(LocalContext.current, error.error.message, Toast.LENGTH_SHORT).show()
+                showMessage(error.error.message ?: "Unknown error", SNACK_BAR_STATUS_ERROR)
                 false
             }
             addressBooks.itemCount < 1 -> {
