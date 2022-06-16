@@ -109,7 +109,7 @@ fun AddressBookItem(
 
 
     CardCustom(
-        onClick = {},
+        onClick = null,
         paddingValues = paddingValues,
         haveBorder = isDefaultAddress
     ) {

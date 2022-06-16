@@ -32,7 +32,7 @@ fun CartProductGroup(
             end = 0.dp,
             bottom = 0.dp
         ),
-        onClick = {}
+        onClick = null
     ) {
         Column(
         ) {

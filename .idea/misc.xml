@@ -9,8 +9,10 @@
         <entry key="..\:/AndroidStudioProjects/JolieCafeJP/app/src/main/res/drawable/ic_add.xml" value="0.163" />
         <entry key="..\:/AndroidStudioProjects/JolieCafeJP/app/src/main/res/drawable/ic_camera.xml" value="0.1" />
         <entry key="..\:/AndroidStudioProjects/JolieCafeJP/app/src/main/res/drawable/ic_capture.xml" value="0.2555" />
+        <entry key="..\:/AndroidStudioProjects/JolieCafeJP/app/src/main/res/drawable/ic_cash.xml" value="0.2645" />
         <entry key="..\:/AndroidStudioProjects/JolieCafeJP/app/src/main/res/drawable/ic_chevron_up.xml" value="0.1885" />
         <entry key="..\:/AndroidStudioProjects/JolieCafeJP/app/src/main/res/drawable/ic_clear.xml" value="0.163" />
+        <entry key="..\:/AndroidStudioProjects/JolieCafeJP/app/src/main/res/drawable/ic_credit_card.xml" value="0.2645" />
         <entry key="..\:/AndroidStudioProjects/JolieCafeJP/app/src/main/res/drawable/ic_croissant_svgrepo_com.xml" value="0.1105" />
         <entry key="..\:/AndroidStudioProjects/JolieCafeJP/app/src/main/res/drawable/ic_edit.xml" value="0.163" />
         <entry key="..\:/AndroidStudioProjects/JolieCafeJP/app/src/main/res/drawable/ic_error.xml" value="0.2135" />
@@ -26,6 +28,7 @@
         <entry key="..\:/AndroidStudioProjects/JolieCafeJP/app/src/main/res/drawable/ic_switch_camera.xml" value="0.2305" />
         <entry key="..\:/AndroidStudioProjects/JolieCafeJP/app/src/main/res/drawable/ic_trash.xml" value="0.163" />
         <entry key="..\:/AndroidStudioProjects/JolieCafeJP/app/src/main/res/drawable/ic_turnoff_camera.xml" value="0.2145" />
+        <entry key="..\:/AndroidStudioProjects/JolieCafeJP/app/src/main/res/drawable/ic_voucher.xml" value="0.2645" />
         <entry key="..\:/AndroidStudioProjects/JolieCafeJP/app/src/main/res/font/fonts.xml" value="0.28020833333333334" />
       </map>
     </option>

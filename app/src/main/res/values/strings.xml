@@ -95,4 +95,14 @@
     <string name="paid">Paid</string>
     <string name="discount">Discount</string>
     <string name="total_cart_product_number">My cart (%d items)</string>
+    <string name="checkout">Checkout</string>
+    <string name="total_cost">Total: %s VND</string>
+    <string name="shipping_infos">Shipping Information</string>
+    <string name="products">Products</string>
+    <string name="quantities">Quantities: %d</string>
+    <string name="product_size">Size: %s</string>
+    <string name="vouchers">Vouchers</string>
+    <string name="choose_a_voucher">Choose a voucher...</string>
+    <string name="cod_payment">COD Payment</string>
+    <string name="cash">Cash</string>
 </resources>

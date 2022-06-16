@@ -29,7 +29,7 @@ fun CardCustom(
         bottom = 0.dp
     ),
     backgroundColor: Color = MaterialTheme.colors.greyOpacity60Primary,
-    onClick: () -> Unit,
+    onClick: (() -> Unit)?,
     content: @Composable () -> Unit,
 ) {
     Card(
@@ -41,13 +41,21 @@ fun CardCustom(
                 color = MaterialTheme.colors.textColor2,
                 shape = MaterialTheme.shapes.medium
             )
-            .clickable() {
-                onClick()
+            .clickable(
+                enabled = onClick != null,
+            ) {
+                if (onClick != null) {
+                    onClick()
+                }
             } else modifier
             .padding(paddingValues)
             .clip(shape = shape)
-            .clickable() {
-                onClick()
+            .clickable(
+                enabled = onClick != null,
+            ) {
+                if (onClick != null) {
+                    onClick()
+                }
             },
         shape = shape,
         backgroundColor = backgroundColor,

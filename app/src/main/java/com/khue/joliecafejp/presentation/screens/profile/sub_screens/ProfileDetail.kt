@@ -49,7 +49,6 @@ import com.khue.joliecafejp.ui.theme.*
 import com.khue.joliecafejp.utils.ApiResult
 import com.khue.joliecafejp.utils.Constants
 import com.khue.joliecafejp.utils.ProfileUpdateFormEvent
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 
@@ -464,7 +463,7 @@ fun BoxUserImage(
 fun CardUserEmail(
     userEmail: String
 ) {
-    CardCustom(onClick = {}) {
+    CardCustom(onClick = null) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -500,7 +499,7 @@ fun CardUserNameAndPhone(
     onUserPhoneNumberChange: (String) -> Unit,
     onSaveUserData: () -> Unit
 ) {
-    CardCustom(onClick = {}) {
+    CardCustom(onClick = null) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -603,7 +602,7 @@ fun CardChangePassword(
 ) {
 
 
-    CardCustom(onClick = {}) {
+    CardCustom(onClick = null) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -751,7 +750,7 @@ fun CardNewPassword(
     onCancelChangeNewPassword: () -> Unit
 ) {
     CardCustom(
-        onClick = {},
+        onClick = null,
         paddingValues = PaddingValues(all = EXTRA_LARGE_PADDING)
     ) {
         Column(

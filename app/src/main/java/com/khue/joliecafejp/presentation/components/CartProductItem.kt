@@ -39,7 +39,7 @@ fun CartProductItem(
             end = ZERO_PADDING,
             bottom = EXTRA_LARGE_PADDING
         ),
-        onClick = {}
+        onClick = null
     ) {
         Row(
             modifier = modifier

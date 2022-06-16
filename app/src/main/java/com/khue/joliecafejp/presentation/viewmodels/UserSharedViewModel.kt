@@ -192,7 +192,6 @@ class UserSharedViewModel @Inject constructor(
 
     fun resetResponseState() {
         _userLoginResponse.value = ApiResult.Idle()
-        _userInfos.value = ApiResult.Idle()
         _updateUserInfosResponse.value = ApiResult.Idle()
     }
 
