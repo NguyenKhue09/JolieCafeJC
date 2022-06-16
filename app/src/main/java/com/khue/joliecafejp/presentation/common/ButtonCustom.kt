@@ -36,7 +36,7 @@ fun ButtonCustom(
     ) {
         Text(
             text = buttonContent,
-            fontSize = MaterialTheme.typography.subtitle2.fontSize,
+            fontSize = MaterialTheme.typography.subtitle1.fontSize,
             fontFamily = ralewayMedium,
         )
     }

@@ -5,9 +5,13 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class CartItem(
-    @SerialName("productId")
-    val product: Product,
+    @SerialName("_id")
+    val id: String,
+    val productId: String,
+    @SerialName("product_detail")
+    val productDetail:Product,
     val size: String,
-    val quantity: Int,
-    val price: Double
+    var quantity: Int,
+    var price: Double
 )
+

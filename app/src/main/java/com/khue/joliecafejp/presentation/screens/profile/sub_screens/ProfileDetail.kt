@@ -1,7 +1,6 @@
 package com.khue.joliecafejp.presentation.screens.profile.sub_screens
 
 import android.annotation.SuppressLint
-import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -38,6 +37,7 @@ import androidx.navigation.NavHostController
 import com.google.firebase.auth.FirebaseAuth
 import com.khue.joliecafejp.R
 import com.khue.joliecafejp.domain.model.ProfileUpdateFormState
+import com.khue.joliecafejp.domain.model.SnackBarData
 import com.khue.joliecafejp.navigation.nav_graph.AUTHENTICATION_ROUTE
 import com.khue.joliecafejp.navigation.nav_screen.BottomBarScreen
 import com.khue.joliecafejp.navigation.nav_screen.ProfileSubScreen
@@ -47,8 +47,8 @@ import com.khue.joliecafejp.presentation.viewmodels.UserSharedViewModel
 import com.khue.joliecafejp.presentation.viewmodels.ProfileDetailViewModel
 import com.khue.joliecafejp.ui.theme.*
 import com.khue.joliecafejp.utils.ApiResult
+import com.khue.joliecafejp.utils.Constants
 import com.khue.joliecafejp.utils.ProfileUpdateFormEvent
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 
@@ -60,6 +60,8 @@ fun ProfileDetail(
     userSharedViewModel: UserSharedViewModel,
     profileDetailViewModel: ProfileDetailViewModel = hiltViewModel()
 ) {
+
+    val snackbarHostState = remember { SnackbarHostState() }
 
     val focusManager = LocalFocusManager.current
 
@@ -76,7 +78,7 @@ fun ProfileDetail(
     }
 
     val passwordVisible = rememberSaveable { mutableStateOf(false) }
-    var createNewPassword  by rememberSaveable { mutableStateOf(false) }
+    var createNewPassword by rememberSaveable { mutableStateOf(false) }
     val newPasswordVisible = rememberSaveable { mutableStateOf(false) }
     val confirmNewPasswordVisible = rememberSaveable { mutableStateOf(false) }
 
@@ -91,6 +93,16 @@ fun ProfileDetail(
 
     var isGGorFaceLogin by remember {
         mutableStateOf(true)
+    }
+
+    var snackBarData by remember {
+        mutableStateOf(
+            SnackBarData(
+                iconId = R.drawable.ic_success,
+                message = "",
+                snackBarState = Constants.SNACK_BAR_STATUS_SUCCESS,
+            )
+        )
     }
 
 
@@ -111,7 +123,10 @@ fun ProfileDetail(
                 ProfileUpdateFormEvent.UserNameChanged(username = userLoginResponse.data!!.fullName)
             )
             profileDetailViewModel.onPhoneAndNameChangeEvent(
-                ProfileUpdateFormEvent.UserPhoneNumberChanged(userPhoneNumber = userLoginResponse.data!!.phone ?: "You don't have phone number")
+                ProfileUpdateFormEvent.UserPhoneNumberChanged(
+                    userPhoneNumber = userLoginResponse.data!!.phone
+                        ?: "You don't have phone number"
+                )
             )
         }
     }
@@ -136,14 +151,25 @@ fun ProfileDetail(
                 is ProfileDetailViewModel.ValidationEvent.ReAuthenticationSuccess -> {
                     isChangePassword.value = false
                     createNewPassword = true
-                    profileDetailViewModel.onCurrentPasswordChangeEvent(event = ProfileUpdateFormEvent.CurrentPasswordChanged(currentPassword = "password"))
+                    profileDetailViewModel.onCurrentPasswordChangeEvent(
+                        event = ProfileUpdateFormEvent.CurrentPasswordChanged(
+                            currentPassword = "password"
+                        )
+                    )
                 }
                 is ProfileDetailViewModel.ValidationEvent.NewPasswordValid -> {
                     profileDetailViewModel.updateNewPassword(password = validateState.newPassword)
                 }
                 is ProfileDetailViewModel.ValidationEvent.ChangePasswordSuccess -> {
                     createNewPassword = false
-                    Toast.makeText(context, "Change password success", Toast.LENGTH_SHORT).show()
+
+                    snackBarData = snackBarData.copy(
+                        message = "Change password success",
+                        iconId = R.drawable.ic_success,
+                        snackBarState = Constants.SNACK_BAR_STATUS_SUCCESS
+                    )
+                    snackbarHostState.showSnackbar("")
+
                     cleanChangePasswordFormState(
                         focusManager = focusManager,
                         profileDetailViewModel = profileDetailViewModel
@@ -152,7 +178,13 @@ fun ProfileDetail(
                 }
                 is ProfileDetailViewModel.ValidationEvent.ChangePasswordFailed -> {
                     createNewPassword = true
-                    Toast.makeText(context, "Change password failed!", Toast.LENGTH_SHORT).show()
+
+                    snackBarData = snackBarData.copy(
+                        message = "Change password failed!",
+                        iconId = R.drawable.ic_error,
+                        snackBarState = Constants.SNACK_BAR_STATUS_ERROR
+                    )
+                    snackbarHostState.showSnackbar("")
                 }
             }
         }
@@ -160,14 +192,26 @@ fun ProfileDetail(
 
     LaunchedEffect(key1 = true) {
         userSharedViewModel.updateUserInfosResponse.collect { result ->
-            when(result) {
+            when (result) {
                 is ApiResult.NullDataSuccess -> {
                     isEdit.value = false
-                    Toast.makeText(context, "Update phone and name success", Toast.LENGTH_SHORT).show()
+
+                    snackBarData = snackBarData.copy(
+                        message = "Update phone and name success",
+                        iconId = R.drawable.ic_success,
+                        snackBarState = Constants.SNACK_BAR_STATUS_SUCCESS
+                    )
+                    snackbarHostState.showSnackbar("")
                 }
                 is ApiResult.Error -> {
                     isEdit.value = true
-                    Toast.makeText(context, result.message, Toast.LENGTH_SHORT).show()
+
+                    snackBarData = snackBarData.copy(
+                        message = result.message!!,
+                        iconId = R.drawable.ic_error,
+                        snackBarState = Constants.SNACK_BAR_STATUS_ERROR
+                    )
+                    snackbarHostState.showSnackbar("")
                 }
                 else -> {}
             }
@@ -200,7 +244,10 @@ fun ProfileDetail(
                 }
             )
         },
-        sheetShape = MaterialTheme.shapes.large.copy(bottomEnd = CornerSize(0), bottomStart = CornerSize(0))
+        sheetShape = MaterialTheme.shapes.large.copy(
+            bottomEnd = CornerSize(0),
+            bottomStart = CornerSize(0)
+        )
     ) {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
@@ -211,6 +258,13 @@ fun ProfileDetail(
                     navController = navController
                 )
             },
+            snackbarHost = {
+                SnackBar(
+                    modifier = Modifier.padding(MEDIUM_PADDING),
+                    snackbarHostState = snackbarHostState,
+                    snackBarData = snackBarData
+                )
+            }
         ) {
             Column(
                 modifier = Modifier
@@ -222,12 +276,22 @@ fun ProfileDetail(
             ) {
 
                 BoxUserImage(
-                    coroutineScope = coroutineScope,
-                    state = modalBottomSheetState,
-                    isGGorFaceLogin = isGGorFaceLogin,
                     image = userLoginResponse.data?.thumbnail
                         ?: FirebaseAuth.getInstance().currentUser?.photoUrl.toString()
-                )
+                ) {
+                    if (isGGorFaceLogin) {
+                        snackBarData = snackBarData.copy(
+                            message = "Only login by Email and Password can change avatar",
+                            iconId = R.drawable.ic_sad,
+                            snackBarState = Constants.SNACK_BAR_STATUS_DISABLE
+                        )
+                        coroutineScope.launch {
+                            snackbarHostState.showSnackbar("")
+                        }
+                    } else {
+                        coroutineScope.launch { modalBottomSheetState.show() }
+                    }
+                }
 
                 CardUserEmail(
                     userEmail = userLoginResponse.data?.email ?: "Can't load your email"
@@ -251,7 +315,9 @@ fun ProfileDetail(
                         )
                     },
                     onSaveUserData = {
-                        if(isEdit.value) profileDetailViewModel.onPhoneAndNameChangeEvent(ProfileUpdateFormEvent.PhoneAndNameSubmit)
+                        if (isEdit.value) profileDetailViewModel.onPhoneAndNameChangeEvent(
+                            ProfileUpdateFormEvent.PhoneAndNameSubmit
+                        )
                         isEdit.value = true
                     }
                 )
@@ -261,14 +327,36 @@ fun ProfileDetail(
                 ) {
                     CardChangePassword(
                         validateState = validateState,
-                        isGGorFaceLogin = isGGorFaceLogin,
                         isChangePassword = isChangePassword,
                         passwordVisible = passwordVisible,
                         onPasswordChange = { currentPassword ->
-                            profileDetailViewModel.onCurrentPasswordChangeEvent(event = ProfileUpdateFormEvent.CurrentPasswordChanged(currentPassword = currentPassword))
+                            profileDetailViewModel.onCurrentPasswordChangeEvent(
+                                event = ProfileUpdateFormEvent.CurrentPasswordChanged(
+                                    currentPassword = currentPassword
+                                )
+                            )
                         },
                         onConfirmCurrentPassword = {
                             profileDetailViewModel.onCurrentPasswordChangeEvent(event = ProfileUpdateFormEvent.CurrentPasswordSubmit)
+                        },
+                        onChangePasswordClicked = {
+                            if (isGGorFaceLogin) {
+                                snackBarData = snackBarData.copy(
+                                    message = "Only login by Email and Password can change password",
+                                    iconId = R.drawable.ic_sad,
+                                    snackBarState = Constants.SNACK_BAR_STATUS_DISABLE
+                                )
+                                coroutineScope.launch {
+                                    snackbarHostState.showSnackbar("")
+                                }
+                            } else {
+                                isChangePassword.value = true
+                                profileDetailViewModel.onCurrentPasswordChangeEvent(
+                                    event = ProfileUpdateFormEvent.CurrentPasswordChanged(
+                                        currentPassword = ""
+                                    )
+                                )
+                            }
                         }
                     )
                 }
@@ -282,10 +370,18 @@ fun ProfileDetail(
                         newPasswordVisible = newPasswordVisible,
                         confirmNewPasswordVisible = confirmNewPasswordVisible,
                         onNewPasswordChange = { newPassword ->
-                            profileDetailViewModel.onCreateNewPasswordChangeEvent(event = ProfileUpdateFormEvent.NewPasswordChanged(newPassword = newPassword))
+                            profileDetailViewModel.onCreateNewPasswordChangeEvent(
+                                event = ProfileUpdateFormEvent.NewPasswordChanged(
+                                    newPassword = newPassword
+                                )
+                            )
                         },
                         onNewConfirmPasswordChange = { confirmPassword ->
-                            profileDetailViewModel.onCreateNewPasswordChangeEvent(event = ProfileUpdateFormEvent.ConfirmPasswordChanged(confirmPassword = confirmPassword))
+                            profileDetailViewModel.onCreateNewPasswordChangeEvent(
+                                event = ProfileUpdateFormEvent.ConfirmPasswordChanged(
+                                    confirmPassword = confirmPassword
+                                )
+                            )
                         },
                         onSubmitNewPassword = {
                             profileDetailViewModel.onCreateNewPasswordChangeEvent(event = ProfileUpdateFormEvent.ChangeNewPasswordSubmit)
@@ -320,20 +416,25 @@ fun cleanChangePasswordFormState(
     profileDetailViewModel: ProfileDetailViewModel
 ) {
     focusManager.clearFocus()
-    profileDetailViewModel.onCreateNewPasswordChangeEvent(event = ProfileUpdateFormEvent.NewPasswordChanged(newPassword = ""))
-    profileDetailViewModel.onCreateNewPasswordChangeEvent(event = ProfileUpdateFormEvent.ConfirmPasswordChanged(confirmPassword = ""))
+    profileDetailViewModel.onCreateNewPasswordChangeEvent(
+        event = ProfileUpdateFormEvent.NewPasswordChanged(
+            newPassword = ""
+        )
+    )
+    profileDetailViewModel.onCreateNewPasswordChangeEvent(
+        event = ProfileUpdateFormEvent.ConfirmPasswordChanged(
+            confirmPassword = ""
+        )
+    )
     profileDetailViewModel.cleanChangeNewPasswordError()
 }
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun BoxUserImage(
-    coroutineScope: CoroutineScope,
-    state: ModalBottomSheetState,
-    isGGorFaceLogin: Boolean,
-    image: String
+    image: String,
+    onGetImageClicked: () -> Unit
 ) {
-    val context = LocalContext.current
     Box(
         modifier = Modifier.padding(bottom = EXTRA_EXTRA_LARGE_PADDING),
         contentAlignment = Alignment.BottomEnd
@@ -347,17 +448,7 @@ fun BoxUserImage(
                 .size(ICON_BUTTON_PROFILE_DETAIL_SIZE)
                 .clip(CircleShape)
                 .background(color = MaterialTheme.colors.greySecondary),
-            onClick = {
-                if (isGGorFaceLogin) {
-                    Toast.makeText(
-                        context,
-                        "Only login by Email and Password can change avatar",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                } else {
-                    coroutineScope.launch { state.show() }
-                }
-            }
+            onClick = onGetImageClicked
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_camera),
@@ -372,7 +463,7 @@ fun BoxUserImage(
 fun CardUserEmail(
     userEmail: String
 ) {
-    CardCustom(onClick = {}) {
+    CardCustom(onClick = null) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -408,7 +499,7 @@ fun CardUserNameAndPhone(
     onUserPhoneNumberChange: (String) -> Unit,
     onSaveUserData: () -> Unit
 ) {
-    CardCustom(onClick = {}) {
+    CardCustom(onClick = null) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -503,16 +594,15 @@ fun CardUserNameAndPhone(
 @Composable
 fun CardChangePassword(
     validateState: ProfileUpdateFormState,
-    isGGorFaceLogin: Boolean,
     isChangePassword: MutableState<Boolean>,
     passwordVisible: MutableState<Boolean>,
     onPasswordChange: (String) -> Unit,
     onConfirmCurrentPassword: () -> Unit,
+    onChangePasswordClicked: () -> Unit
 ) {
 
-    val context = LocalContext.current
 
-    CardCustom(onClick = {}) {
+    CardCustom(onClick = null) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -546,16 +636,7 @@ fun CardChangePassword(
                             indication = null,
                             interactionSource = remember { MutableInteractionSource() }
                         ) {
-                            if (isGGorFaceLogin) {
-                                Toast.makeText(
-                                    context,
-                                    "Only login by Email and Password can change password",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            } else {
-                                isChangePassword.value = true
-                                onPasswordChange("")
-                            }
+                            onChangePasswordClicked()
                         },
                         text = stringResource(R.string.change),
                         fontFamily = raleway,
@@ -669,7 +750,7 @@ fun CardNewPassword(
     onCancelChangeNewPassword: () -> Unit
 ) {
     CardCustom(
-        onClick = {},
+        onClick = null,
         paddingValues = PaddingValues(all = EXTRA_LARGE_PADDING)
     ) {
         Column(

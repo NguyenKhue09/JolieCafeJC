@@ -15,14 +15,37 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import com.khue.joliecafejp.R
+import com.khue.joliecafejp.domain.model.CartItem
+import com.khue.joliecafejp.domain.model.Product
 import com.khue.joliecafejp.ui.theme.*
 
 @Composable
 fun ProductOrderHistoryItem(
     modifier: Modifier = Modifier,
-    name: String = "Black Tea",
-    price: Int = 90000,
-    quantities: Int = 5,
+    item: CartItem = CartItem(
+        id = "",
+        productId = "",
+        price = 100000.0,
+        quantity = 5,
+        size = "M",
+        productDetail = Product(
+            discountPercent = 0,
+            startDateDiscount = "2022-06-09T03:43:49.731Z",
+            endDateDiscount = "2022-06-09T03:43:49.731Z",
+            id = "6267f76e02095fbefdd3cbae",
+            name = "Molasses",
+            status = "Available",
+            description = "Tea, sugar cane",
+            thumbnail = "https://firebasestorage.googleapis.com/v0/b/joliecafe-799f7.appspot.com/o/molasses.jpg?alt=media&token=1d2f1aee-31bb-4307-8e49-66b0134b628e",
+            comments = emptyList(),
+            originPrice = 46000.0,
+            avgRating = 3,
+            isDeleted = false,
+            type = "Tea",
+            updatedAt = null,
+            createdAt = null
+        )
+    ),
 ) {
 
     Row(
@@ -37,7 +60,7 @@ fun ProductOrderHistoryItem(
     ) {
 
         Image(
-            modifier = modifier
+            modifier = Modifier
                 .height(IMAGE_PRODUCT_SIZE)
                 .width(IMAGE_PRODUCT_SIZE)
                 .clip(MaterialTheme.shapes.medium),
@@ -47,7 +70,7 @@ fun ProductOrderHistoryItem(
         )
 
         Column(
-            modifier = modifier
+            modifier = Modifier
                 .padding(horizontal = SMALL_PADDING)
                 .weight(weight = 1f, fill = true)
                 .wrapContentHeight(),
@@ -55,8 +78,8 @@ fun ProductOrderHistoryItem(
             horizontalAlignment = Alignment.Start
         ) {
             Text(
-                modifier = modifier.wrapContentHeight(),
-                text = "$name",
+                modifier = Modifier.wrapContentHeight(),
+                text = item.productDetail.name,
                 fontFamily = raleway,
                 color = MaterialTheme.colors.titleTextColor,
                 fontSize = MaterialTheme.typography.subtitle2.fontSize,
@@ -64,8 +87,17 @@ fun ProductOrderHistoryItem(
                 overflow = TextOverflow.Ellipsis,
             )
             Text(
-                modifier = modifier.wrapContentHeight(),
-                text = "Quantities: $quantities",
+                modifier = Modifier.wrapContentHeight(),
+                text = stringResource(R.string.quantities, item.quantity),
+                fontFamily = raleway,
+                color = MaterialTheme.colors.textColor,
+                fontSize = MaterialTheme.typography.caption.fontSize,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Text(
+                modifier = Modifier.wrapContentHeight(),
+                text = stringResource(R.string.product_size, item.size),
                 fontFamily = raleway,
                 color = MaterialTheme.colors.textColor,
                 fontSize = MaterialTheme.typography.caption.fontSize,
@@ -75,11 +107,10 @@ fun ProductOrderHistoryItem(
         }
 
         Text(
-            modifier = modifier
-                .padding(end = SMALL_PADDING)
+            modifier = Modifier
                 .weight(weight = 1f, fill = true)
                 .wrapContentHeight(),
-            text = "$price VND",
+            text = stringResource(id = R.string.product_price, item.price.toString()),
             fontFamily = montserratFontFamily,
             color = MaterialTheme.colors.textColor,
             fontSize = MaterialTheme.typography.subtitle2.fontSize,

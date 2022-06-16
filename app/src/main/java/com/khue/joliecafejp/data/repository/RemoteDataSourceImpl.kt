@@ -130,4 +130,15 @@ class RemoteDataSourceImpl(
     ): Response<ApiResponseSingleData<Address>> {
         return jolieCafeApi.addNewAddress(body = data, token = "Bearer $token")
     }
+
+    override suspend fun addProductToCart(
+        data: Map<String, String>,
+        token: String
+    ): Response<ApiResponseSingleData<Unit>> {
+        return jolieCafeApi.addProductToCart(body = data, token = "Bearer $token")
+    }
+
+    override suspend fun getCartItems(token: String): Response<ApiResponseMultiData<CartItemByCategory>> {
+        return jolieCafeApi.getCartItems(token = "Bearer $token")
+    }
 }

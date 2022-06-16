@@ -19,4 +19,6 @@ data class ApiUseCases(
     val deleteAddressUseCase: DeleteAddressUseCase,
     val addNewAddressUseCase: AddNewAddressUseCase,
     val addNewDefaultAddressUseCase: AddNewDefaultAddressUseCase,
+    val addProductToCartUseCase: AddProductToCartUseCase,
+    val getCartItemsUseCase: GetCartItemsUseCase
 )

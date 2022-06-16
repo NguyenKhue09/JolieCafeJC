@@ -55,7 +55,7 @@ fun Settings(
 fun NotificationCard(
     turnOffNotification: MutableState<Boolean>
 ) {
-    CardCustom(onClick = {}) {
+    CardCustom(onClick = null) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -102,7 +102,7 @@ fun NotificationCard(
 @Composable
 fun LanguageCard(
 ) {
-    CardCustom(onClick = {}) {
+    CardCustom(onClick = null) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()

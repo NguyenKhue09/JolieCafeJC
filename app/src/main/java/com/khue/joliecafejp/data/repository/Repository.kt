@@ -118,4 +118,17 @@ class Repository @Inject constructor(
     ): Response<ApiResponseSingleData<Address>> {
         return remote.addNewAddress(data = data, token = token)
     }
+
+    suspend fun addProductToCart(
+        data: Map<String, String>,
+        token: String
+    ): Response<ApiResponseSingleData<Unit>> {
+        return remote.addProductToCart(data = data, token = token)
+    }
+
+    suspend fun getCartItems(
+        token: String
+    ): Response<ApiResponseMultiData<CartItemByCategory>> {
+        return remote.getCartItems(token = token)
+    }
 }

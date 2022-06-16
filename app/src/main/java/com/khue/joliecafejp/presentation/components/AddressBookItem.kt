@@ -1,8 +1,6 @@
 package com.khue.joliecafejp.presentation.components
 
-import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -11,7 +9,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -19,7 +16,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.google.protobuf.Api
 import com.khue.joliecafejp.R
 import com.khue.joliecafejp.domain.model.Address
 import com.khue.joliecafejp.presentation.common.ButtonCustom
@@ -29,15 +25,16 @@ import com.khue.joliecafejp.presentation.viewmodels.AddressBookViewModel
 import com.khue.joliecafejp.presentation.viewmodels.UserSharedViewModel
 import com.khue.joliecafejp.ui.theme.*
 import com.khue.joliecafejp.utils.ApiResult
-import kotlinx.coroutines.flow.collect
+import com.khue.joliecafejp.utils.Constants.Companion.SNACK_BAR_STATUS_ERROR
+import com.khue.joliecafejp.utils.Constants.Companion.SNACK_BAR_STATUS_SUCCESS
 import kotlinx.coroutines.launch
-import javax.annotation.meta.When
 
 @Composable
 fun AddressBookItem(
     address: Address,
     isDefaultAddress: Boolean,
     addressBookViewModel: AddressBookViewModel,
+    userSharedViewModel: UserSharedViewModel,
     paddingValues: PaddingValues = PaddingValues(
         top = EXTRA_LARGE_PADDING,
         start = EXTRA_LARGE_PADDING,
@@ -47,7 +44,7 @@ fun AddressBookItem(
     onDelete: () -> Unit,
     onUpdate: (String, String, String) -> Unit,
     onUpdateDefaultAddress: () -> Unit,
-    userSharedViewModel: UserSharedViewModel,
+    showMessage: (String, Int) -> Unit
 ) {
 
     var isEdit by remember {
@@ -72,21 +69,18 @@ fun AddressBookItem(
         mutableStateOf("")
     }
 
-    val context = LocalContext.current
-
     LaunchedEffect(key1 = startObserverEdit) {
         if(startObserverEdit) {
             launch {
                 addressBookViewModel.updateAddressResponse.collect { result ->
                     when (result) {
                         is ApiResult.Success -> {
-                            Toast.makeText(context, "Update address successfully", Toast.LENGTH_SHORT)
-                                .show()
+                            showMessage("Update address successfully", SNACK_BAR_STATUS_SUCCESS)
                             isEdit = false
                             startObserverEdit = false
                         }
                         is ApiResult.Error -> {
-                            Toast.makeText(context, "Update address failed!", Toast.LENGTH_SHORT).show()
+                            showMessage("Update address failed!", SNACK_BAR_STATUS_ERROR)
                         }
                         else -> {}
                     }
@@ -98,13 +92,12 @@ fun AddressBookItem(
                 userSharedViewModel.updateUserInfosResponse.collect { updateUserInfosResponse ->
                     when(updateUserInfosResponse) {
                         is ApiResult.NullDataSuccess -> {
-                            Toast.makeText(context, "Update default address successfully", Toast.LENGTH_SHORT)
-                                .show()
+                            showMessage("Update default address successfully", SNACK_BAR_STATUS_SUCCESS)
                             isEdit = false
                             startObserverEdit = false
                         }
                         is ApiResult.Error -> {
-                            Toast.makeText(context, "Update default address failed!", Toast.LENGTH_SHORT).show()
+                            showMessage("Update default address failed!", SNACK_BAR_STATUS_ERROR)
                         }
                         else -> {}
                     }
@@ -116,7 +109,7 @@ fun AddressBookItem(
 
 
     CardCustom(
-        onClick = {},
+        onClick = null,
         paddingValues = paddingValues,
         haveBorder = isDefaultAddress
     ) {

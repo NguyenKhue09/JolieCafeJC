@@ -28,6 +28,7 @@ import com.khue.joliecafejp.presentation.viewmodels.HomeViewModel
 import com.khue.joliecafejp.ui.theme.*
 import com.khue.joliecafejp.utils.AddProductToCartEvent
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -38,6 +39,8 @@ fun ProductOptionsBottomSheet(
     modalBottomSheetState: ModalBottomSheetState,
     product: Product?,
     homeViewModel: HomeViewModel,
+    onAddProductToCart: (Map<String, String>) -> Unit,
+    onPurchaseProduct: () -> Unit
 ) {
 
     val addProductToCartState by homeViewModel.addProductToCartState.collectAsState()
@@ -79,16 +82,26 @@ fun ProductOptionsBottomSheet(
         ),
     )
 
-    //val (selectedOptionSize, onOptionSizeSelected) = remember { mutableStateOf(size[0]) }
-    //val (selectedOptionSugar, onOptionSugarSelected) = remember { mutableStateOf(percent[0]) }
-    //val (selectedOptionIce, onOptionIceSelected) = remember { mutableStateOf(percent[0]) }
-    val (selectedToppingOption, onToppingOptionSelected) = remember {
-        mutableStateOf<ProductTopping?>(
-            null
-        )
+    LaunchedEffect(key1 = product) {
+        homeViewModel.productEvent.collect { event ->
+            when (event) {
+                is HomeViewModel.ProductEvent.AddToCart -> {
+                    product?.let {
+                        val data = mapOf(
+                            "productId" to product.id,
+                            "size" to addProductToCartState.size,
+                            "quantity" to "1",
+                            "price" to product.originPrice.toString(),
+                        )
+                        onAddProductToCart(data)
+                    }
+                }
+                is HomeViewModel.ProductEvent.Purchase -> {
+                    onPurchaseProduct()
+                }
+            }
+        }
     }
-
-    val (productNoteTextState, onProductNoteTextChange) = remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier
@@ -188,7 +201,11 @@ fun ProductOptionsBottomSheet(
                 options = percent,
                 selectedOption = addProductToCartState.sugar,
                 onOptionSelected = { sugar ->
-                    homeViewModel.onAddProductToCart(event = AddProductToCartEvent.SugarChanged(sugar = sugar))
+                    homeViewModel.onAddProductToCart(
+                        event = AddProductToCartEvent.SugarChanged(
+                            sugar = sugar
+                        )
+                    )
                 }
             )
             Spacer(modifier = Modifier.height(EXTRA_LARGE_PADDING))
@@ -226,8 +243,14 @@ fun ProductOptionsBottomSheet(
             }
             Spacer(modifier = Modifier.height(EXTRA_LARGE_PADDING))
             ProductNote(
-                noteTextState = productNoteTextState,
-                onProductNoteTextChange = onProductNoteTextChange
+                noteTextState = addProductToCartState.note,
+                onProductNoteTextChange = { note ->
+                    homeViewModel.onAddProductToCart(
+                        event = AddProductToCartEvent.OnNoteChanged(
+                            note = note
+                        )
+                    )
+                }
             )
             Spacer(modifier = Modifier.height(EXTRA_LARGE_PADDING))
             Text(
@@ -244,8 +267,12 @@ fun ProductOptionsBottomSheet(
             )
         }
         ButtonAction(
-            onAddToCartClicked = {},
-            onPurchaseClicked = {}
+            onAddToCartClicked = {
+                homeViewModel.onAddProductToCart(event = AddProductToCartEvent.AddToCart)
+            },
+            onPurchaseClicked = {
+                homeViewModel.onAddProductToCart(event = AddProductToCartEvent.Purchase)
+            }
         )
     }
 }

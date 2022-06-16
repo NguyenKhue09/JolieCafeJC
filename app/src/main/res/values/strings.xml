@@ -92,4 +92,26 @@
     <string name="take_picture">Take picture</string>
     <string name="turn_off_camera">Turn off camera</string>
     <string name="product_image">Product image</string>
+    <string name="paid">Paid</string>
+    <string name="discount">Discount</string>
+    <string name="total_cart_product_number">My cart (%d items)</string>
+    <string name="checkout">Checkout</string>
+    <string name="total_cost">Total: %s VND</string>
+    <string name="shipping_infos">Shipping Information</string>
+    <string name="products">Products</string>
+    <string name="quantities">Quantities: %d</string>
+    <string name="product_size">Size: %s</string>
+    <string name="vouchers">Vouchers</string>
+    <string name="choose_a_voucher">Choose a voucher...</string>
+    <string name="cod_payment">COD Payment</string>
+    <string name="cash">Cash</string>
+    <string name="payments">Payments</string>
+    <string name="credit_card">Credit Card</string>
+    <string name="momo">MoMo</string>
+    <string name="jolie_coin">Jolie coins</string>
+    <string name="use_jolie_coin">Use %d Jolie Coin</string>
+    <string name="apply_coin">[-%d]</string>
+    <string name="money">%s VND</string>
+    <string name="voucher_apply">Voucher applied</string>
+    <string name="order">Order</string>
 </resources>

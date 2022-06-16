@@ -37,7 +37,7 @@ class FavoriteViewModel @Inject constructor(
     fun getUserFavoriteProducts(
         productQuery: Map<String, String>,
         token: String
-    ) {
+    ) =
          try {
              viewModelScope.launch {
                  apiUseCases.getUserFavoriteProductsUseCase(
@@ -51,7 +51,7 @@ class FavoriteViewModel @Inject constructor(
             e.printStackTrace()
              _favoriteProduct.value = PagingData.empty()
         }
-    }
+
 
 
 

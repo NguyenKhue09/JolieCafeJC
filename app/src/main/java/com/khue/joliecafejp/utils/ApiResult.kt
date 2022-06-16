@@ -8,5 +8,6 @@ sealed class ApiResult<T>(
     class NullDataSuccess<T>(): ApiResult<T>()
     class Error<T>(message: String?, data: T? = null): ApiResult<T>(data, message)
     class Loading<T>: ApiResult<T>()
+    class Idle<T>: ApiResult<T>()
 }
 

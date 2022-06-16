@@ -6,7 +6,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
@@ -21,7 +20,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.khue.joliecafejp.R
 import com.khue.joliecafejp.presentation.common.CardCustom
 import com.khue.joliecafejp.ui.theme.*
@@ -30,11 +28,12 @@ import com.khue.joliecafejp.ui.theme.*
 fun OrderHistoryItem(
     modifier: Modifier = Modifier,
     scrollToPosition: MutableState<Float>,
-    onExpanded: () -> Unit
+    onExpanded: () -> Unit,
+    onReviewClicked: () -> Unit,
 ) {
 
     var isExpanded by remember {
-        mutableStateOf(false)
+        mutableStateOf(true)
     }
 
     val angle: Float by animateFloatAsState(
@@ -60,16 +59,25 @@ fun OrderHistoryItem(
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                horizontalArrangement = Arrangement.Start,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
+                    modifier = Modifier.weight(1f),
                     text = "27/02/2022",
                     fontFamily = montserratFontFamily,
                     color = MaterialTheme.colors.greySecondary,
                     fontSize = MaterialTheme.typography.caption.fontSize,
                     overflow = TextOverflow.Ellipsis,
                 )
+
+                IconButton(onClick = onReviewClicked) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_review),
+                        contentDescription = stringResource(id = R.string.review),
+                        tint = MaterialTheme.colors.textColor2
+                    )
+                }
 
                 IconButton(
                     onClick = {
@@ -86,6 +94,18 @@ fun OrderHistoryItem(
                 }
             }
 
+            Text(
+                modifier = Modifier
+                    .padding(
+                        bottom = SMALL_PADDING
+                    ).align(Alignment.Start),
+                text = "Order ID: 123456789",
+                fontFamily = montserratFontFamily,
+                color = MaterialTheme.colors.greySecondary,
+                fontSize = MaterialTheme.typography.subtitle2.fontSize,
+                overflow = TextOverflow.Ellipsis,
+            )
+
             AnimatedVisibility(
                 visible = isExpanded,
                 exit = fadeOut() + shrinkVertically(animationSpec = tween(durationMillis = 500))
@@ -95,7 +115,6 @@ fun OrderHistoryItem(
                     horizontalAlignment = Alignment.Start,
                     verticalArrangement = Arrangement.Center
                 ) {
-
                     Column(
                         modifier = Modifier.wrapContentHeight()
                     ) {
@@ -220,6 +239,38 @@ fun OrderHistoryItem(
 
                     Row(
                         modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(
+                                bottom = SMALL_PADDING
+                            ),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = stringResource(R.string.discount),
+                            fontFamily = raleway,
+                            color = MaterialTheme.colors.textColor,
+                            fontSize = MaterialTheme.typography.caption.fontSize,
+                            overflow = TextOverflow.Ellipsis,
+                            maxLines = 2
+                        )
+
+                        Text(
+                            modifier = Modifier
+                                .padding(
+                                    start = SMALL_PADDING
+                                ),
+                            text = "180.000 VND",
+                            fontFamily = montserratFontFamily,
+                            color = MaterialTheme.colors.textColor,
+                            fontSize = MaterialTheme.typography.caption.fontSize,
+                            overflow = TextOverflow.Ellipsis,
+                            maxLines = 2
+                        )
+                    }
+
+                    Row(
+                        modifier = Modifier
                             .fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
@@ -239,6 +290,35 @@ fun OrderHistoryItem(
                                     start = SMALL_PADDING
                                 ),
                             text = "180.000 VND",
+                            fontFamily = montserratFontFamily,
+                            color = MaterialTheme.colors.titleTextColor,
+                            fontSize = MaterialTheme.typography.caption.fontSize,
+                            overflow = TextOverflow.Ellipsis,
+                            maxLines = 2
+                        )
+                    }
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = stringResource(R.string.paid),
+                            fontFamily = raleway,
+                            color = MaterialTheme.colors.titleTextColor,
+                            fontSize = MaterialTheme.typography.caption.fontSize,
+                            overflow = TextOverflow.Ellipsis,
+                            maxLines = 2
+                        )
+
+                        Text(
+                            modifier = Modifier
+                                .padding(
+                                    start = SMALL_PADDING
+                                ),
+                            text = "You paid this bill",
                             fontFamily = montserratFontFamily,
                             color = MaterialTheme.colors.titleTextColor,
                             fontSize = MaterialTheme.typography.caption.fontSize,
@@ -279,7 +359,11 @@ fun OrderHistoryItem(
 @Preview
 @Composable
 fun OrderHistoryItemPrev() {
-//    OrderHistoryItem(
-//        onExpanded = {}
-//    )
+    OrderHistoryItem(
+        onExpanded = {},
+        scrollToPosition = remember {
+            mutableStateOf(0f)
+        },
+        onReviewClicked = {}
+    )
 }

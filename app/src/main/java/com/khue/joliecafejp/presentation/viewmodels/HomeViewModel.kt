@@ -36,7 +36,13 @@ class HomeViewModel @Inject constructor(
     private val _favProductsId = MutableStateFlow<ApiResult<List<String>>>(ApiResult.Loading())
     val favProductsId: StateFlow<ApiResult<List<String>>> = _favProductsId
 
+    private val _addProductToCartResponse = MutableStateFlow<ApiResult<Unit>>(ApiResult.Idle())
+    val addProductToCartResponse: StateFlow<ApiResult<Unit>> = _addProductToCartResponse
+
     val addProductToCartState = MutableStateFlow(AddProductToCartState())
+
+    private val productEventChannel = Channel<ProductEvent>()
+    val productEvent = productEventChannel.receiveAsFlow()
 
     fun updateSearchTextState(newValue: String) {
         _searchTextState.value = newValue
@@ -70,6 +76,20 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    fun addProductToCart(
+       data: Map<String, String>,
+       token: String
+    ) = viewModelScope.launch {
+        try {
+            _addProductToCartResponse.value = ApiResult.Loading()
+            val response = apiUseCases.addProductToCartUseCase(data = data, token = token)
+            _addProductToCartResponse.value = handleNullDataApiResponse(response = response)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            _addProductToCartResponse.value = ApiResult.Error(e.message)
+        }
+    }
+
     fun onAddProductToCart(event: AddProductToCartEvent) {
         when(event) {
             is AddProductToCartEvent.SizeChanged -> {
@@ -91,10 +111,14 @@ class HomeViewModel @Inject constructor(
                 addProductToCartState.value = addProductToCartState.value.copy(note = event.note)
             }
             is AddProductToCartEvent.AddToCart -> {
-
+                viewModelScope.launch {
+                    productEventChannel.send(ProductEvent.AddToCart)
+                }
             }
             is AddProductToCartEvent.Purchase -> {
-
+                viewModelScope.launch {
+                    productEventChannel.send(ProductEvent.Purchase)
+                }
             }
         }
     }
@@ -118,5 +142,31 @@ class HomeViewModel @Inject constructor(
                 ApiResult.Error(response.message())
             }
         }
+    }
+
+    private fun handleNullDataApiResponse(response: Response<ApiResponseSingleData<Unit>>): ApiResult<Unit> {
+        return when {
+            response.message().toString().contains("timeout") -> {
+                ApiResult.Error("Timeout")
+            }
+            response.code() == 500 -> {
+                ApiResult.Error(response.message())
+            }
+            response.isSuccessful -> {
+               ApiResult.NullDataSuccess()
+            }
+            else -> {
+                ApiResult.Error(response.message())
+            }
+        }
+    }
+
+    fun resetAddProductToCartResponse() {
+        _addProductToCartResponse.value = ApiResult.Idle()
+    }
+
+    sealed class ProductEvent {
+        object AddToCart: ProductEvent()
+        object Purchase: ProductEvent()
     }
 }

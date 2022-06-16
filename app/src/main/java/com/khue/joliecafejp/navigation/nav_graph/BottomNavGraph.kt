@@ -44,7 +44,7 @@ fun NavGraphBuilder.bottomNavGraph(
             )
         }
         composable(route = BottomBarScreen.Cart.route) {
-            CartScreen( userSharedViewModel = userSharedViewModel)
+            CartScreen(paddingValues = paddingValues)
         }
 
         navigation(
