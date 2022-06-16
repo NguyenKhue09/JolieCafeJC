@@ -105,4 +105,13 @@
     <string name="choose_a_voucher">Choose a voucher...</string>
     <string name="cod_payment">COD Payment</string>
     <string name="cash">Cash</string>
+    <string name="payments">Payments</string>
+    <string name="credit_card">Credit Card</string>
+    <string name="momo">MoMo</string>
+    <string name="jolie_coin">Jolie coins</string>
+    <string name="use_jolie_coin">Use %d Jolie Coin</string>
+    <string name="apply_coin">[-%d]</string>
+    <string name="money">%s VND</string>
+    <string name="voucher_apply">Voucher applied</string>
+    <string name="order">Order</string>
 </resources>
