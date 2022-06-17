@@ -18,6 +18,8 @@ import com.khue.joliecafejp.R
 import com.khue.joliecafejp.domain.model.CartItem
 import com.khue.joliecafejp.domain.model.Product
 import com.khue.joliecafejp.ui.theme.*
+import java.text.NumberFormat
+import java.util.*
 
 @Composable
 fun ProductOrderHistoryItem(
@@ -80,7 +82,7 @@ fun ProductOrderHistoryItem(
             Text(
                 modifier = Modifier.wrapContentHeight(),
                 text = item.productDetail.name,
-                fontFamily = raleway,
+                fontFamily = ralewayMedium,
                 color = MaterialTheme.colors.titleTextColor,
                 fontSize = MaterialTheme.typography.subtitle2.fontSize,
                 maxLines = 2,
@@ -89,7 +91,7 @@ fun ProductOrderHistoryItem(
             Text(
                 modifier = Modifier.wrapContentHeight(),
                 text = stringResource(R.string.quantities, item.quantity),
-                fontFamily = raleway,
+                fontFamily = ralewayMedium,
                 color = MaterialTheme.colors.textColor,
                 fontSize = MaterialTheme.typography.caption.fontSize,
                 maxLines = 2,
@@ -98,7 +100,7 @@ fun ProductOrderHistoryItem(
             Text(
                 modifier = Modifier.wrapContentHeight(),
                 text = stringResource(R.string.product_size, item.size),
-                fontFamily = raleway,
+                fontFamily = ralewayMedium,
                 color = MaterialTheme.colors.textColor,
                 fontSize = MaterialTheme.typography.caption.fontSize,
                 maxLines = 2,
@@ -110,7 +112,11 @@ fun ProductOrderHistoryItem(
             modifier = Modifier
                 .weight(weight = 1f, fill = true)
                 .wrapContentHeight(),
-            text = stringResource(id = R.string.product_price, item.price.toString()),
+            text = stringResource(
+                id = R.string.product_price, NumberFormat.getNumberInstance(
+                    Locale.US
+                ).format(item.price)
+            ),
             fontFamily = montserratFontFamily,
             color = MaterialTheme.colors.textColor,
             fontSize = MaterialTheme.typography.subtitle2.fontSize,

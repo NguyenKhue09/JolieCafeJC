@@ -22,6 +22,8 @@ import com.khue.joliecafejp.R
 import com.khue.joliecafejp.domain.model.Product
 import com.khue.joliecafejp.presentation.common.CardCustom
 import com.khue.joliecafejp.ui.theme.*
+import java.text.NumberFormat
+import java.util.*
 
 @Composable
 fun HorizontalProductItem(
@@ -136,7 +138,11 @@ fun HorizontalProductItem(
 
                 Text(
                     modifier = modifier.wrapContentSize(),
-                    text = stringResource(id = R.string.product_price, product.originPrice.toString()),
+                    text = stringResource(
+                        id = R.string.product_price, NumberFormat.getNumberInstance(
+                            Locale.US
+                        ).format(product.originPrice)
+                    ),
                     fontFamily = montserratFontFamily,
                     color = MaterialTheme.colors.textColor,
                     fontSize = MaterialTheme.typography.caption.fontSize,
@@ -174,5 +180,17 @@ fun HorizontalProductItem(
 @Preview
 @Composable
 fun ProductItemPrev() {
-    //HorizontalProductItem()
+    HorizontalProductItem(
+        product = Product(
+            id = "1",
+            name = "Product 1",
+            type = "Type 1",
+            thumbnail = "https://images.unsplash.com/photo-1518791841217-8f162f1e1131?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1050&q=80",
+            originPrice = 1000.0,
+            avgRating = 4,
+            description = "Description 1",
+            isDeleted = false,
+            status = "Status 1"
+        )
+    )
 }

@@ -76,7 +76,7 @@ fun BottomBar(navController: NavHostController) {
             if (route.isNullOrEmpty()) {
                 true
             } else {
-                route.split('/')[0] != "detail"
+                route.split('/')[0] != "detail" && route.split('/')[0] != "checkout"
             }
         }
     }

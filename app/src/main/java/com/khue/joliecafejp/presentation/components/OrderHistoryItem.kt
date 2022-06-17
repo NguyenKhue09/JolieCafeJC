@@ -23,6 +23,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.khue.joliecafejp.R
 import com.khue.joliecafejp.presentation.common.CardCustom
 import com.khue.joliecafejp.ui.theme.*
+import java.text.NumberFormat
+import java.util.*
 
 @Composable
 fun OrderHistoryItem(
@@ -44,7 +46,8 @@ fun OrderHistoryItem(
         modifier = modifier.onGloballyPositioned { coordinates ->
             scrollToPosition.value = coordinates.positionInParent().y
         },
-        onClick = {}
+        onClick = null,
+        paddingValues = PaddingValues(all = ZERO_PADDING)
     ) {
         Column(
             modifier = Modifier
@@ -98,7 +101,8 @@ fun OrderHistoryItem(
                 modifier = Modifier
                     .padding(
                         bottom = SMALL_PADDING
-                    ).align(Alignment.Start),
+                    )
+                    .align(Alignment.Start),
                 text = "Order ID: 123456789",
                 fontFamily = montserratFontFamily,
                 color = MaterialTheme.colors.greySecondary,
@@ -131,7 +135,7 @@ fun OrderHistoryItem(
                                 bottom = SMALL_PADDING
                             ),
                         text = "Sweet Latte",
-                        fontFamily = raleway,
+                        fontFamily = ralewayMedium,
                         color = MaterialTheme.colors.greySecondary,
                         fontSize = MaterialTheme.typography.subtitle2.fontSize,
                         overflow = TextOverflow.Ellipsis,
@@ -184,7 +188,7 @@ fun OrderHistoryItem(
                     ) {
                         Text(
                             text = stringResource(R.string.subtotal),
-                            fontFamily = raleway,
+                            fontFamily = ralewayMedium,
                             color = MaterialTheme.colors.textColor,
                             fontSize = MaterialTheme.typography.caption.fontSize,
                             overflow = TextOverflow.Ellipsis,
@@ -196,7 +200,11 @@ fun OrderHistoryItem(
                                 .padding(
                                     start = SMALL_PADDING
                                 ),
-                            text = "180.000 VND",
+                            text = stringResource(
+                                id = R.string.money, NumberFormat.getNumberInstance(
+                                    Locale.US
+                                ).format(1800000)
+                            ),
                             fontFamily = montserratFontFamily,
                             color = MaterialTheme.colors.textColor,
                             fontSize = MaterialTheme.typography.caption.fontSize,
@@ -216,7 +224,7 @@ fun OrderHistoryItem(
                     ) {
                         Text(
                             text = stringResource(R.string.shipping_fee),
-                            fontFamily = raleway,
+                            fontFamily = ralewayMedium,
                             color = MaterialTheme.colors.textColor,
                             fontSize = MaterialTheme.typography.caption.fontSize,
                             overflow = TextOverflow.Ellipsis,
@@ -228,7 +236,11 @@ fun OrderHistoryItem(
                                 .padding(
                                     start = SMALL_PADDING
                                 ),
-                            text = "180.000 VND",
+                            text = stringResource(
+                                id = R.string.money, NumberFormat.getNumberInstance(
+                                    Locale.US
+                                ).format(1800000)
+                            ),
                             fontFamily = montserratFontFamily,
                             color = MaterialTheme.colors.textColor,
                             fontSize = MaterialTheme.typography.caption.fontSize,
@@ -248,7 +260,7 @@ fun OrderHistoryItem(
                     ) {
                         Text(
                             text = stringResource(R.string.discount),
-                            fontFamily = raleway,
+                            fontFamily = ralewayMedium,
                             color = MaterialTheme.colors.textColor,
                             fontSize = MaterialTheme.typography.caption.fontSize,
                             overflow = TextOverflow.Ellipsis,
@@ -260,7 +272,11 @@ fun OrderHistoryItem(
                                 .padding(
                                     start = SMALL_PADDING
                                 ),
-                            text = "180.000 VND",
+                            text = stringResource(
+                                id = R.string.money, NumberFormat.getNumberInstance(
+                                    Locale.US
+                                ).format(1800000)
+                            ),
                             fontFamily = montserratFontFamily,
                             color = MaterialTheme.colors.textColor,
                             fontSize = MaterialTheme.typography.caption.fontSize,
@@ -277,7 +293,7 @@ fun OrderHistoryItem(
                     ) {
                         Text(
                             text = stringResource(R.string.total),
-                            fontFamily = raleway,
+                            fontFamily = ralewayMedium,
                             color = MaterialTheme.colors.titleTextColor,
                             fontSize = MaterialTheme.typography.caption.fontSize,
                             overflow = TextOverflow.Ellipsis,
@@ -289,7 +305,11 @@ fun OrderHistoryItem(
                                 .padding(
                                     start = SMALL_PADDING
                                 ),
-                            text = "180.000 VND",
+                            text = stringResource(
+                                id = R.string.money, NumberFormat.getNumberInstance(
+                                    Locale.US
+                                ).format(1800000)
+                            ),
                             fontFamily = montserratFontFamily,
                             color = MaterialTheme.colors.titleTextColor,
                             fontSize = MaterialTheme.typography.caption.fontSize,
@@ -306,7 +326,7 @@ fun OrderHistoryItem(
                     ) {
                         Text(
                             text = stringResource(R.string.paid),
-                            fontFamily = raleway,
+                            fontFamily = ralewayMedium,
                             color = MaterialTheme.colors.titleTextColor,
                             fontSize = MaterialTheme.typography.caption.fontSize,
                             overflow = TextOverflow.Ellipsis,
@@ -344,7 +364,11 @@ fun OrderHistoryItem(
                         overflow = TextOverflow.Ellipsis,
                     )
                     Text(
-                        text = "400.000 VND",
+                        text = stringResource(
+                            id = R.string.money, NumberFormat.getNumberInstance(
+                                Locale.US
+                            ).format(1800000)
+                        ),
                         fontFamily = montserratFontFamily,
                         color = MaterialTheme.colors.greySecondary,
                         fontSize = MaterialTheme.typography.caption.fontSize,

@@ -25,6 +25,8 @@ import com.khue.joliecafejp.R
 import com.khue.joliecafejp.domain.model.FavoriteProduct
 import com.khue.joliecafejp.presentation.common.CardCustom
 import com.khue.joliecafejp.ui.theme.*
+import java.text.NumberFormat
+import java.util.*
 
 @Composable
 fun FavoriteItem(
@@ -127,7 +129,11 @@ fun FavoriteItem(
 
                 Text(
                     modifier = modifier.wrapContentSize(),
-                    text = stringResource(id = R.string.product_price, productFav.product.originPrice.toString()),
+                    text = stringResource(
+                        id = R.string.product_price, NumberFormat.getNumberInstance(
+                            Locale.US
+                        ).format(productFav.product.originPrice)
+                    ),
                     fontFamily = montserratFontFamily,
                     color = MaterialTheme.colors.textColor,
                     fontSize = MaterialTheme.typography.caption.fontSize,

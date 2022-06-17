@@ -30,6 +30,8 @@ import com.khue.joliecafejp.utils.AddProductToCartEvent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import java.text.NumberFormat
+import java.util.*
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -260,7 +262,9 @@ fun ProductOptionsBottomSheet(
                 fontFamily = ralewayMedium
             )
             Text(
-                text = stringResource(id = R.string.product_price, 90000),
+                text = stringResource(id = R.string.product_price, NumberFormat.getNumberInstance(
+                    Locale.US
+                ).format(90000)),
                 color = MaterialTheme.colors.textColor,
                 fontSize = MaterialTheme.typography.subtitle1.fontSize,
                 fontFamily = montserratFontFamily
@@ -433,7 +437,9 @@ fun ProductToppingOption(
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = stringResource(id = R.string.product_price, option.price),
+                    text = stringResource(id = R.string.product_price, NumberFormat.getNumberInstance(
+                        Locale.US
+                    ).format(option.price)),
                     color = MaterialTheme.colors.textColor,
                     fontSize = MaterialTheme.typography.subtitle1.fontSize,
                     fontFamily = montserratFontFamily,

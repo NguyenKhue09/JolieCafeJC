@@ -13,5 +13,5 @@ data class CartItem(
     val size: String,
     var quantity: Int,
     var price: Double
-)
+): java.io.Serializable
 

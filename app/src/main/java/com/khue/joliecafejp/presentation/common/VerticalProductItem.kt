@@ -29,6 +29,8 @@ import coil.request.ImageRequest
 import com.khue.joliecafejp.R
 import com.khue.joliecafejp.domain.model.Product
 import com.khue.joliecafejp.ui.theme.*
+import java.text.NumberFormat
+import java.util.*
 
 @Composable
 fun VerticalProductItem(
@@ -84,8 +86,7 @@ fun VerticalProductItem(
                 modifier = Modifier.weight(1f),
                 text = product.name,
                 fontSize = MaterialTheme.typography.subtitle2.fontSize,
-                fontFamily = raleway,
-                fontWeight = FontWeight.Bold,
+                fontFamily = ralewayMedium,
                 color = MaterialTheme.colors.textColor,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
@@ -102,18 +103,17 @@ fun VerticalProductItem(
                 )
             }
         }
-        Spacer(modifier = Modifier.height(SMALL_PADDING))
         Text(
             text = product.type,
             fontSize = MaterialTheme.typography.caption.fontSize,
-            fontFamily = raleway,
+            fontFamily = ralewayMedium,
             color = MaterialTheme.colors.textColor,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
         Spacer(modifier = Modifier.height(SMALL_PADDING))
         Text(
-            text = stringResource(id = R.string.product_price, product.originPrice.toString()),
+            text = stringResource(id = R.string.product_price, NumberFormat.getNumberInstance(Locale.US).format(product.originPrice)),
             fontSize = MaterialTheme.typography.caption.fontSize,
             fontFamily = montserratFontFamily,
             color = MaterialTheme.colors.textColor2,
@@ -126,8 +126,26 @@ fun VerticalProductItem(
 @Preview
 @Composable
 fun ProductItemPrev() {
-//    VerticalProductItem(
-//        onFavClicked = {},
-//        onItemClicked = {}
-//    )
+    VerticalProductItem(
+        product = Product(
+            discountPercent = 0,
+            startDateDiscount = "2022-06-09T03:43:49.731Z",
+            endDateDiscount = "2022-06-09T03:43:49.731Z",
+            id = "6267f76e02095fbefdd3cbae",
+            name = "Molasses",
+            status = "Available",
+            description = "Tea, sugar cane",
+            thumbnail = "https://firebasestorage.googleapis.com/v0/b/joliecafe-799f7.appspot.com/o/molasses.jpg?alt=media&token=1d2f1aee-31bb-4307-8e49-66b0134b628e",
+            comments = emptyList(),
+            originPrice = 46000.0,
+            avgRating = 3,
+            isDeleted = false,
+            type = "Tea",
+            updatedAt = null,
+            createdAt = null
+        ),
+        isFav = true,
+        onFavClicked = {},
+        onItemClicked = {}
+    )
 }
