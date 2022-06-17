@@ -21,6 +21,8 @@ import com.khue.joliecafejp.domain.model.Product
 import com.khue.joliecafejp.presentation.common.CardCustom
 import com.khue.joliecafejp.presentation.common.CartProductCount
 import com.khue.joliecafejp.ui.theme.*
+import java.text.NumberFormat
+import java.util.*
 
 @Composable
 fun CartProductItem(
@@ -114,7 +116,11 @@ fun CartProductItem(
 
                 Text(
                     modifier = modifier.wrapContentSize(),
-                    text = stringResource(id = R.string.product_price, cartItem.price.toString()),
+                    text = stringResource(
+                        id = R.string.product_price, NumberFormat.getNumberInstance(
+                            Locale.US
+                        ).format(cartItem.price)
+                    ),
                     fontFamily = montserratFontFamily,
                     color = MaterialTheme.colors.textColor,
                     fontSize = MaterialTheme.typography.caption.fontSize,
@@ -147,13 +153,13 @@ fun CartProductPrev() {
     CartProductItem(
         cartItem = CartItem(
             id = "1",
-            price = 100.0,
+            price = 100000.0,
             productDetail = Product(
                 id = "1",
                 name = "Product 1",
                 type = "Type 1",
                 thumbnail = "https://images.unsplash.com/photo-1518791841217-8f162f1e1131?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1050&q=80",
-                originPrice = 100.0,
+                originPrice = 100000.0,
                 avgRating = 4,
                 description = "Description 1",
                 isDeleted = false,

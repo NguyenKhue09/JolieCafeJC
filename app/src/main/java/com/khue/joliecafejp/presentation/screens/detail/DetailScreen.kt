@@ -49,6 +49,8 @@ import com.khue.joliecafejp.ui.theme.*
 import com.khue.joliecafejp.utils.ApiResult
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import java.text.NumberFormat
+import java.util.*
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -84,13 +86,17 @@ fun DetailScreen(
     }
 
     LaunchedEffect(key1 = getProductDetailResponse) {
-        when(getProductDetailResponse) {
+        when (getProductDetailResponse) {
             is ApiResult.Loading -> {
                 isLoading = true
             }
             is ApiResult.Error -> {
                 isLoading = false
-                Toast.makeText(context, getProductDetailResponse.message ?: "Unknown error!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    context,
+                    getProductDetailResponse.message ?: "Unknown error!",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
             is ApiResult.Success -> {
                 isLoading = false
@@ -104,14 +110,22 @@ fun DetailScreen(
 
     LaunchedEffect(key1 = true) {
         productDetailViewModel.removeUserFavResponse.collect { result ->
-            when(result) {
+            when (result) {
                 is ApiResult.NullDataSuccess -> {
-                    Toast.makeText(context, "Remove ${product?.name} from favorite success", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        context,
+                        "Remove ${product?.name} from favorite success",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
                 is ApiResult.Error -> {
                     println(result.message)
                     productDetailViewModel.setFavProductState(isFav = true)
-                    Toast.makeText(context, "Remove ${product?.name} from favorite failed!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        context,
+                        "Remove ${product?.name} from favorite failed!",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
                 else -> {}
             }
@@ -120,14 +134,22 @@ fun DetailScreen(
 
     LaunchedEffect(key1 = true) {
         productDetailViewModel.addUserFavResponse.collect { result ->
-            when(result) {
+            when (result) {
                 is ApiResult.NullDataSuccess -> {
-                    Toast.makeText(context, "Add ${product?.name} to favorite success", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        context,
+                        "Add ${product?.name} to favorite success",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
                 is ApiResult.Error -> {
                     println(result.message)
                     productDetailViewModel.setFavProductState(isFav = false)
-                    Toast.makeText(context, "Add ${product?.name} to favorite failed!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        context,
+                        "Add ${product?.name} to favorite failed!",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
                 else -> {}
             }
@@ -144,7 +166,10 @@ fun DetailScreen(
         sheetContent = {
             CommentBottomSheet()
         },
-        sheetShape = MaterialTheme.shapes.large.copy(bottomEnd = CornerSize(0), bottomStart = CornerSize(0))
+        sheetShape = MaterialTheme.shapes.large.copy(
+            bottomEnd = CornerSize(0),
+            bottomStart = CornerSize(0)
+        )
     ) {
         Scaffold(
             backgroundColor = MaterialTheme.colors.greyPrimary,
@@ -155,7 +180,7 @@ fun DetailScreen(
                     .fillMaxSize(),
             ) {
 
-                AnimatedVisibility(visible = product != null, modifier = Modifier.fillMaxSize(),) {
+                AnimatedVisibility(visible = product != null, modifier = Modifier.fillMaxSize()) {
                     product?.let { productDetail ->
                         LazyColumn(
                             modifier = Modifier
@@ -175,7 +200,7 @@ fun DetailScreen(
                                     name = productDetail.name,
                                     isFav = isFav
                                 ) {
-                                    if(isFav) {
+                                    if (isFav) {
                                         productDetailViewModel.setFavProductState(isFav = false)
                                         productDetailViewModel.removeUserFavProduct(
                                             token = userToken,
@@ -224,7 +249,10 @@ fun DetailScreen(
 
                 DetailScreenTopBar(navController = navController)
 
-                AnimatedVisibility(visible = product != null, modifier = Modifier.align(Alignment.BottomCenter),) {
+                AnimatedVisibility(
+                    visible = product != null,
+                    modifier = Modifier.align(Alignment.BottomCenter),
+                ) {
                     BottomButtonAction(
                         modifier = Modifier,
                         onAddToCardClicked = {},
@@ -232,7 +260,10 @@ fun DetailScreen(
                     )
                 }
 
-                AnimatedVisibility(visible = isLoading, modifier = Modifier.align(Alignment.Center)) {
+                AnimatedVisibility(
+                    visible = isLoading,
+                    modifier = Modifier.align(Alignment.Center)
+                ) {
                     CircularProgressIndicator(
                         color = MaterialTheme.colors.textColor2
                     )
@@ -326,7 +357,7 @@ fun ProductNameSection(
         )
         IconButton(onClick = onFavClicked) {
             Icon(
-                painter = painterResource(id = if(isFav) R.drawable.ic_heart_fill else R.drawable.ic_favorite),
+                painter = painterResource(id = if (isFav) R.drawable.ic_heart_fill else R.drawable.ic_favorite),
                 contentDescription = stringResource(
                     id = R.string.favorite
                 ),
@@ -350,34 +381,40 @@ fun PriceAndRatingSection(
     ) {
         Text(
             modifier = Modifier.weight(1f, fill = false),
-            text = stringResource(id = R.string.product_price, price.toString()),
+            text = stringResource(
+                id = R.string.product_price, NumberFormat.getNumberInstance(
+                    Locale.US
+                ).format(price)
+            ),
             color = MaterialTheme.colors.textColor,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
             fontFamily = montserratFontFamily,
             fontSize = MaterialTheme.typography.subtitle2.fontSize
         )
-        Text(
-            modifier = Modifier.padding(horizontal = EXTRA_EXTRA_SMALL_PADDING),
-            text = "•",
-            fontFamily = raleway,
-            color = MaterialTheme.colors.textColor,
-            fontSize = MaterialTheme.typography.subtitle2.fontSize,
-        )
-        Text(
-            text = rating.toString(),
-            color = MaterialTheme.colors.textColor,
-            fontFamily = montserratFontFamily,
-            fontSize = MaterialTheme.typography.subtitle2.fontSize,
-        )
-        repeat(rating) {
-            Spacer(modifier = Modifier.width(EXTRA_EXTRA_SMALL_PADDING))
-            Icon(
-                modifier = Modifier.size(PRODUCT_RATING_SIZE),
-                painter = painterResource(id = R.drawable.ic_favorite),
-                contentDescription = stringResource(id = R.string.favorite),
-                tint = MaterialTheme.colors.textColor
+        if(rating > 0) {
+            Text(
+                modifier = Modifier.padding(horizontal = EXTRA_EXTRA_SMALL_PADDING),
+                text = "•",
+                fontFamily = raleway,
+                color = MaterialTheme.colors.textColor,
+                fontSize = MaterialTheme.typography.subtitle2.fontSize,
             )
+            Text(
+                text = rating.toString(),
+                color = MaterialTheme.colors.textColor,
+                fontFamily = montserratFontFamily,
+                fontSize = MaterialTheme.typography.subtitle2.fontSize,
+            )
+            repeat(rating) {
+                Spacer(modifier = Modifier.width(EXTRA_EXTRA_SMALL_PADDING))
+                Icon(
+                    modifier = Modifier.size(PRODUCT_RATING_SIZE),
+                    painter = painterResource(id = R.drawable.ic_favorite),
+                    contentDescription = stringResource(id = R.string.favorite),
+                    tint = MaterialTheme.colors.textColor
+                )
+            }
         }
     }
 }
@@ -580,7 +617,7 @@ fun CommentSection() {
         verticalArrangement = Arrangement.spacedBy(EXTRA_LARGE_PADDING),
     ) {
         repeat(3) {
-                CommentItem()
+            CommentItem()
         }
     }
 }

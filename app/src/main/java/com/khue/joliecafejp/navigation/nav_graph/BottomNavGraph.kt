@@ -43,9 +43,23 @@ fun NavGraphBuilder.bottomNavGraph(
                 navController = navController
             )
         }
-        composable(route = BottomBarScreen.Cart.route) {
-            CartScreen(paddingValues = paddingValues)
+        navigation(
+            startDestination = BottomBarScreen.Cart.route,
+            route = "cart-root"
+        ) {
+            composable(route = BottomBarScreen.Cart.route) {
+                CartScreen(
+                    paddingValues = paddingValues,
+                    navController = navController
+                )
+
+            }
+            cartSubNavGraph(
+                navController = navController,
+                userSharedViewModel = userSharedViewModel
+            )
         }
+
 
         navigation(
             startDestination = BottomBarScreen.Profile.route,

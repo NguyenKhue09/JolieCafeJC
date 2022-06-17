@@ -1,7 +1,6 @@
 package com.khue.joliecafejp.presentation.screens.cart.sub_screens
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -9,7 +8,6 @@ import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -18,25 +16,28 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.khue.joliecafejp.R
 import com.khue.joliecafejp.domain.model.Address
 import com.khue.joliecafejp.domain.model.CartItem
 import com.khue.joliecafejp.domain.model.Product
-import com.khue.joliecafejp.domain.model.Voucher
 import com.khue.joliecafejp.presentation.common.ButtonCustom
 import com.khue.joliecafejp.presentation.common.CardCustom
 import com.khue.joliecafejp.presentation.common.TopBar
 import com.khue.joliecafejp.presentation.components.ProductOrderHistoryItem
+import com.khue.joliecafejp.presentation.viewmodels.UserSharedViewModel
 import com.khue.joliecafejp.ui.theme.*
 import com.khue.joliecafejp.utils.extensions.haveBorder
+import java.text.NumberFormat
+import java.util.*
 
 @Composable
 fun CheckoutScreen(
-    navController: NavHostController
+    navController: NavHostController,
+    userSharedViewModel: UserSharedViewModel
 ) {
 
     Scaffold(
@@ -521,7 +522,10 @@ internal fun JolieCoin(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = EXTRA_LARGE_PADDING, vertical = EXTRA_EXTRA_SMALL_PADDING),
+                    .padding(
+                        horizontal = EXTRA_LARGE_PADDING,
+                        vertical = EXTRA_EXTRA_SMALL_PADDING
+                    ),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -614,7 +618,11 @@ internal fun Summary(
                             .padding(
                                 start = SMALL_PADDING
                             ),
-                        text = stringResource(R.string.money, subTotal.toString()),
+                        text = stringResource(
+                            R.string.money, NumberFormat.getNumberInstance(
+                                Locale.US
+                            ).format(subTotal)
+                        ),
                         fontFamily = montserratFontFamily,
                         color = MaterialTheme.colors.textColor,
                         fontSize = MaterialTheme.typography.body2.fontSize,
@@ -644,7 +652,11 @@ internal fun Summary(
                                 .padding(
                                     start = SMALL_PADDING
                                 ),
-                            text = stringResource(id = R.string.money, shippingFee.toString()),
+                            text = stringResource(
+                                id = R.string.money, NumberFormat.getNumberInstance(
+                                    Locale.US
+                                ).format(shippingFee)
+                            ),
                             fontFamily = montserratFontFamily,
                             color = MaterialTheme.colors.textColor,
                             fontSize = MaterialTheme.typography.body2.fontSize,
@@ -675,7 +687,13 @@ internal fun Summary(
                                 .padding(
                                     start = SMALL_PADDING
                                 ),
-                            text = stringResource(id = R.string.money, "-$jolieCoin"),
+                            text = stringResource(
+                                id = R.string.money, "-${
+                                    NumberFormat.getNumberInstance(
+                                        Locale.US
+                                    ).format(jolieCoin)
+                                }"
+                            ),
                             fontFamily = montserratFontFamily,
                             color = MaterialTheme.colors.textColor,
                             fontSize = MaterialTheme.typography.body2.fontSize,
@@ -706,7 +724,13 @@ internal fun Summary(
                                 .padding(
                                     start = SMALL_PADDING
                                 ),
-                            text = stringResource(id = R.string.money, "-$voucher"),
+                            text = stringResource(
+                                id = R.string.money, "-${
+                                    NumberFormat.getNumberInstance(
+                                        Locale.US
+                                    ).format(voucher)
+                                }"
+                            ),
                             fontFamily = montserratFontFamily,
                             color = MaterialTheme.colors.textColor,
                             fontSize = MaterialTheme.typography.body2.fontSize,
@@ -738,7 +762,11 @@ internal fun Summary(
                             .padding(
                                 start = SMALL_PADDING
                             ),
-                        text = stringResource(id = R.string.money, total.toString()),
+                        text = stringResource(
+                            id = R.string.money, NumberFormat.getNumberInstance(
+                                Locale.US
+                            ).format(total)
+                        ),
                         fontFamily = montserratFontFamily,
                         color = MaterialTheme.colors.titleTextColor,
                         fontSize = MaterialTheme.typography.body2.fontSize,
@@ -779,7 +807,7 @@ internal fun FooterButtonAction(
             )
         )
         ButtonCustom(
-            modifier = Modifier.size(height = 65.dp,width = 150.dp),
+            modifier = Modifier.size(height = 65.dp, width = 150.dp),
             buttonContent = stringResource(R.string.order),
             backgroundColor = MaterialTheme.colors.titleTextColor,
             textColor = MaterialTheme.colors.textColor,
@@ -947,5 +975,8 @@ fun FooterButtonActionPrev() {
 @Preview
 @Composable
 fun CheckoutScreenPrev() {
-    CheckoutScreen(navController = rememberNavController())
+    CheckoutScreen(
+        navController = rememberNavController(),
+        userSharedViewModel = hiltViewModel()
+    )
 }

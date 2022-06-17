@@ -22,9 +22,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import com.khue.joliecafejp.R
 import com.khue.joliecafejp.domain.model.CartItemByCategory
 import com.khue.joliecafejp.domain.model.SnackBarData
+import com.khue.joliecafejp.domain.model.TestItem
+import com.khue.joliecafejp.navigation.nav_screen.CartSubScreen
+import com.khue.joliecafejp.navigation.nav_screen.HomeSubScreen
 import com.khue.joliecafejp.presentation.common.ButtonCustom
 import com.khue.joliecafejp.presentation.common.LoadingBody
 import com.khue.joliecafejp.presentation.common.SnackBar
@@ -36,14 +40,18 @@ import com.khue.joliecafejp.presentation.viewmodels.UserSharedViewModel
 import com.khue.joliecafejp.ui.theme.*
 import com.khue.joliecafejp.utils.ApiResult
 import com.khue.joliecafejp.utils.Constants
+import com.khue.joliecafejp.utils.Constants.Companion.CARTS
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import java.text.NumberFormat
+import java.util.*
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun CartScreen(
     cartViewModel: CartViewModel = hiltViewModel(),
-    paddingValues: PaddingValues
+    paddingValues: PaddingValues,
+    navController: NavHostController
 ) {
 
     val userToken by cartViewModel.userToken.collectAsState(initial = "")
@@ -62,7 +70,9 @@ fun CartScreen(
 
     val coroutineScope = rememberCoroutineScope()
 
-    LaunchedEffect(key1 = Unit) {
+    println("CartScreen: $userToken")
+
+    LaunchedEffect(key1 = userToken) {
         cartViewModel.getCartItems(token = userToken)
     }
 
@@ -88,7 +98,7 @@ fun CartScreen(
                 snackbarHostState.showSnackbar("")
             }
         }
-        
+
         if (result) {
             Box(
                 modifier = Modifier.fillMaxSize()
@@ -147,13 +157,16 @@ fun CartScreen(
                         }
                     }
 
-                    items(getCartItemResponse.data!!) { item ->
-                        CartProductGroup(
-                            cartItemByCategory = item,
-                            onSelectedGroup = {_,_ ->},
-                            isSelectedGroup = false
-                        )
+                    getCartItemResponse.data?.let {
+                        items(it) { item ->
+                            CartProductGroup(
+                                cartItemByCategory = item,
+                                onSelectedGroup = { _, _ -> },
+                                isSelectedGroup = false
+                            )
+                        }
                     }
+
                     item {
                         Spacer(modifier = Modifier.height(58.dp))
                     }
@@ -162,7 +175,13 @@ fun CartScreen(
                 BottomButtonAction(
                     modifier = Modifier.align(Alignment.BottomCenter),
                     totalCost = 1000000.0,
-                    onCheckoutClicked = {}
+                    onCheckoutClicked = {
+                        navController.currentBackStackEntry?.savedStateHandle?.set(
+                            key = CARTS,
+                            value = getCartItemResponse.data!![0].products
+                        )
+                        navController.navigate(CartSubScreen.Checkout.route)
+                    }
                 )
             }
         }
@@ -207,6 +226,7 @@ fun BottomButtonAction(
                         Color.Transparent,
                         MaterialTheme.colors.greyPrimary,
                         MaterialTheme.colors.greyPrimary,
+                        MaterialTheme.colors.greyPrimary,
                     ),
                 )
             )
@@ -219,7 +239,11 @@ fun BottomButtonAction(
             modifier = Modifier
                 .weight(1.2f)
                 .wrapContentSize(align = Alignment.CenterStart),
-            text = stringResource(R.string.total_cost, totalCost.toString()),
+            text = stringResource(
+                R.string.total_cost, NumberFormat.getNumberInstance(
+                    Locale.US
+                ).format(totalCost)
+            ),
             fontFamily = montserratFontFamily,
             color = MaterialTheme.colors.textColor,
             fontSize = MaterialTheme.typography.body1.fontSize,
