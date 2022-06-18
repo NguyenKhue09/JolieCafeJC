@@ -192,7 +192,7 @@ fun LoginScreen(
         Text(
             modifier = Modifier.padding(top = 60.dp),
             text = stringResource(R.string.login_title),
-            fontFamily = raleway,
+            fontFamily = ralewayMedium,
             color = MaterialTheme.colors.titleTextColor,
             fontSize = 24.sp,
             textAlign = TextAlign.Center,
@@ -283,7 +283,7 @@ fun LoginScreen(
                     }
                 },
             text = stringResource(R.string.forgot_password),
-            fontFamily = raleway,
+            fontFamily = ralewayMedium,
             color = MaterialTheme.colors.titleTextColor,
             fontSize = 16.sp,
             textAlign = TextAlign.Left,
@@ -301,7 +301,7 @@ fun LoginScreen(
         ) {
             Text(
                 text = stringResource(R.string.sign_in_content),
-                fontFamily = raleway,
+                fontFamily = ralewayMedium,
                 color = Color.White,
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp,
@@ -313,7 +313,7 @@ fun LoginScreen(
             modifier = Modifier
                 .padding(top = 24.dp),
             text = stringResource(R.string.or),
-            fontFamily = raleway,
+            fontFamily = ralewayMedium,
             color = MaterialTheme.colors.textColor,
             fontSize = 16.sp,
             textAlign = TextAlign.Left,
@@ -345,7 +345,7 @@ fun LoginScreen(
                     style = SpanStyle(
                         color = MaterialTheme.colors.textColor,
                         fontSize = 14.sp,
-                        fontFamily = raleway,
+                        fontFamily = ralewayMedium,
                     )
                 ) {
                     append(stringResource(R.string.not_signed_up_yet))
@@ -354,7 +354,7 @@ fun LoginScreen(
                     style = SpanStyle(
                         color = MaterialTheme.colors.titleTextColor,
                         fontSize = 14.sp,
-                        fontFamily = raleway,
+                        fontFamily = ralewayMedium,
                     )
                 ) {
                     append(stringResource(R.string.sign_up_here))

@@ -411,7 +411,7 @@ fun CardAddNewAddress(
             end = EXTRA_LARGE_PADDING,
             bottom = 0.dp
         ),
-        onClick = {}
+        onClick = null
     ) {
         Column(
             modifier = Modifier

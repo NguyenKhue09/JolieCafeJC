@@ -77,6 +77,7 @@ object RepositoryModule {
             getCartItemsUseCase = GetCartItemsUseCase(repository = repository),
             getAdminNotificationForUserUseCase = GetAdminNotificationForUserUseCase(repository = repository),
             getUserBillsUseCase = GetUserBillsUseCase(repository = repository),
+            reviewBillUseCase = ReviewBillUseCase(repository = repository),
         )
     }
 }

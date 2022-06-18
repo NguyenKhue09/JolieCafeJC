@@ -73,4 +73,6 @@ interface RemoteDataSource {
     ): Flow<PagingData<Notification>>
 
     fun getUserBills(token: String): Flow<PagingData<OrderHistory>>
+
+    suspend fun reviewBill(token: String, body: BillReviewBody): Response<ApiResponseSingleData<Unit>>
 }

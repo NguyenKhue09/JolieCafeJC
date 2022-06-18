@@ -25,7 +25,7 @@ fun CustomDialog(
 ) {
     Dialog(onDismissRequest = onDismiss) {
         CardCustom(
-            onClick = {},
+            onClick = null,
             paddingValues = PaddingValues(all = 0.dp)
         ) {
             Column(

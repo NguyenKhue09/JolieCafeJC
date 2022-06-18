@@ -159,4 +159,11 @@ class RemoteDataSourceImpl(
         ).flow
     }
 
+    override suspend fun reviewBill(
+        token: String,
+        body: BillReviewBody
+    ): Response<ApiResponseSingleData<Unit>> {
+        return jolieCafeApi.reviewBill(token = "Bearer $token", body = body)
+    }
+
 }

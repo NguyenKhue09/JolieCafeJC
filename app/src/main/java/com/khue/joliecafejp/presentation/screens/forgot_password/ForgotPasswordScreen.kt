@@ -16,7 +16,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -57,17 +56,16 @@ fun ForgotPassword(navController: NavHostController) {
         Text(
             modifier = Modifier.padding(top = 90.dp),
             text = stringResource(R.string.forgot_password_title),
-            fontFamily = raleway,
+            fontFamily = ralewayMedium,
             color = MaterialTheme.colors.titleTextColor,
             fontSize = 24.sp,
             textAlign = TextAlign.Center,
-            fontWeight = FontWeight.Bold
         )
 
         Text(
             modifier = Modifier.padding(top = 32.dp, start = 20.dp, end = 20.dp),
             text = stringResource(R.string.forgot_password_sub_title),
-            fontFamily = raleway,
+            fontFamily = ralewayMedium,
             color = MaterialTheme.colors.titleTextColor,
             fontSize = 20.sp,
             textAlign = TextAlign.Center,
@@ -115,7 +113,7 @@ fun ForgotPassword(navController: NavHostController) {
                 onClick = {
                     navController.popBackStack()
                 },
-                shape = MaterialTheme.shapes.large,
+                shape = MaterialTheme.shapes.medium,
                 colors = ButtonDefaults.buttonColors(
                     backgroundColor = Color.Transparent
                 ),
@@ -123,7 +121,7 @@ fun ForgotPassword(navController: NavHostController) {
             ) {
                 Text(
                     text = stringResource(R.string.cancel),
-                    fontFamily = raleway,
+                    fontFamily = ralewayMedium,
                     color = MaterialTheme.colors.titleTextColor,
                     fontSize = 16.sp,
                     textAlign = TextAlign.Center,
@@ -146,7 +144,7 @@ fun ForgotPassword(navController: NavHostController) {
                         )
                     }
                 },
-                shape = MaterialTheme.shapes.large,
+                shape = MaterialTheme.shapes.medium,
                 colors = ButtonDefaults.buttonColors(
                     backgroundColor = MaterialTheme.colors.titleTextColor
                 ),
@@ -154,7 +152,7 @@ fun ForgotPassword(navController: NavHostController) {
             ) {
                 Text(
                     text = stringResource(R.string.confirm),
-                    fontFamily = raleway,
+                    fontFamily = ralewayMedium,
                     color = MaterialTheme.colors.textColor,
                     fontSize = 16.sp,
                     textAlign = TextAlign.Center,

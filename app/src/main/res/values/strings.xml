@@ -117,4 +117,7 @@
     <string name="notification_image">Notification Image</string>
     <string name="order_id">Order ID: %s</string>
     <string name="items">%d items</string>
+    <string name="post">Post</string>
+    <string name="rating">Rating</string>
+    <string name="comment">Comment</string>
 </resources>

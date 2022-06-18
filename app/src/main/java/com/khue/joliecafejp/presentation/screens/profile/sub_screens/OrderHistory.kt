@@ -1,10 +1,14 @@
 package com.khue.joliecafejp.presentation.screens.profile.sub_screens
 
-import androidx.compose.foundation.gestures.animateScrollBy
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material.*
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
+import androidx.compose.material.SnackbarHostState
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
@@ -15,21 +19,25 @@ import androidx.navigation.compose.rememberNavController
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.items
+import androidx.paging.compose.itemsIndexed
 import com.khue.joliecafejp.R
+import com.khue.joliecafejp.domain.model.BillReviewBody
 import com.khue.joliecafejp.domain.model.OrderHistory
 import com.khue.joliecafejp.domain.model.SnackBarData
 import com.khue.joliecafejp.navigation.nav_screen.ProfileSubScreen
 import com.khue.joliecafejp.presentation.common.LoadingBody
 import com.khue.joliecafejp.presentation.common.SnackBar
-import com.khue.joliecafejp.presentation.components.OrderHistoryItem
 import com.khue.joliecafejp.presentation.common.TopBar
+import com.khue.joliecafejp.presentation.components.OrderHistoryItem
+import com.khue.joliecafejp.presentation.components.ReviewBillDialog
 import com.khue.joliecafejp.presentation.viewmodels.OrderHistoryViewModel
 import com.khue.joliecafejp.ui.theme.EXTRA_LARGE_PADDING
 import com.khue.joliecafejp.ui.theme.MEDIUM_PADDING
 import com.khue.joliecafejp.ui.theme.greyPrimary
+import com.khue.joliecafejp.utils.ApiResult
 import com.khue.joliecafejp.utils.Constants
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @Composable
@@ -38,7 +46,7 @@ fun OrderHistory(
     orderHistoryViewModel: OrderHistoryViewModel = hiltViewModel()
 ) {
 
-    val scrollState = rememberScrollState()
+    val scrollState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
     val scrollToPosition = remember { mutableStateOf(0F) }
 
@@ -47,16 +55,55 @@ fun OrderHistory(
 
     val snackbarHostState = remember { SnackbarHostState() }
     var snackBarData by remember {
-        mutableStateOf( SnackBarData(
-            iconId = R.drawable.ic_success,
-            message = "",
-            snackBarState = Constants.SNACK_BAR_STATUS_SUCCESS,
+        mutableStateOf(
+            SnackBarData(
+                iconId = R.drawable.ic_success,
+                message = "",
+                snackBarState = Constants.SNACK_BAR_STATUS_SUCCESS,
+            )
         )
-        )
+    }
+
+    var showReviewBillDialog by remember { mutableStateOf(false) }
+    var reviewBillSelected by remember {
+        mutableStateOf(BillReviewBody(
+            billId = "",
+            rating = 0f,
+            content = "",
+            productIds = emptyList()
+        ))
     }
 
     LaunchedEffect(key1 = Unit) {
         orderHistoryViewModel.getUserBills(userToken)
+        orderHistoryViewModel.reviewBillResponse.collectLatest { result ->
+            when(result) {
+                is ApiResult.Loading -> {
+
+                }
+                is ApiResult.NullDataSuccess -> {
+                    snackBarData = snackBarData.copy(
+                        message = "Review bill success",
+                        snackBarState = Constants.SNACK_BAR_STATUS_SUCCESS
+                    )
+                    coroutineScope.launch {
+                        snackbarHostState.showSnackbar("")
+                    }
+                    bills.refresh()
+                }
+                is ApiResult.Error -> {
+                    snackBarData = snackBarData.copy(
+                        message = "Review bill failed",
+                        snackBarState = Constants.SNACK_BAR_STATUS_ERROR,
+                        iconId = R.drawable.ic_error
+                    )
+                    coroutineScope.launch {
+                        snackbarHostState.showSnackbar("")
+                    }
+                }
+                else -> {}
+            }
+        }
     }
 
     Scaffold(
@@ -76,7 +123,7 @@ fun OrderHistory(
             )
         }
     ) {
-        val result = handleBillPagingResult(bills = bills) {message, type ->
+        val result = handleBillPagingResult(bills = bills) { message, type ->
             snackBarData = SnackBarData(
                 iconId = R.drawable.ic_error,
                 message = message,
@@ -87,7 +134,7 @@ fun OrderHistory(
             }
         }
 
-        if(result) {
+        if (result) {
             LazyColumn(
                 modifier = Modifier
                     .padding(it)
@@ -95,10 +142,14 @@ fun OrderHistory(
                 verticalArrangement = Arrangement.spacedBy(EXTRA_LARGE_PADDING),
                 contentPadding = PaddingValues(
                     all = EXTRA_LARGE_PADDING,
-                )
+                ),
+                state = scrollState
             ) {
-                items(bills) { bill ->
-                    var isExpanded by rememberSaveable  {
+                itemsIndexed(
+                    bills,
+                    key = { _, bill -> bill.id },
+                ) { index, bill ->
+                    var isExpanded by rememberSaveable {
                         mutableStateOf(false)
                     }
 
@@ -109,18 +160,48 @@ fun OrderHistory(
                             scrollToPosition = scrollToPosition,
                             onExpanded = {
                                 isExpanded = !isExpanded
-                                coroutineScope.launch {
-                                    delay(500L)
-                                    scrollState.animateScrollBy(scrollToPosition.value)
+                                if (isExpanded) {
+                                    coroutineScope.launch {
+                                        delay(500L)
+                                        scrollState.animateScrollToItem(index)
+                                    }
                                 }
                             },
-                            onReviewClicked = {}
+                            onReviewClicked = {
+                                showReviewBillDialog = true
+                                reviewBillSelected = reviewBillSelected.copy(
+                                    billId = bill.id,
+                                    productIds = bill.products.map { item -> item.product.id }
+                                )
+                            }
                         )
                     }
                 }
             }
         }
 
+        if (showReviewBillDialog) {
+            ReviewBillDialog(
+                onDismiss = {
+                    showReviewBillDialog = false
+                },
+                onNegativeClick = {
+                    showReviewBillDialog = false
+                },
+                onPositiveClick = { rating, comment ->
+                    reviewBillSelected = reviewBillSelected.copy(
+                        rating = rating,
+                        content = comment
+                    )
+                    println(reviewBillSelected)
+                    orderHistoryViewModel.reviewBills(
+                        token = userToken,
+                        billReviewBody = reviewBillSelected
+                    )
+                    showReviewBillDialog = false
+                }
+            )
+        }
     }
 }
 

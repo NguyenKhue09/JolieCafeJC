@@ -11,6 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -209,7 +210,7 @@ fun CustomScrollableTabRow(
     ) {
         tabs.forEachIndexed { tabIndex, tab ->
             Tab(
-                modifier = Modifier.height(30.dp),
+                modifier = Modifier.height(30.dp).clip(shape = MaterialTheme.shapes.small),
                 selected = pagerState.currentPage == tabIndex,
                 onClick = { onTabClick(tabIndex) },
                 selectedContentColor = MaterialTheme.colors.titleTextColor,
@@ -223,8 +224,7 @@ fun CustomScrollableTabRow(
                                 with(density) { textLayoutResult.size.width.toDp() }
                         },
                         fontSize = 18.sp,
-                        fontFamily = raleway,
-                        fontWeight = FontWeight.Bold,
+                        fontFamily = ralewayMedium,
                     )
                 },
             )

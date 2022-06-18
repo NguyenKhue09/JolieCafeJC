@@ -7,6 +7,7 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
@@ -205,7 +206,7 @@ internal fun CustomTabRow(
     }
 
     TabRow(
-        modifier = Modifier.padding(top = EXTRA_LARGE_PADDING),
+        modifier = Modifier.padding(top = EXTRA_LARGE_PADDING, start = EXTRA_LARGE_PADDING, end = EXTRA_LARGE_PADDING),
         selectedTabIndex = pagerState.currentPage,
         backgroundColor = Color.Transparent,
         contentColor = MaterialTheme.colors.textColor,
@@ -221,7 +222,7 @@ internal fun CustomTabRow(
     ) {
         tabs.forEachIndexed { tabIndex, tab ->
             Tab(
-                modifier = Modifier.height(30.dp),
+                modifier = Modifier.height(30.dp).clip(shape = MaterialTheme.shapes.small),
                 selected = pagerState.currentPage == tabIndex,
                 onClick = { onTabClick(tabIndex) },
                 selectedContentColor = MaterialTheme.colors.titleTextColor,
@@ -235,8 +236,7 @@ internal fun CustomTabRow(
                                 with(density) { textLayoutResult.size.width.toDp() }
                         },
                         fontSize = 18.sp,
-                        fontFamily = raleway,
-                        fontWeight = FontWeight.Bold,
+                        fontFamily = ralewayMedium,
                     )
                 },
             )

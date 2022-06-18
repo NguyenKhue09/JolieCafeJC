@@ -23,4 +23,5 @@ data class ApiUseCases(
     val getCartItemsUseCase: GetCartItemsUseCase,
     val getAdminNotificationForUserUseCase: GetAdminNotificationForUserUseCase,
     val getUserBillsUseCase: GetUserBillsUseCase,
+    val reviewBillUseCase: ReviewBillUseCase,
 )

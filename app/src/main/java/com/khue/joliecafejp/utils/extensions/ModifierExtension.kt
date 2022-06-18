@@ -4,6 +4,7 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.width
@@ -26,6 +27,18 @@ fun Modifier.haveBorder(haveBorder: Boolean) = composed {
             color = MaterialTheme.colors.textColor2,
             shape = MaterialTheme.shapes.medium
         )
+    } else {
+        this
+    }
+}
+
+fun Modifier.haveClickable(isClickable: Boolean, onClick: (() -> Unit)?) = composed {
+    if (isClickable) {
+        this.clickable{
+            if(onClick != null) {
+                onClick()
+            }
+        }
     } else {
         this
     }
