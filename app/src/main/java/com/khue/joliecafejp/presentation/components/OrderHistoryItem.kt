@@ -21,8 +21,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import com.khue.joliecafejp.R
+import com.khue.joliecafejp.domain.model.OrderHistory
+import com.khue.joliecafejp.domain.model.OrderHistoryUserInfos
 import com.khue.joliecafejp.presentation.common.CardCustom
 import com.khue.joliecafejp.ui.theme.*
+import com.khue.joliecafejp.utils.extensions.formatTo
+import com.khue.joliecafejp.utils.extensions.toDate
 import java.text.NumberFormat
 import java.util.*
 
@@ -32,12 +36,9 @@ fun OrderHistoryItem(
     scrollToPosition: MutableState<Float>,
     onExpanded: () -> Unit,
     onReviewClicked: () -> Unit,
+    bill: OrderHistory,
+    isExpanded: Boolean,
 ) {
-
-    var isExpanded by remember {
-        mutableStateOf(true)
-    }
-
     val angle: Float by animateFloatAsState(
         targetValue = if (!isExpanded) 180f else 0f
     )
@@ -67,25 +68,26 @@ fun OrderHistoryItem(
             ) {
                 Text(
                     modifier = Modifier.weight(1f),
-                    text = "27/02/2022",
+                    text ="${bill.orderDate.toDate()!!.formatTo()} - ${bill.status}",
                     fontFamily = montserratFontFamily,
                     color = MaterialTheme.colors.greySecondary,
                     fontSize = MaterialTheme.typography.caption.fontSize,
                     overflow = TextOverflow.Ellipsis,
                 )
 
-                IconButton(onClick = onReviewClicked) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_review),
-                        contentDescription = stringResource(id = R.string.review),
-                        tint = MaterialTheme.colors.textColor2
-                    )
+                if(bill.paid) {
+                    IconButton(onClick = onReviewClicked) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_review),
+                            contentDescription = stringResource(id = R.string.review),
+                            tint = MaterialTheme.colors.textColor2
+                        )
+                    }
                 }
 
                 IconButton(
                     onClick = {
-                        isExpanded = !isExpanded
-                        if (isExpanded) onExpanded()
+                        onExpanded()
                     }
                 ) {
                     Icon(
@@ -103,7 +105,7 @@ fun OrderHistoryItem(
                         bottom = SMALL_PADDING
                     )
                     .align(Alignment.Start),
-                text = "Order ID: 123456789",
+                text = stringResource(R.string.order_id, bill.orderId),
                 fontFamily = montserratFontFamily,
                 color = MaterialTheme.colors.greySecondary,
                 fontSize = MaterialTheme.typography.subtitle2.fontSize,
@@ -122,8 +124,8 @@ fun OrderHistoryItem(
                     Column(
                         modifier = Modifier.wrapContentHeight()
                     ) {
-                        repeat(5) {
-                            ProductOrderHistoryItem()
+                        bill.products.forEach {
+                            ProductOrderHistoryItem(item = it)
                         }
                     }
 
@@ -134,7 +136,7 @@ fun OrderHistoryItem(
                             .padding(
                                 bottom = SMALL_PADDING
                             ),
-                        text = "Sweet Latte",
+                        text = bill.address.userName,
                         fontFamily = ralewayMedium,
                         color = MaterialTheme.colors.greySecondary,
                         fontSize = MaterialTheme.typography.subtitle2.fontSize,
@@ -145,7 +147,7 @@ fun OrderHistoryItem(
                             .padding(
                                 bottom = SMALL_PADDING
                             ),
-                        text = "0365895412",
+                        text = bill.address.phone,
                         fontFamily = montserratFontFamily,
                         color = MaterialTheme.colors.textColor,
                         fontSize = MaterialTheme.typography.caption.fontSize,
@@ -156,7 +158,7 @@ fun OrderHistoryItem(
                             .padding(
                                 bottom = EXTRA_LARGE_PADDING
                             ),
-                        text = "12 Robusta Street, Frappe District, White City",
+                        text = bill.address.address,
                         fontFamily = montserratFontFamily,
                         color = MaterialTheme.colors.textColor,
                         fontSize = MaterialTheme.typography.caption.fontSize,
@@ -203,7 +205,7 @@ fun OrderHistoryItem(
                             text = stringResource(
                                 id = R.string.money, NumberFormat.getNumberInstance(
                                     Locale.US
-                                ).format(1800000)
+                                ).format(bill.totalCost - bill.shippingFee - bill.discountCost - bill.scoreApply)
                             ),
                             fontFamily = montserratFontFamily,
                             color = MaterialTheme.colors.textColor,
@@ -239,7 +241,7 @@ fun OrderHistoryItem(
                             text = stringResource(
                                 id = R.string.money, NumberFormat.getNumberInstance(
                                     Locale.US
-                                ).format(1800000)
+                                ).format(bill.shippingFee)
                             ),
                             fontFamily = montserratFontFamily,
                             color = MaterialTheme.colors.textColor,
@@ -275,7 +277,43 @@ fun OrderHistoryItem(
                             text = stringResource(
                                 id = R.string.money, NumberFormat.getNumberInstance(
                                     Locale.US
-                                ).format(1800000)
+                                ).format(-bill.discountCost)
+                            ),
+                            fontFamily = montserratFontFamily,
+                            color = MaterialTheme.colors.textColor,
+                            fontSize = MaterialTheme.typography.caption.fontSize,
+                            overflow = TextOverflow.Ellipsis,
+                            maxLines = 2
+                        )
+                    }
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(
+                                bottom = SMALL_PADDING
+                            ),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Score applied",
+                            fontFamily = ralewayMedium,
+                            color = MaterialTheme.colors.textColor,
+                            fontSize = MaterialTheme.typography.caption.fontSize,
+                            overflow = TextOverflow.Ellipsis,
+                            maxLines = 2
+                        )
+
+                        Text(
+                            modifier = Modifier
+                                .padding(
+                                    start = SMALL_PADDING
+                                ),
+                            text = stringResource(
+                                id = R.string.money, NumberFormat.getNumberInstance(
+                                    Locale.US
+                                ).format(-bill.scoreApply)
                             ),
                             fontFamily = montserratFontFamily,
                             color = MaterialTheme.colors.textColor,
@@ -308,7 +346,7 @@ fun OrderHistoryItem(
                             text = stringResource(
                                 id = R.string.money, NumberFormat.getNumberInstance(
                                     Locale.US
-                                ).format(1800000)
+                                ).format(bill.totalCost)
                             ),
                             fontFamily = montserratFontFamily,
                             color = MaterialTheme.colors.titleTextColor,
@@ -338,7 +376,7 @@ fun OrderHistoryItem(
                                 .padding(
                                     start = SMALL_PADDING
                                 ),
-                            text = "You paid this bill",
+                            text = if(bill.paid) "You paid this bill" else "You haven't paid this bill",
                             fontFamily = montserratFontFamily,
                             color = MaterialTheme.colors.titleTextColor,
                             fontSize = MaterialTheme.typography.caption.fontSize,
@@ -357,7 +395,7 @@ fun OrderHistoryItem(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "5 items",
+                        text = stringResource(R.string.items, bill.products.sumOf { it.quantity }),
                         fontFamily = montserratFontFamily,
                         color = MaterialTheme.colors.greySecondary,
                         fontSize = MaterialTheme.typography.subtitle2.fontSize,
@@ -367,7 +405,7 @@ fun OrderHistoryItem(
                         text = stringResource(
                             id = R.string.money, NumberFormat.getNumberInstance(
                                 Locale.US
-                            ).format(1800000)
+                            ).format(bill.totalCost)
                         ),
                         fontFamily = montserratFontFamily,
                         color = MaterialTheme.colors.greySecondary,
@@ -384,10 +422,30 @@ fun OrderHistoryItem(
 @Composable
 fun OrderHistoryItemPrev() {
     OrderHistoryItem(
-        onExpanded = {},
         scrollToPosition = remember {
             mutableStateOf(0f)
         },
-        onReviewClicked = {}
+        onExpanded = {},
+        onReviewClicked = {},
+        bill = OrderHistory(
+            id = "1",
+            products = emptyList(),
+            shippingFee = 100.0,
+            discountCost = 50.0,
+            totalCost = 300.0,
+            paid = true,
+            address = OrderHistoryUserInfos(
+                userId = "1",
+                userName = "John Doe",
+                phone = "0912345678",
+                address = "123 ABC Street, District 1, HCM City",
+            ),
+            orderDate = "2022-06-18T07:54:59.633Z",
+            orderId = "1",
+            status = "Pending",
+            paymentMethod = "COD",
+            scoreApply = 0,
+        ),
+        isExpanded = true
     )
 }

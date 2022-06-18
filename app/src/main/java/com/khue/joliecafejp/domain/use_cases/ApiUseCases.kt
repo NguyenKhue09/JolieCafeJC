@@ -20,5 +20,7 @@ data class ApiUseCases(
     val addNewAddressUseCase: AddNewAddressUseCase,
     val addNewDefaultAddressUseCase: AddNewDefaultAddressUseCase,
     val addProductToCartUseCase: AddProductToCartUseCase,
-    val getCartItemsUseCase: GetCartItemsUseCase
+    val getCartItemsUseCase: GetCartItemsUseCase,
+    val getAdminNotificationForUserUseCase: GetAdminNotificationForUserUseCase,
+    val getUserBillsUseCase: GetUserBillsUseCase,
 )

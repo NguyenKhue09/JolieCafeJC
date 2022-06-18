@@ -33,12 +33,14 @@ object NetworkModule {
             .build()
     }
 
+    private var json = Json { ignoreUnknownKeys = true }
+
     @OptIn(ExperimentalSerializationApi::class)
     @Singleton
     @Provides
     fun provideConverterFactory(): Converter.Factory {
         val contentType = "application/json".toMediaType()
-        return Json.asConverterFactory(contentType)
+        return json.asConverterFactory(contentType)
     }
 
     @Singleton

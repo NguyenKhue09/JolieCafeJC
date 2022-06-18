@@ -37,7 +37,8 @@ fun CategoriesButtonGroup(
                     .fillMaxWidth()
                     .height(170.dp),
                 columns = GridCells.Fixed(4),
-                contentPadding = PaddingValues(0.dp)
+                contentPadding = PaddingValues(0.dp),
+                userScrollEnabled = false,
             ) {
                 items(categories) {
                     CategoryButton(

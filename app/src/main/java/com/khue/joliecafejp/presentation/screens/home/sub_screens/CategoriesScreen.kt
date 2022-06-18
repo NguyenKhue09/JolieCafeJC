@@ -253,7 +253,7 @@ fun CategoriesScreen(
 }
 
 @Composable
-fun handlePagingResult(
+internal fun handlePagingResult(
     categoryProducts: LazyPagingItems<Product>
 ): Boolean {
     categoryProducts.apply {
