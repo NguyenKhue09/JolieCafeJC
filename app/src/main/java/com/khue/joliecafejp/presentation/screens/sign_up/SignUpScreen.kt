@@ -208,7 +208,7 @@ fun SignUpScreen(
         Text(
             modifier = Modifier.padding(top = 40.dp),
             text = stringResource(R.string.sign_up_title),
-            fontFamily = raleway,
+            fontFamily = ralewayMedium,
             color = MaterialTheme.colors.titleTextColor,
             fontSize = 24.sp,
             textAlign = TextAlign.Center,
@@ -368,7 +368,7 @@ fun SignUpScreen(
         ) {
             Text(
                 text = stringResource(R.string.sign_up_content),
-                fontFamily = raleway,
+                fontFamily = ralewayMedium,
                 color = Color.White,
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp,
@@ -408,7 +408,7 @@ fun SignUpScreen(
                     style = SpanStyle(
                         color = MaterialTheme.colors.textColor,
                         fontSize = 14.sp,
-                        fontFamily = raleway,
+                        fontFamily = ralewayMedium,
                     )
                 ) {
                     append(stringResource(R.string.already_signed_up))
@@ -417,7 +417,7 @@ fun SignUpScreen(
                     style = SpanStyle(
                         color = MaterialTheme.colors.titleTextColor,
                         fontSize = 14.sp,
-                        fontFamily = raleway,
+                        fontFamily = ralewayMedium,
                     )
                 ) {
                     append(stringResource(R.string.sign_in_here))

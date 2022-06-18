@@ -10,13 +10,14 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
 import com.khue.joliecafejp.ui.theme.raleway
+import com.khue.joliecafejp.ui.theme.ralewayMedium
 
 @Composable
 fun TextCustom(
     modifier: Modifier,
     content: String,
     color: Color,
-    fontFamily: FontFamily = raleway,
+    fontFamily: FontFamily = ralewayMedium,
     fontSize: TextUnit = 16.sp
 ) {
 

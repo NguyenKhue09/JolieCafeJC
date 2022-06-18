@@ -1,32 +1,42 @@
-package com.khue.joliecafejp.presentation.common
+package com.khue.joliecafejp.presentation.components
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.khue.joliecafejp.R
+import com.khue.joliecafejp.presentation.common.ButtonCustom
+import com.khue.joliecafejp.presentation.common.CardCustom
+import com.khue.joliecafejp.presentation.common.rating_bar.CustomRatingBar
+import com.khue.joliecafejp.presentation.common.rating_bar.RatingBarConfig
+import com.khue.joliecafejp.presentation.common.rating_bar.RatingBarStyle
 import com.khue.joliecafejp.ui.theme.*
 
 @Composable
-fun CustomDialog(
-    title: String,
-    content: String,
+fun ReviewBillDialog(
     onDismiss: () -> Unit,
     onNegativeClick: () -> Unit,
     onPositiveClick: () -> Unit
 ) {
+    var rating: Float by rememberSaveable { mutableStateOf(4f) }
+
     Dialog(onDismissRequest = onDismiss) {
         CardCustom(
             onClick = null,
-            paddingValues = PaddingValues(all = 0.dp)
+            paddingValues = PaddingValues(all = ZERO_PADDING)
         ) {
             Column(
                 modifier = Modifier.fillMaxWidth(),
@@ -41,11 +51,10 @@ fun CustomDialog(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = title,
-                        fontFamily = raleway,
+                        text = "Review Bill",
+                        fontFamily = ralewayMedium,
                         color = MaterialTheme.colors.titleTextColor,
-                        fontSize = MaterialTheme.typography.subtitle2.fontSize,
-                        fontWeight = FontWeight.Bold
+                        fontSize = MaterialTheme.typography.h6.fontSize,
                     )
                     IconButton(
                         onClick = onDismiss
@@ -66,24 +75,75 @@ fun CustomDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = EXTRA_LARGE_PADDING, vertical = SMALL_PADDING),
-                    text = content,
-                    fontFamily = raleway,
+                    text = stringResource(R.string.rating),
+                    fontFamily = ralewayMedium,
                     color = MaterialTheme.colors.textColor,
-                    fontSize = MaterialTheme.typography.subtitle2.fontSize,
-                    fontWeight = FontWeight.Bold
+                    fontSize = MaterialTheme.typography.body1.fontSize,
                 )
+
+                CustomRatingBar(
+                    value = rating,
+                    onValueChange = {
+                        rating = it
+                    },
+                    onRatingChanged = {},
+                    config = RatingBarConfig()
+                        .style(RatingBarStyle.HighLighted)
+                )
+
+                Text(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = EXTRA_LARGE_PADDING, vertical = SMALL_PADDING),
+                    text = stringResource(R.string.comment),
+                    fontFamily = ralewayMedium,
+                    color = MaterialTheme.colors.textColor,
+                    fontSize = MaterialTheme.typography.body1.fontSize,
+                )
+
+                OutlinedTextField(
+                    value = "",
+                    onValueChange = {
+
+                    },
+                    colors = TextFieldDefaults.textFieldColors(
+                        backgroundColor = Color.Transparent,
+                        focusedIndicatorColor = MaterialTheme.colors.titleTextColor,
+                        disabledTextColor = MaterialTheme.colors.textColor,
+                        disabledIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.White,
+                        cursorColor = MaterialTheme.colors.textColor,
+                        textColor = MaterialTheme.colors.textColor,
+                        placeholderColor = MaterialTheme.colors.textColor
+                    ),
+                    placeholder = {
+                        Text(
+                            text = "Leave a comment",
+                            fontFamily = ralewayMedium,
+                            color = MaterialTheme.colors.darkTextColor,
+                            fontSize = 13.sp,
+                            textAlign = TextAlign.Left,
+                        )
+                    },
+                )
+
+                Spacer(modifier = Modifier.height(MEDIUM_PADDING))
 
                 Row(
                     modifier = Modifier
-                        .padding(start = EXTRA_LARGE_PADDING, end = EXTRA_LARGE_PADDING, bottom = EXTRA_LARGE_PADDING)
+                        .padding(
+                            start = EXTRA_LARGE_PADDING,
+                            end = EXTRA_LARGE_PADDING,
+                            bottom = EXTRA_LARGE_PADDING
+                        )
                         .fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.End
                 ) {
                     ButtonCustom(
-                        buttonContent = stringResource(id = R.string.delete),
+                        buttonContent = stringResource(id = R.string.cancel),
                         backgroundColor = Color.Transparent,
-                        textColor = MaterialTheme.colors.errorTextColor,
+                        textColor = MaterialTheme.colors.textColor2,
                         onClick = onNegativeClick,
                         paddingValues = PaddingValues(top = 0.dp),
                         contentPadding = PaddingValues(
@@ -96,7 +156,7 @@ fun CustomDialog(
                         )
                     )
                     ButtonCustom(
-                        buttonContent = stringResource(id = R.string.cancel),
+                        buttonContent = stringResource(R.string.post),
                         backgroundColor = MaterialTheme.colors.titleTextColor,
                         textColor = MaterialTheme.colors.textColor,
                         onClick = onPositiveClick,
@@ -118,10 +178,8 @@ fun CustomDialog(
 
 @Preview
 @Composable
-fun CustomDialogPrev() {
-    CustomDialog(
-        "Delete address?",
-        "Delete address? Delete address? Delete address?",
+fun ReviewBillDialogPrev() {
+    ReviewBillDialog(
         {},
         {},
         {}

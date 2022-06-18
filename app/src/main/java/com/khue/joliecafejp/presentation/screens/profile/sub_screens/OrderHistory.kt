@@ -1,10 +1,14 @@
 package com.khue.joliecafejp.presentation.screens.profile.sub_screens
 
-import androidx.compose.foundation.gestures.animateScrollBy
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material.*
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
+import androidx.compose.material.SnackbarHostState
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
@@ -15,15 +19,16 @@ import androidx.navigation.compose.rememberNavController
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.items
+import androidx.paging.compose.itemsIndexed
 import com.khue.joliecafejp.R
 import com.khue.joliecafejp.domain.model.OrderHistory
 import com.khue.joliecafejp.domain.model.SnackBarData
 import com.khue.joliecafejp.navigation.nav_screen.ProfileSubScreen
 import com.khue.joliecafejp.presentation.common.LoadingBody
 import com.khue.joliecafejp.presentation.common.SnackBar
-import com.khue.joliecafejp.presentation.components.OrderHistoryItem
 import com.khue.joliecafejp.presentation.common.TopBar
+import com.khue.joliecafejp.presentation.components.OrderHistoryItem
+import com.khue.joliecafejp.presentation.components.ReviewBillDialog
 import com.khue.joliecafejp.presentation.viewmodels.OrderHistoryViewModel
 import com.khue.joliecafejp.ui.theme.EXTRA_LARGE_PADDING
 import com.khue.joliecafejp.ui.theme.MEDIUM_PADDING
@@ -38,7 +43,7 @@ fun OrderHistory(
     orderHistoryViewModel: OrderHistoryViewModel = hiltViewModel()
 ) {
 
-    val scrollState = rememberScrollState()
+    val scrollState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
     val scrollToPosition = remember { mutableStateOf(0F) }
 
@@ -54,6 +59,8 @@ fun OrderHistory(
         )
         )
     }
+
+    var showReviewBillDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(key1 = Unit) {
         orderHistoryViewModel.getUserBills(userToken)
@@ -95,9 +102,13 @@ fun OrderHistory(
                 verticalArrangement = Arrangement.spacedBy(EXTRA_LARGE_PADDING),
                 contentPadding = PaddingValues(
                     all = EXTRA_LARGE_PADDING,
-                )
+                ),
+                state = scrollState
             ) {
-                items(bills) { bill ->
+                itemsIndexed(
+                    bills,
+                    key = { _, bill ->  bill.id},
+                ) { index, bill ->
                     var isExpanded by rememberSaveable  {
                         mutableStateOf(false)
                     }
@@ -109,18 +120,35 @@ fun OrderHistory(
                             scrollToPosition = scrollToPosition,
                             onExpanded = {
                                 isExpanded = !isExpanded
-                                coroutineScope.launch {
-                                    delay(500L)
-                                    scrollState.animateScrollBy(scrollToPosition.value)
+                                if(isExpanded) {
+                                    coroutineScope.launch {
+                                        delay(500L)
+                                        scrollState.animateScrollToItem(index)
+                                    }
                                 }
                             },
-                            onReviewClicked = {}
+                            onReviewClicked = {
+                                showReviewBillDialog = true
+                            }
                         )
                     }
                 }
             }
         }
 
+        if(showReviewBillDialog) {
+            ReviewBillDialog(
+                onDismiss = {
+                    showReviewBillDialog = false
+                },
+                onNegativeClick = {
+                    showReviewBillDialog = false
+                },
+                onPositiveClick = {
+                    showReviewBillDialog = false
+                }
+            )
+        }
     }
 }
 

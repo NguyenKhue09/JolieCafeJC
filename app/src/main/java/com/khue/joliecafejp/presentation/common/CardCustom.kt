@@ -1,6 +1,5 @@
 package com.khue.joliecafejp.presentation.common
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CornerBasedShape
@@ -14,6 +13,7 @@ import androidx.compose.ui.unit.dp
 import com.khue.joliecafejp.ui.theme.EXTRA_LARGE_PADDING
 import com.khue.joliecafejp.ui.theme.greyOpacity60Primary
 import com.khue.joliecafejp.utils.extensions.haveBorder
+import com.khue.joliecafejp.utils.extensions.haveClickable
 
 @Composable
 fun CardCustom(
@@ -34,13 +34,8 @@ fun CardCustom(
         modifier = modifier
             .padding(paddingValues)
             .clip(shape = shape)
-            .clickable(
-                enabled = onClick != null,
-            ) {
-                if (onClick != null) {
-                    onClick()
-                }
-            }.haveBorder(haveBorder),
+            .haveClickable(isClickable = onClick != null, onClick = onClick)
+            .haveBorder(haveBorder),
         shape = shape,
         backgroundColor = backgroundColor,
         elevation = 0.dp

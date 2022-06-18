@@ -76,7 +76,7 @@ fun NotificationCard(
                     )
                     .weight(8f),
                 text = stringResource(id = R.string.notification),
-                fontFamily = raleway,
+                fontFamily = ralewayMedium,
                 color = MaterialTheme.colors.textColor,
                 fontSize = MaterialTheme.typography.body1.fontSize,
                 overflow = TextOverflow.Ellipsis,
@@ -123,7 +123,7 @@ fun LanguageCard(
                     )
                     .weight(8f),
                 text = stringResource(R.string.language),
-                fontFamily = raleway,
+                fontFamily = ralewayMedium,
                 color = MaterialTheme.colors.textColor,
                 fontSize = MaterialTheme.typography.body1.fontSize,
                 overflow = TextOverflow.Ellipsis,
@@ -135,7 +135,7 @@ fun LanguageCard(
                 modifier = Modifier
                     .weight(1f),
                 text = "EN",
-                fontFamily = raleway,
+                fontFamily = ralewayMedium,
                 color = MaterialTheme.colors.titleTextColor,
                 fontSize = MaterialTheme.typography.body1.fontSize,
                 overflow = TextOverflow.Ellipsis,
