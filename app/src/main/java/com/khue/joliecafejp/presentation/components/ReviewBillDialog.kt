@@ -1,5 +1,6 @@
 package com.khue.joliecafejp.presentation.components
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
@@ -8,6 +9,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -17,6 +19,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.khue.joliecafejp.R
 import com.khue.joliecafejp.presentation.common.ButtonCustom
 import com.khue.joliecafejp.presentation.common.CardCustom
@@ -25,18 +28,27 @@ import com.khue.joliecafejp.presentation.common.rating_bar.RatingBarConfig
 import com.khue.joliecafejp.presentation.common.rating_bar.RatingBarStyle
 import com.khue.joliecafejp.ui.theme.*
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ReviewBillDialog(
     onDismiss: () -> Unit,
     onNegativeClick: () -> Unit,
-    onPositiveClick: () -> Unit
+    onPositiveClick: (Float, String) -> Unit
 ) {
-    var rating: Float by rememberSaveable { mutableStateOf(4f) }
+    var rating: Float by rememberSaveable { mutableStateOf(5f) }
+    var comment: String by rememberSaveable { mutableStateOf("") }
 
-    Dialog(onDismissRequest = onDismiss) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
         CardCustom(
             onClick = null,
-            paddingValues = PaddingValues(all = ZERO_PADDING)
+            paddingValues = PaddingValues(all = ZERO_PADDING),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = EXTRA_LARGE_PADDING)
+                .animateContentSize()
         ) {
             Column(
                 modifier = Modifier.fillMaxWidth(),
@@ -102,9 +114,12 @@ fun ReviewBillDialog(
                 )
 
                 OutlinedTextField(
-                    value = "",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = EXTRA_LARGE_PADDING),
+                    value = comment,
                     onValueChange = {
-
+                        comment = it
                     },
                     colors = TextFieldDefaults.textFieldColors(
                         backgroundColor = Color.Transparent,
@@ -125,6 +140,7 @@ fun ReviewBillDialog(
                             textAlign = TextAlign.Left,
                         )
                     },
+                    maxLines = 5,
                 )
 
                 Spacer(modifier = Modifier.height(MEDIUM_PADDING))
@@ -159,7 +175,9 @@ fun ReviewBillDialog(
                         buttonContent = stringResource(R.string.post),
                         backgroundColor = MaterialTheme.colors.titleTextColor,
                         textColor = MaterialTheme.colors.textColor,
-                        onClick = onPositiveClick,
+                        onClick = {
+                            onPositiveClick(rating, comment)
+                        },
                         paddingValues = PaddingValues(
                             start = EXTRA_LARGE_PADDING,
                             top = 0.dp
@@ -182,6 +200,6 @@ fun ReviewBillDialogPrev() {
     ReviewBillDialog(
         {},
         {},
-        {}
+        {_, _ ->}
     )
 }

@@ -21,6 +21,7 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemsIndexed
 import com.khue.joliecafejp.R
+import com.khue.joliecafejp.domain.model.BillReviewBody
 import com.khue.joliecafejp.domain.model.OrderHistory
 import com.khue.joliecafejp.domain.model.SnackBarData
 import com.khue.joliecafejp.navigation.nav_screen.ProfileSubScreen
@@ -33,8 +34,10 @@ import com.khue.joliecafejp.presentation.viewmodels.OrderHistoryViewModel
 import com.khue.joliecafejp.ui.theme.EXTRA_LARGE_PADDING
 import com.khue.joliecafejp.ui.theme.MEDIUM_PADDING
 import com.khue.joliecafejp.ui.theme.greyPrimary
+import com.khue.joliecafejp.utils.ApiResult
 import com.khue.joliecafejp.utils.Constants
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @Composable
@@ -52,18 +55,55 @@ fun OrderHistory(
 
     val snackbarHostState = remember { SnackbarHostState() }
     var snackBarData by remember {
-        mutableStateOf( SnackBarData(
-            iconId = R.drawable.ic_success,
-            message = "",
-            snackBarState = Constants.SNACK_BAR_STATUS_SUCCESS,
-        )
+        mutableStateOf(
+            SnackBarData(
+                iconId = R.drawable.ic_success,
+                message = "",
+                snackBarState = Constants.SNACK_BAR_STATUS_SUCCESS,
+            )
         )
     }
 
     var showReviewBillDialog by remember { mutableStateOf(false) }
+    var reviewBillSelected by remember {
+        mutableStateOf(BillReviewBody(
+            billId = "",
+            rating = 0f,
+            content = "",
+            productIds = emptyList()
+        ))
+    }
 
     LaunchedEffect(key1 = Unit) {
         orderHistoryViewModel.getUserBills(userToken)
+        orderHistoryViewModel.reviewBillResponse.collectLatest { result ->
+            when(result) {
+                is ApiResult.Loading -> {
+
+                }
+                is ApiResult.NullDataSuccess -> {
+                    snackBarData = snackBarData.copy(
+                        message = "Review bill success",
+                        snackBarState = Constants.SNACK_BAR_STATUS_SUCCESS
+                    )
+                    coroutineScope.launch {
+                        snackbarHostState.showSnackbar("")
+                    }
+                    bills.refresh()
+                }
+                is ApiResult.Error -> {
+                    snackBarData = snackBarData.copy(
+                        message = "Review bill failed",
+                        snackBarState = Constants.SNACK_BAR_STATUS_ERROR,
+                        iconId = R.drawable.ic_error
+                    )
+                    coroutineScope.launch {
+                        snackbarHostState.showSnackbar("")
+                    }
+                }
+                else -> {}
+            }
+        }
     }
 
     Scaffold(
@@ -83,7 +123,7 @@ fun OrderHistory(
             )
         }
     ) {
-        val result = handleBillPagingResult(bills = bills) {message, type ->
+        val result = handleBillPagingResult(bills = bills) { message, type ->
             snackBarData = SnackBarData(
                 iconId = R.drawable.ic_error,
                 message = message,
@@ -94,7 +134,7 @@ fun OrderHistory(
             }
         }
 
-        if(result) {
+        if (result) {
             LazyColumn(
                 modifier = Modifier
                     .padding(it)
@@ -107,9 +147,9 @@ fun OrderHistory(
             ) {
                 itemsIndexed(
                     bills,
-                    key = { _, bill ->  bill.id},
+                    key = { _, bill -> bill.id },
                 ) { index, bill ->
-                    var isExpanded by rememberSaveable  {
+                    var isExpanded by rememberSaveable {
                         mutableStateOf(false)
                     }
 
@@ -120,7 +160,7 @@ fun OrderHistory(
                             scrollToPosition = scrollToPosition,
                             onExpanded = {
                                 isExpanded = !isExpanded
-                                if(isExpanded) {
+                                if (isExpanded) {
                                     coroutineScope.launch {
                                         delay(500L)
                                         scrollState.animateScrollToItem(index)
@@ -129,6 +169,10 @@ fun OrderHistory(
                             },
                             onReviewClicked = {
                                 showReviewBillDialog = true
+                                reviewBillSelected = reviewBillSelected.copy(
+                                    billId = bill.id,
+                                    productIds = bill.products.map { item -> item.product.id }
+                                )
                             }
                         )
                     }
@@ -136,7 +180,7 @@ fun OrderHistory(
             }
         }
 
-        if(showReviewBillDialog) {
+        if (showReviewBillDialog) {
             ReviewBillDialog(
                 onDismiss = {
                     showReviewBillDialog = false
@@ -144,7 +188,16 @@ fun OrderHistory(
                 onNegativeClick = {
                     showReviewBillDialog = false
                 },
-                onPositiveClick = {
+                onPositiveClick = { rating, comment ->
+                    reviewBillSelected = reviewBillSelected.copy(
+                        rating = rating,
+                        content = comment
+                    )
+                    println(reviewBillSelected)
+                    orderHistoryViewModel.reviewBills(
+                        token = userToken,
+                        billReviewBody = reviewBillSelected
+                    )
                     showReviewBillDialog = false
                 }
             )

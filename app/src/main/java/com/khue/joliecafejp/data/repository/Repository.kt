@@ -146,4 +146,11 @@ class Repository @Inject constructor(
     fun getUserBills(token: String): Flow<PagingData<OrderHistory>> {
         return remote.getUserBills(token = token)
     }
+
+    suspend fun reviewBill(
+        token: String,
+        body: BillReviewBody
+    ): Response<ApiResponseSingleData<Unit>> {
+        return remote.reviewBill(token = token, body = body)
+    }
 }

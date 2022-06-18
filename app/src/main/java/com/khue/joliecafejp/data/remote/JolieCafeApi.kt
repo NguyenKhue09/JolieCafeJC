@@ -169,4 +169,10 @@ interface JolieCafeApi {
         @Header("Authorization") token: String,
         @QueryMap orderQuery: Map<String, String>,
     ): ApiResponseMultiData<OrderHistory>
+
+    @POST("$API_GATEWAY/comment/add")
+    suspend fun reviewBill(
+        @Header("Authorization") token: String,
+        @Body body: BillReviewBody,
+    ): Response<ApiResponseSingleData<Unit>>
 }

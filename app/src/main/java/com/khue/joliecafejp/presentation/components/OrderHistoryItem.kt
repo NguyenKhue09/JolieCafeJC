@@ -75,7 +75,7 @@ fun OrderHistoryItem(
                     overflow = TextOverflow.Ellipsis,
                 )
 
-                if(bill.paid) {
+                if(bill.paid && !bill.isRated) {
                     IconButton(onClick = onReviewClicked) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_review),
