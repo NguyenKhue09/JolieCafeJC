@@ -1,9 +1,13 @@
 package com.khue.joliecafejp.data.repository
 
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import com.khue.joliecafejp.data.paging_source.OrderHistoryPagingSource
 import com.khue.joliecafejp.domain.model.*
 import com.khue.joliecafejp.domain.repository.DataStoreOperations
 import com.khue.joliecafejp.domain.repository.RemoteDataSource
+import com.khue.joliecafejp.utils.Constants
 import kotlinx.coroutines.flow.Flow
 import retrofit2.Response
 import javax.inject.Inject
@@ -130,5 +134,16 @@ class Repository @Inject constructor(
         token: String
     ): Response<ApiResponseMultiData<CartItemByCategory>> {
         return remote.getCartItems(token = token)
+    }
+
+    suspend fun getAdminNotificationForUser(
+        token: String,
+        tab: String
+    ): Flow<PagingData<Notification>> {
+        return remote.getAdminNotificationForUser(token = token, tab = tab)
+    }
+
+    fun getUserBills(token: String): Flow<PagingData<OrderHistory>> {
+        return remote.getUserBills(token = token)
     }
 }

@@ -75,6 +75,8 @@ object RepositoryModule {
             deleteAddressUseCase = DeleteAddressUseCase(repository = repository),
             addProductToCartUseCase = AddProductToCartUseCase(repository = repository),
             getCartItemsUseCase = GetCartItemsUseCase(repository = repository),
+            getAdminNotificationForUserUseCase = GetAdminNotificationForUserUseCase(repository = repository),
+            getUserBillsUseCase = GetUserBillsUseCase(repository = repository),
         )
     }
 }

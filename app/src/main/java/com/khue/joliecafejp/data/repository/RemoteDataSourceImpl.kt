@@ -3,9 +3,7 @@ package com.khue.joliecafejp.data.repository
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
-import com.khue.joliecafejp.data.paging_source.AddressPagingSource
-import com.khue.joliecafejp.data.paging_source.FavoriteProductPagingSource
-import com.khue.joliecafejp.data.paging_source.ProductPagingSource
+import com.khue.joliecafejp.data.paging_source.*
 import com.khue.joliecafejp.data.remote.JolieCafeApi
 import com.khue.joliecafejp.domain.model.*
 import com.khue.joliecafejp.domain.repository.RemoteDataSource
@@ -141,4 +139,24 @@ class RemoteDataSourceImpl(
     override suspend fun getCartItems(token: String): Response<ApiResponseMultiData<CartItemByCategory>> {
         return jolieCafeApi.getCartItems(token = "Bearer $token")
     }
+
+    override suspend fun getAdminNotificationForUser(
+        token: String,
+        tab: String
+    ): Flow<PagingData<Notification>> {
+        return Pager(
+            config = PagingConfig(pageSize = PAGE_SIZE),
+            pagingSourceFactory = {
+                NotificationPagingSource(jolieCafeApi, "Bearer $token", tab)
+            }
+        ).flow
+    }
+
+    override fun getUserBills(token: String): Flow<PagingData<OrderHistory>> {
+        return Pager(
+            config = PagingConfig(pageSize = PAGE_SIZE),
+            pagingSourceFactory = { OrderHistoryPagingSource(token = "Bearer $token", jolieCafeApi = jolieCafeApi) }
+        ).flow
+    }
+
 }

@@ -16,20 +16,21 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import com.khue.joliecafejp.R
 import com.khue.joliecafejp.domain.model.CartItem
-import com.khue.joliecafejp.domain.model.OrderHistoryProduct
 import com.khue.joliecafejp.domain.model.Product
 import com.khue.joliecafejp.ui.theme.*
 import java.text.NumberFormat
 import java.util.*
 
 @Composable
-fun ProductOrderHistoryItem(
+fun ProductCartItem(
     modifier: Modifier = Modifier,
-    item: OrderHistoryProduct = OrderHistoryProduct(
+    item: CartItem = CartItem(
+        id = "1",
+        productId = "1",
         price = 100000.0,
         quantity = 5,
         size = "M",
-        product = Product(
+        productDetail = Product(
             discountPercent = 0,
             startDateDiscount = "2022-06-09T03:43:49.731Z",
             endDateDiscount = "2022-06-09T03:43:49.731Z",
@@ -80,7 +81,7 @@ fun ProductOrderHistoryItem(
         ) {
             Text(
                 modifier = Modifier.wrapContentHeight(),
-                text = item.product.name,
+                text = item.productDetail.name,
                 fontFamily = ralewayMedium,
                 color = MaterialTheme.colors.titleTextColor,
                 fontSize = MaterialTheme.typography.subtitle2.fontSize,
@@ -128,6 +129,6 @@ fun ProductOrderHistoryItem(
 
 @Preview()
 @Composable
-fun ProductOrderHistoryItemPrev() {
-    ProductOrderHistoryItem()
+fun ProductCartItemPrev() {
+    ProductCartItem()
 }

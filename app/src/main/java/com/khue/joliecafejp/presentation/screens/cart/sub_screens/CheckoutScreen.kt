@@ -27,6 +27,7 @@ import com.khue.joliecafejp.domain.model.Product
 import com.khue.joliecafejp.presentation.common.ButtonCustom
 import com.khue.joliecafejp.presentation.common.CardCustom
 import com.khue.joliecafejp.presentation.common.TopBar
+import com.khue.joliecafejp.presentation.components.ProductCartItem
 import com.khue.joliecafejp.presentation.components.ProductOrderHistoryItem
 import com.khue.joliecafejp.presentation.viewmodels.UserSharedViewModel
 import com.khue.joliecafejp.ui.theme.*
@@ -299,7 +300,7 @@ internal fun Products(
         ) {
             Column {
                 items.forEach { item ->
-                    ProductOrderHistoryItem(
+                    ProductCartItem(
                         modifier = Modifier.padding(horizontal = MEDIUM_PADDING),
                         item = item
                     )

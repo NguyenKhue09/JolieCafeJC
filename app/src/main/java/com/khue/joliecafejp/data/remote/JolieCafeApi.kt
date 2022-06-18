@@ -151,4 +151,22 @@ interface JolieCafeApi {
     ): Response<ApiResponseMultiData<CartItemByCategory>>
    // https://stackoverflow.com/questions/41078866/retrofit2-authorization-global-interceptor-for-access-token
 
+    @GET("$API_GATEWAY/notification/all-admin-notice-user")
+    suspend fun getAdminNotificationForUser(
+        @QueryMap notificationQuery: Map<String, String>,
+        @Header("Authorization") token: String
+    ): ApiResponseMultiData<Notification>
+
+    @GET("$API_GATEWAY/notification/all-user-notice")
+    suspend fun getAllUserNotification(
+        @QueryMap notificationQuery: Map<String, String>,
+        @Header("Authorization") token: String
+    ): ApiResponseMultiData<Notification>
+
+    @Headers("Content-Type: application/json")
+    @GET("$API_GATEWAY/bill/get-bill-user")
+    suspend fun getUserBills(
+        @Header("Authorization") token: String,
+        @QueryMap orderQuery: Map<String, String>,
+    ): ApiResponseMultiData<OrderHistory>
 }

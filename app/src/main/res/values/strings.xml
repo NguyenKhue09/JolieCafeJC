@@ -114,4 +114,7 @@
     <string name="money">%s VND</string>
     <string name="voucher_apply">Voucher applied</string>
     <string name="order">Order</string>
+    <string name="notification_image">Notification Image</string>
+    <string name="order_id">Order ID: %s</string>
+    <string name="items">%d items</string>
 </resources>

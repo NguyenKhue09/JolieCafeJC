@@ -1,5 +1,7 @@
 package com.khue.joliecafejp.domain.repository
 
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.khue.joliecafejp.domain.model.*
 import kotlinx.coroutines.flow.Flow
@@ -64,4 +66,11 @@ interface RemoteDataSource {
     suspend fun getCartItems(
         token: String
     ): Response<ApiResponseMultiData<CartItemByCategory>>
+
+    suspend fun getAdminNotificationForUser(
+        token: String,
+        tab: String
+    ): Flow<PagingData<Notification>>
+
+    fun getUserBills(token: String): Flow<PagingData<OrderHistory>>
 }
