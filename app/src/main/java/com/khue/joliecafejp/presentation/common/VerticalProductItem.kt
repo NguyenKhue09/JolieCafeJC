@@ -38,11 +38,7 @@ fun VerticalProductItem(
 ) {
 
     val configuration = LocalConfiguration.current
-
     val screenWidth = configuration.screenWidthDp.dp
-
-
-    val density = LocalDensity.current.density
     val maxWith = (screenWidth/2) - EXTRA_LARGE_PADDING * 2
 
 

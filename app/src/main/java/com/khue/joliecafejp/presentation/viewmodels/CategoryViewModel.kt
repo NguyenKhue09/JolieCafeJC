@@ -7,6 +7,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import androidx.paging.filter
+import androidx.paging.map
 import com.khue.joliecafejp.domain.model.*
 import com.khue.joliecafejp.domain.use_cases.ApiUseCases
 import com.khue.joliecafejp.domain.use_cases.DataStoreUseCases
@@ -17,6 +19,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import retrofit2.Response
 import javax.inject.Inject
@@ -25,7 +28,7 @@ import javax.inject.Inject
 class CategoryViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val apiUseCases: ApiUseCases,
-    private val dataStoreUseCases: DataStoreUseCases
+    dataStoreUseCases: DataStoreUseCases
 ) : ViewModel() {
 
     private var category: String
