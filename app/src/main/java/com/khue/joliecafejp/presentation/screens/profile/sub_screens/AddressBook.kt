@@ -76,7 +76,7 @@ fun AddressBook(
     val addNewAddressFormState by addressBookViewModel.addNewAddressFormState.collectAsState()
 
     LaunchedEffect(key1 = userToken) {
-        addressBookViewModel.getProducts(userToken)
+        addressBookViewModel.getAddresses(userToken)
     }
 
     val addressBooks = addressBookViewModel.addressBooks.collectAsLazyPagingItems()
@@ -231,7 +231,7 @@ fun AddressBook(
             ) {
                 val result = handlePagingResult(addressBooks = addressBooks) { message, status ->
                     snackBarData = snackBarData.copy(
-                        message = message,
+                        message = "Address book could not be loaded",
                         iconId = R.drawable.ic_error,
                         snackBarState = status
                     )
@@ -421,7 +421,7 @@ fun CardAddNewAddress(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = LARGE_PADDING, horizontal = EXTRA_LARGE_PADDING),
+                .padding(vertical = if(isAddNewAddress) EXTRA_LARGE_PADDING else SMALL_PADDING, horizontal = EXTRA_LARGE_PADDING),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.Start
         ) {

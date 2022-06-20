@@ -28,6 +28,7 @@ import com.khue.joliecafejp.utils.Constants.Companion.SNACK_BAR_STATUS_ERROR
 import com.khue.joliecafejp.utils.Constants.Companion.SNACK_BAR_STATUS_SUCCESS
 import com.khue.joliecafejp.utils.extensions.items
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 @Composable
@@ -53,6 +54,8 @@ fun CategoriesScreen(
            snackBarState = SNACK_BAR_STATUS_SUCCESS,
        ))
     }
+
+    val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(key1 = true) {
         categoryViewModel.initData(token = userToken)
@@ -211,7 +214,16 @@ fun CategoriesScreen(
             }
             Spacer(modifier = Modifier.height(EXTRA_LARGE_PADDING))
 
-            val result = handlePagingResult(categoryProducts = categoryProducts)
+            val result = handlePagingResult(categoryProducts = categoryProducts) { message ->
+                snackBarData = snackBarData.copy(
+                    message = "Category products could not be loaded",
+                    iconId = R.drawable.ic_error,
+                    snackBarState = SNACK_BAR_STATUS_ERROR
+                )
+                coroutineScope.launch {
+                    snackbarHostState.showSnackbar("")
+                }
+            }
 
             AnimatedVisibility(visible = result) {
                 LazyVerticalGrid(
@@ -268,7 +280,8 @@ fun CategoriesScreen(
 
 @Composable
 internal fun handlePagingResult(
-    categoryProducts: LazyPagingItems<Product>
+    categoryProducts: LazyPagingItems<Product>,
+    showMessage: (String) -> Unit
 ): Boolean {
     categoryProducts.apply {
         val error = when {
@@ -284,7 +297,7 @@ internal fun handlePagingResult(
                 false
             }
             error != null -> {
-                Toast.makeText(LocalContext.current, error.error.message, Toast.LENGTH_SHORT).show()
+                showMessage(error.error.message.orEmpty())
                 false
             }
             categoryProducts.itemCount < 1 -> {

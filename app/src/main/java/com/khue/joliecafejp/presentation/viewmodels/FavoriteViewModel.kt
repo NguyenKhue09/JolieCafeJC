@@ -39,6 +39,7 @@ class FavoriteViewModel @Inject constructor(
         token: String
     ) =
          try {
+             println("call api")
              viewModelScope.launch {
                  apiUseCases.getUserFavoriteProductsUseCase(
                      productQuery = productQuery,
