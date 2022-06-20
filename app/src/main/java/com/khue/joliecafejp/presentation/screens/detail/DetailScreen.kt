@@ -1,8 +1,6 @@
 package com.khue.joliecafejp.presentation.screens.detail
 
-import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -26,27 +24,33 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.items
 import coil.compose.AsyncImage
-import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
 import com.khue.joliecafejp.R
+import com.khue.joliecafejp.domain.model.Comment
 import com.khue.joliecafejp.domain.model.Product
+import com.khue.joliecafejp.domain.model.SnackBarData
 import com.khue.joliecafejp.presentation.common.ButtonCustom
 import com.khue.joliecafejp.presentation.common.CommentBottomSheet
+import com.khue.joliecafejp.presentation.common.SnackBar
 import com.khue.joliecafejp.presentation.common.VerticalProductItem
 import com.khue.joliecafejp.presentation.components.CommentItem
 import com.khue.joliecafejp.presentation.viewmodels.ProductDetailViewModel
 import com.khue.joliecafejp.ui.theme.*
 import com.khue.joliecafejp.utils.ApiResult
+import com.khue.joliecafejp.utils.Constants
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
@@ -61,8 +65,18 @@ fun DetailScreen(
 ) {
 
 
+    val snackbarHostState = remember { SnackbarHostState() }
+    var snackBarData by remember {
+        mutableStateOf(
+            SnackBarData(
+                iconId = R.drawable.ic_success,
+                message = "",
+                snackBarState = Constants.SNACK_BAR_STATUS_SUCCESS,
+            )
+        )
+    }
+
     val state = rememberLazyListState()
-    val context = LocalContext.current
 
     val (selectedRating, onSelectedRating) = remember {
         mutableStateOf(R.string.all)
@@ -76,9 +90,15 @@ fun DetailScreen(
     val userToken by productDetailViewModel.userToken.collectAsState(initial = "")
     val isFav by productDetailViewModel.isFav
     val getProductDetailResponse by productDetailViewModel.getProductDetailResponse.collectAsState()
+    val getProductCommentsResponse by productDetailViewModel.getCommentProductResponse.collectAsState()
+    val moreProducts = productDetailViewModel.moreProducts.collectAsLazyPagingItems()
 
     var product by remember {
         mutableStateOf<Product?>(null)
+    }
+
+    var comments by remember {
+        mutableStateOf<List<Comment>?>(null)
     }
 
     var isLoading by remember {
@@ -92,11 +112,14 @@ fun DetailScreen(
             }
             is ApiResult.Error -> {
                 isLoading = false
-                Toast.makeText(
-                    context,
-                    getProductDetailResponse.message ?: "Unknown error!",
-                    Toast.LENGTH_SHORT
-                ).show()
+                snackBarData = snackBarData.copy(
+                    message = getProductDetailResponse.message ?: "Unknown error!",
+                    iconId = R.drawable.ic_error,
+                    snackBarState = Constants.SNACK_BAR_STATUS_ERROR
+                )
+                coroutineScope.launch {
+                    snackbarHostState.showSnackbar("")
+                }
             }
             is ApiResult.Success -> {
                 isLoading = false
@@ -108,24 +131,52 @@ fun DetailScreen(
         }
     }
 
+    LaunchedEffect(key1 = getProductCommentsResponse) {
+        when (getProductCommentsResponse) {
+            is ApiResult.Loading -> {
+            }
+            is ApiResult.Error -> {
+                snackBarData = snackBarData.copy(
+                    message = getProductCommentsResponse.message ?: "Unknown error!",
+                    iconId = R.drawable.ic_error,
+                    snackBarState = Constants.SNACK_BAR_STATUS_ERROR
+                )
+                coroutineScope.launch {
+                    snackbarHostState.showSnackbar("")
+                }
+            }
+            is ApiResult.Success -> {
+                comments = getProductCommentsResponse.data
+            }
+            else -> {
+            }
+        }
+    }
+
     LaunchedEffect(key1 = true) {
         productDetailViewModel.removeUserFavResponse.collect { result ->
             when (result) {
                 is ApiResult.NullDataSuccess -> {
-                    Toast.makeText(
-                        context,
-                        "Remove ${product?.name} from favorite success",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    snackBarData = snackBarData.copy(
+                        message = "Remove ${product?.name} from favorite success",
+                        iconId = R.drawable.ic_success,
+                        snackBarState = Constants.SNACK_BAR_STATUS_SUCCESS
+                    )
+                    coroutineScope.launch {
+                        snackbarHostState.showSnackbar("")
+                    }
                 }
                 is ApiResult.Error -> {
                     println(result.message)
                     productDetailViewModel.setFavProductState(isFav = true)
-                    Toast.makeText(
-                        context,
-                        "Remove ${product?.name} from favorite failed!",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    snackBarData = snackBarData.copy(
+                        message = "Remove ${product?.name} from favorite failed!",
+                        iconId = R.drawable.ic_error,
+                        snackBarState = Constants.SNACK_BAR_STATUS_ERROR
+                    )
+                    coroutineScope.launch {
+                        snackbarHostState.showSnackbar("")
+                    }
                 }
                 else -> {}
             }
@@ -136,20 +187,26 @@ fun DetailScreen(
         productDetailViewModel.addUserFavResponse.collect { result ->
             when (result) {
                 is ApiResult.NullDataSuccess -> {
-                    Toast.makeText(
-                        context,
-                        "Add ${product?.name} to favorite success",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    snackBarData = snackBarData.copy(
+                        message = "Add ${product?.name} to favorite success",
+                        iconId = R.drawable.ic_success,
+                        snackBarState = Constants.SNACK_BAR_STATUS_SUCCESS
+                    )
+                    coroutineScope.launch {
+                        snackbarHostState.showSnackbar("")
+                    }
                 }
                 is ApiResult.Error -> {
                     println(result.message)
                     productDetailViewModel.setFavProductState(isFav = false)
-                    Toast.makeText(
-                        context,
-                        "Add ${product?.name} to favorite failed!",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    snackBarData = snackBarData.copy(
+                        message = "Add ${product?.name} to favorite failed!",
+                        iconId = R.drawable.ic_error,
+                        snackBarState = Constants.SNACK_BAR_STATUS_ERROR
+                    )
+                    coroutineScope.launch {
+                        snackbarHostState.showSnackbar("")
+                    }
                 }
                 else -> {}
             }
@@ -158,13 +215,15 @@ fun DetailScreen(
 
     LaunchedEffect(key1 = true) {
         productDetailViewModel.getProductDetail(token = userToken, productId = productId!!)
+        productDetailViewModel.getComment(token = userToken, productId = productId)
+        productDetailViewModel.getProducts(productQuery = mapOf("type" to "All"), token = userToken)
     }
 
     ModalBottomSheetLayout(
         sheetState = bottomSheetState,
         modifier = Modifier.fillMaxSize(),
         sheetContent = {
-            CommentBottomSheet()
+            CommentBottomSheet(comments = comments)
         },
         sheetShape = MaterialTheme.shapes.large.copy(
             bottomEnd = CornerSize(0),
@@ -173,6 +232,13 @@ fun DetailScreen(
     ) {
         Scaffold(
             backgroundColor = MaterialTheme.colors.greyPrimary,
+            snackbarHost = {
+                SnackBar(
+                    modifier = Modifier.padding(MEDIUM_PADDING),
+                    snackbarHostState = snackbarHostState,
+                    snackBarData = snackBarData
+                )
+            }
         ) {
             Box(
                 modifier = Modifier
@@ -227,22 +293,40 @@ fun DetailScreen(
                                 DescriptionSection(description = productDetail.description)
                             }
 
-                            item {
-                                RatingSection(
-                                    selectedRating = selectedRating,
-                                    onSelectedRating = onSelectedRating,
-                                    coroutineScope = coroutineScope,
-                                    bottomSheetState = bottomSheetState
-                                )
+                            if(!comments.isNullOrEmpty()) {
+                                item {
+                                    RatingSection(
+                                        isSeeMoreComment = comments!!.size > 3,
+                                        selectedRating = selectedRating,
+                                        onSelectedRating = onSelectedRating,
+                                        coroutineScope = coroutineScope,
+                                        bottomSheetState = bottomSheetState
+                                    )
+                                }
+
+                                item {
+                                    CommentSection(
+                                        if (comments!!.size > 3) comments!!.subList(0, 3) else comments!!,
+                                    )
+                                }
                             }
 
                             item {
-                                CommentSection()
+                                val result  = handlePagingResult(moreProducts = moreProducts) { message ->
+                                    snackBarData = snackBarData.copy(
+                                        message = message,
+                                        iconId = R.drawable.ic_error,
+                                        snackBarState = Constants.SNACK_BAR_STATUS_ERROR
+                                    )
+                                    coroutineScope.launch {
+                                        snackbarHostState.showSnackbar("")
+                                    }
+                                }
+                                if(result) {
+                                    MoreProductSection(moreProducts = moreProducts)
+                                }
                             }
 
-                            item {
-                                MoreProductSection()
-                            }
                         }
                     }
                 }
@@ -351,8 +435,7 @@ fun ProductNameSection(
             color = MaterialTheme.colors.textColor2,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
-            fontFamily = raleway,
-            fontWeight = FontWeight.Bold,
+            fontFamily = ralewayMedium,
             fontSize = MaterialTheme.typography.h6.fontSize
         )
         IconButton(onClick = onFavClicked) {
@@ -392,11 +475,11 @@ fun PriceAndRatingSection(
             fontFamily = montserratFontFamily,
             fontSize = MaterialTheme.typography.subtitle2.fontSize
         )
-        if(rating > 0) {
+        if (rating > 0) {
             Text(
                 modifier = Modifier.padding(horizontal = EXTRA_EXTRA_SMALL_PADDING),
                 text = "•",
-                fontFamily = raleway,
+                fontFamily = ralewayMedium,
                 color = MaterialTheme.colors.textColor,
                 fontSize = MaterialTheme.typography.subtitle2.fontSize,
             )
@@ -432,15 +515,14 @@ fun DescriptionSection(
     ) {
         Text(
             text = stringResource(R.string.description),
-            fontFamily = raleway,
+            fontFamily = ralewayMedium,
             color = MaterialTheme.colors.textColor,
-            fontSize = MaterialTheme.typography.subtitle2.fontSize,
-            fontWeight = FontWeight.Bold
+            fontSize = MaterialTheme.typography.body1.fontSize,
         )
         Spacer(modifier = Modifier.height(SMALL_PADDING))
         Text(
             text = description,
-            fontFamily = raleway,
+            fontFamily = ralewayMedium,
             color = MaterialTheme.colors.textColor,
             fontSize = MaterialTheme.typography.caption.fontSize,
             maxLines = 5,
@@ -450,7 +532,7 @@ fun DescriptionSection(
 }
 
 @Composable
-fun MoreProductSection() {
+fun MoreProductSection(moreProducts: LazyPagingItems<Product>) {
     Column(
         modifier = Modifier
             .fillMaxWidth(),
@@ -461,10 +543,9 @@ fun MoreProductSection() {
         Text(
             modifier = Modifier.padding(start = EXTRA_LARGE_PADDING),
             text = stringResource(R.string.more_products),
-            fontFamily = raleway,
+            fontFamily = ralewayMedium,
             color = MaterialTheme.colors.textColor,
-            fontSize = MaterialTheme.typography.subtitle2.fontSize,
-            fontWeight = FontWeight.Bold
+            fontSize = MaterialTheme.typography.body1.fontSize,
         )
         LazyRow(
             contentPadding = PaddingValues(
@@ -474,9 +555,14 @@ fun MoreProductSection() {
             ),
             horizontalArrangement = Arrangement.spacedBy(EXTRA_LARGE_PADDING)
         ) {
-            repeat(10) {
-                item {
-                    //VerticalProductItem(onItemClicked = {}, onFavClicked = {})
+            items(moreProducts) { product ->
+                product?.let {
+                    VerticalProductItem(
+                        onItemClicked = {},
+                        onFavClicked = {},
+                        product = product,
+                        isFav = false
+                    )
                 }
             }
         }
@@ -489,10 +575,11 @@ fun MoreProductSection() {
 @Composable
 fun RatingSection(
     avgRating: Int = 5,
+    isSeeMoreComment: Boolean,
     selectedRating: Int,
-    onSelectedRating: (Int) -> Unit,
     coroutineScope: CoroutineScope,
-    bottomSheetState: ModalBottomSheetState
+    bottomSheetState: ModalBottomSheetState,
+    onSelectedRating: (Int) -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -508,21 +595,21 @@ fun RatingSection(
         ) {
             Text(
                 text = stringResource(R.string.review),
-                fontFamily = raleway,
+                fontFamily = ralewayMedium,
                 color = MaterialTheme.colors.textColor,
-                fontSize = MaterialTheme.typography.subtitle2.fontSize,
-                fontWeight = FontWeight.Bold
+                fontSize = MaterialTheme.typography.body1.fontSize,
             )
-            Text(
-                modifier = Modifier.clickable {
-                    coroutineScope.launch { bottomSheetState.show() }
-                },
-                text = "Xem chi tiết...",
-                fontFamily = raleway,
-                color = MaterialTheme.colors.textColor2,
-                fontSize = MaterialTheme.typography.caption.fontSize,
-                fontWeight = FontWeight.Bold
-            )
+            if (isSeeMoreComment) {
+                Text(
+                    modifier = Modifier.clickable {
+                        coroutineScope.launch { bottomSheetState.show() }
+                    },
+                    text = "Xem chi tiết...",
+                    fontFamily = ralewayMedium,
+                    color = MaterialTheme.colors.textColor2,
+                    fontSize = MaterialTheme.typography.caption.fontSize,
+                )
+            }
         }
         Spacer(modifier = Modifier.height(SMALL_PADDING))
         Row(
@@ -611,13 +698,15 @@ fun ReviewFilterButton(
 }
 
 @Composable
-fun CommentSection() {
+fun CommentSection(
+    comments: List<Comment>,
+) {
     Column(
         modifier = Modifier.padding(horizontal = EXTRA_LARGE_PADDING),
         verticalArrangement = Arrangement.spacedBy(EXTRA_LARGE_PADDING),
     ) {
-        repeat(3) {
-            CommentItem()
+        comments.forEach {
+            CommentItem(it)
         }
     }
 }
@@ -676,6 +765,37 @@ fun BottomButtonAction(
             shapes = RoundedCornerShape(26.dp)
         )
         Spacer(modifier = Modifier.width(EXTRA_LARGE_PADDING))
+    }
+}
+
+@Composable
+fun handlePagingResult(
+    moreProducts: LazyPagingItems<Product>,
+    showMessage: (String) -> Unit
+): Boolean {
+    moreProducts.apply {
+        val error = when {
+            loadState.refresh is LoadState.Error -> loadState.refresh as LoadState.Error
+            loadState.prepend is LoadState.Error -> loadState.prepend as LoadState.Error
+            loadState.append is LoadState.Error -> loadState.append as LoadState.Error
+            else -> null
+        }
+
+        return when {
+            loadState.refresh is LoadState.Loading -> {
+                false
+            }
+            error != null -> {
+                showMessage(error.error.message.orEmpty())
+                false
+            }
+            moreProducts.itemCount < 1 -> {
+                false
+            }
+            else -> {
+                true
+            }
+        }
     }
 }
 

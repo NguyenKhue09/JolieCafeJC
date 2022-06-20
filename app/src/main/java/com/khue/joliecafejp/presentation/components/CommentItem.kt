@@ -10,17 +10,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import com.khue.joliecafejp.R
+import com.khue.joliecafejp.domain.model.Comment
+import com.khue.joliecafejp.domain.model.User
 import com.khue.joliecafejp.presentation.common.CustomImage
 import com.khue.joliecafejp.ui.theme.*
 
 @Composable
 fun CommentItem(
-    name: String = "Latte",
-    rating: Int = 5,
-    content: String = "Typically composed of a single espresso shot and hot milk, with the surface topped with foamed..."
+    comment: Comment
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -35,14 +36,14 @@ fun CommentItem(
             CustomImage(
                 height = IMAGE_LOGO_COMMENT_SIZE,
                 width = IMAGE_LOGO_COMMENT_SIZE,
-                paddingValues = PaddingValues(all = ZERO_PADDING)
+                paddingValues = PaddingValues(all = ZERO_PADDING),
+                image = comment.userId.thumbnail ?: ""
             )
             Spacer(modifier = Modifier.width(SMALL_PADDING))
             Text(
                 modifier = Modifier.weight(1f, fill = false),
-                text = name,
-                fontFamily = raleway,
-                fontWeight = FontWeight.Bold,
+                text = comment.userId.fullName,
+                fontFamily = ralewayMedium,
                 color = MaterialTheme.colors.textColor,
                 fontSize = MaterialTheme.typography.subtitle2.fontSize,
                 maxLines = 1,
@@ -56,7 +57,7 @@ fun CommentItem(
                 fontSize = MaterialTheme.typography.subtitle2.fontSize,
             )
             Text(
-                text = rating.toString(),
+                text = comment.rating.toString(),
                 color = MaterialTheme.colors.textColor,
                 fontFamily = montserratFontFamily,
                 fontSize = MaterialTheme.typography.subtitle2.fontSize,
@@ -71,10 +72,12 @@ fun CommentItem(
         }
         Spacer(modifier = Modifier.height(MEDIUM_SMALL_PADDING))
         Text(
-            text = content,
-            fontFamily = raleway,
+            modifier = Modifier.fillMaxWidth(),
+            text = comment.content,
+            fontFamily = ralewayMedium,
             color = MaterialTheme.colors.textColor,
-            fontSize = MaterialTheme.typography.caption.fontSize
+            fontSize = MaterialTheme.typography.caption.fontSize,
+            textAlign = TextAlign.Start,
         )
     }
 }
@@ -82,5 +85,23 @@ fun CommentItem(
 @Preview
 @Composable
 fun CommentItemPrev() {
-    CommentItem()
+    CommentItem(
+        comment = Comment(
+            userId = User(
+                fullName = "John Doe",
+                thumbnail = "https://randomuser.me/api/portraits/",
+                coins = 0,
+                token = "",
+                id = "",
+                disable = false,
+                email = "",
+                phone = "",
+                scores = 0,
+            ),
+            content = "Lorem",
+            rating = 4,
+            createdAt = "2020-01-01",
+            updatedAt = "2020-01-01"
+        )
+    )
 }

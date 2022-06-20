@@ -1,6 +1,5 @@
 package com.khue.joliecafejp.presentation.common
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -9,22 +8,20 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.khue.joliecafejp.R
 import com.khue.joliecafejp.domain.model.Product
@@ -40,10 +37,14 @@ fun VerticalProductItem(
     onFavClicked: (String) -> Unit
 ) {
 
+    val configuration = LocalConfiguration.current
+
+    val screenWidth = configuration.screenWidthDp.dp
+
+
     val density = LocalDensity.current.density
-    var maxWith by remember {
-        mutableStateOf(0.dp)
-    }
+    val maxWith = (screenWidth/2) - EXTRA_LARGE_PADDING * 2
+
 
     Column(
         modifier = Modifier
@@ -77,7 +78,7 @@ fun VerticalProductItem(
         Row(
             modifier = Modifier
                 .onGloballyPositioned {
-                    maxWith = (it.size.width / density).dp
+                    //maxWith = (it.size.width / density).dp
                 },
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Start

@@ -175,4 +175,10 @@ interface JolieCafeApi {
         @Header("Authorization") token: String,
         @Body body: BillReviewBody,
     ): Response<ApiResponseSingleData<Unit>>
+
+    @GET("$API_GATEWAY/comment/get")
+    suspend fun getCommentProduct(
+        @Header("Authorization") token: String,
+        @Query("productId") productId: String,
+    ):  Response<ApiResponseMultiData<Comment>>
 }

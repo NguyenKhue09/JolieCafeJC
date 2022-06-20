@@ -12,10 +12,13 @@ sealed class HomeSubScreen(
     )
     object Categories: HomeSubScreen(
         titleId = R.string.categories,
-        route = "categories/{category}"
+        route = "categories/{category}?search={search}"
     ) {
-        fun passCategory(category: String): String {
-            return "categories/$category"
+        fun passCategory(category: String, search: String?): String {
+            if(search.isNullOrEmpty()) {
+                return "categories/$category"
+            }
+            return "categories/$category?search=$search"
         }
     }
 }

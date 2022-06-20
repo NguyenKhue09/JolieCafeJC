@@ -166,4 +166,11 @@ class RemoteDataSourceImpl(
         return jolieCafeApi.reviewBill(token = "Bearer $token", body = body)
     }
 
+    override suspend fun getProductComments(
+        token: String,
+        productId: String
+    ): Response<ApiResponseMultiData<Comment>> {
+        return jolieCafeApi.getCommentProduct( token= "Bearer $token", productId = productId)
+    }
+
 }
