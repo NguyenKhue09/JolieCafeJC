@@ -276,7 +276,9 @@ fun HomeScreen(
                                 homeViewModel.updateSearchTextState(newValue = "")
                             },
                             onSearchClicked = { searchString ->
-
+                                navController.navigate(HomeSubScreen.Categories.passCategory(category = categories[0].title, search = searchString)) {
+                                    launchSingleTop = true
+                                }
                             },
                             onTextChange = { newValue ->
                                 homeViewModel.updateSearchTextState(newValue = newValue)
@@ -303,7 +305,7 @@ fun HomeScreen(
                             categories = categories,
                             selectedButton = null
                         ) { category ->
-                            navController.navigate(HomeSubScreen.Categories.passCategory(category = category)) {
+                            navController.navigate(HomeSubScreen.Categories.passCategory(category = category, search = null)) {
                                 launchSingleTop = true
                             }
                         }

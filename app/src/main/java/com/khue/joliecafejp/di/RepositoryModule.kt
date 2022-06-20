@@ -78,6 +78,7 @@ object RepositoryModule {
             getAdminNotificationForUserUseCase = GetAdminNotificationForUserUseCase(repository = repository),
             getUserBillsUseCase = GetUserBillsUseCase(repository = repository),
             reviewBillUseCase = ReviewBillUseCase(repository = repository),
+            getProductCommentUseCase = GetProductCommentUseCase(repository = repository),
         )
     }
 }

@@ -5,6 +5,7 @@ import androidx.compose.ui.unit.dp
 class Constants {
     companion object {
         const val CATEGORY = "category"
+        const val SEARCH = "search"
         const val IS_FAV = "isFav"
         const val PRODUCT_ID = "productId"
         const val CARTS = "carts"

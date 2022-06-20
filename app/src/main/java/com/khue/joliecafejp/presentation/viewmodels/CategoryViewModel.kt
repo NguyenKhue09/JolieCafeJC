@@ -12,6 +12,7 @@ import com.khue.joliecafejp.domain.use_cases.ApiUseCases
 import com.khue.joliecafejp.domain.use_cases.DataStoreUseCases
 import com.khue.joliecafejp.utils.ApiResult
 import com.khue.joliecafejp.utils.Constants.Companion.CATEGORY
+import com.khue.joliecafejp.utils.Constants.Companion.SEARCH
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -55,11 +56,20 @@ class CategoryViewModel @Inject constructor(
 
     init {
         category = savedStateHandle.get<String>(CATEGORY) ?: "All"
+        savedStateHandle.get<String?>(SEARCH)?.let {
+            _searchTextState.value = it
+        }
         updateSelectedCategory(category)
     }
 
     fun initData(token: String) {
-        getCategoriesProducts(productQuery = mapOf("type" to category), token = token)
+        val query = mutableMapOf(
+            "type" to category
+        )
+        if(_searchTextState.value.isNotEmpty()) {
+            query["name"] = _searchTextState.value
+        }
+        getCategoriesProducts(productQuery = query, token = token)
     }
 
     fun updateSearchTextState(newValue: String) {

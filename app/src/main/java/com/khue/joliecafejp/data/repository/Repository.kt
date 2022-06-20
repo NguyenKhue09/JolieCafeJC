@@ -1,13 +1,9 @@
 package com.khue.joliecafejp.data.repository
 
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
 import androidx.paging.PagingData
-import com.khue.joliecafejp.data.paging_source.OrderHistoryPagingSource
 import com.khue.joliecafejp.domain.model.*
 import com.khue.joliecafejp.domain.repository.DataStoreOperations
 import com.khue.joliecafejp.domain.repository.RemoteDataSource
-import com.khue.joliecafejp.utils.Constants
 import kotlinx.coroutines.flow.Flow
 import retrofit2.Response
 import javax.inject.Inject
@@ -152,5 +148,12 @@ class Repository @Inject constructor(
         body: BillReviewBody
     ): Response<ApiResponseSingleData<Unit>> {
         return remote.reviewBill(token = token, body = body)
+    }
+
+    suspend fun getProductComments(
+        token: String,
+        productId: String
+    ): Response<ApiResponseMultiData<Comment>> {
+        return remote.getProductComments( token= token, productId = productId)
     }
 }

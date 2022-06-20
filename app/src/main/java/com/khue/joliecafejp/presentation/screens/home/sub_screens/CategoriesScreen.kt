@@ -175,10 +175,18 @@ fun CategoriesScreen(
             SearchBar(
                 text = searchTextState,
                 onCloseClicked = {
+                    println("onCloseClicked")
+                    categoryViewModel.getCategoriesProducts(
+                        productQuery = mapOf("type" to selectedCategory),
+                        token = userToken
+                    )
                     categoryViewModel.updateSearchTextState(newValue = "")
                 },
                 onSearchClicked = { searchString ->
-
+                    categoryViewModel.getCategoriesProducts(
+                        productQuery = mapOf("type" to selectedCategory, "name" to searchString),
+                        token = userToken
+                    )
                 },
                 onTextChange = { newValue ->
                     categoryViewModel.updateSearchTextState(newValue = newValue)
@@ -189,8 +197,14 @@ fun CategoriesScreen(
                 categories = categories,
                 selectedButton = selectedCategory
             ) { category ->
+                val query = mutableMapOf(
+                    "type" to category
+                )
+                if(searchTextState.isNotEmpty()) {
+                    query["name"] = searchTextState
+                }
                 categoryViewModel.getCategoriesProducts(
-                    productQuery = mapOf("type" to category),
+                    productQuery = query,
                     token = userToken
                 )
                 categoryViewModel.updateSelectedCategory(newValue = category)

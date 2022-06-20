@@ -1,6 +1,7 @@
 package com.khue.joliecafejp.presentation.common
 
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -13,12 +14,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
-import com.khue.joliecafejp.ui.theme.SEARCH_CORNER_SHAPE
-import com.khue.joliecafejp.ui.theme.greyOpacity60Primary
-import com.khue.joliecafejp.ui.theme.textColor
-import com.khue.joliecafejp.ui.theme.titleTextColor
+import androidx.compose.ui.tooling.preview.Preview
+import com.khue.joliecafejp.R
+import com.khue.joliecafejp.ui.theme.*
 
 @Composable
 fun SearchBar(
@@ -43,8 +44,8 @@ fun SearchBar(
                 Text(
                     modifier = Modifier
                         .alpha(ContentAlpha.medium),
-                    text = "Search here...",
-                    color = Color.White
+                    text = stringResource(R.string.search_your_product_here),
+                    color = MaterialTheme.colors.darkTextColor
                 )
             },
             textStyle = TextStyle(
@@ -53,14 +54,15 @@ fun SearchBar(
             singleLine = true,
             leadingIcon = {
                 IconButton(
-                    modifier = Modifier
-                        .alpha(ContentAlpha.medium),
-                    onClick = {}
+                    onClick = {
+                        onSearchClicked(text)
+                    },
+                    enabled = text.isNotEmpty(),
                 ) {
                     Icon(
                         imageVector = Icons.Default.Search,
-                        contentDescription = "Search Icon",
-                        tint = Color.White
+                        contentDescription = stringResource(R.string.search_icon),
+                        tint = MaterialTheme.colors.textColor
                     )
                 }
             },
@@ -76,7 +78,7 @@ fun SearchBar(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Close,
-                        contentDescription = "Close Icon",
+                        contentDescription = stringResource(R.string.close_icon),
                         tint = MaterialTheme.colors.textColor
                     )
                 }
@@ -86,7 +88,9 @@ fun SearchBar(
             ),
             keyboardActions = KeyboardActions(
                 onSearch = {
-                    onSearchClicked(text)
+                    if (text.isNotEmpty()) {
+                        onSearchClicked(text)
+                    }
                 }
             ),
             colors = TextFieldDefaults.textFieldColors(
@@ -100,4 +104,16 @@ fun SearchBar(
                 placeholderColor = MaterialTheme.colors.textColor
             ))
     }
+}
+
+@Preview
+@Composable
+fun SearchBarPrev() {
+    SearchBar(
+        text = "",
+        onTextChange = { _ ->
+        },
+        onCloseClicked = {},
+        onSearchClicked = { _ ->}
+    )
 }
