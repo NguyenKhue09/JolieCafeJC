@@ -46,7 +46,7 @@ class AddressBookViewModel @Inject constructor(
 
     val addNewAddressFormState = MutableStateFlow(AddNewAddressFormState())
 
-    fun getProducts(
+    fun getAddresses(
         token: String
     ) {
         try {

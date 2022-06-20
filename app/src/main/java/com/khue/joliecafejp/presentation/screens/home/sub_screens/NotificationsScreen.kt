@@ -1,5 +1,8 @@
 package com.khue.joliecafejp.presentation.screens.home.sub_screens
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -138,7 +141,11 @@ fun NotificationTabPage(
         notifications = notifications,
         showMessage = showMessage
     )
-    if(result) {
+    AnimatedVisibility(
+        visible = result,
+        exit = fadeOut(),
+        enter = fadeIn()
+    ) {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize(),

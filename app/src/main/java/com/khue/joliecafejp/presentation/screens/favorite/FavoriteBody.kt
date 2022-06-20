@@ -1,18 +1,16 @@
 package com.khue.joliecafejp.presentation.screens.favorite
 
-import android.widget.Toast
-import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.layout.LazyLayout
-import androidx.compose.foundation.lazy.layout.LazyLayoutItemProvider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -23,17 +21,26 @@ import com.khue.joliecafejp.R
 import com.khue.joliecafejp.domain.model.FavoriteProduct
 import com.khue.joliecafejp.presentation.common.LoadingBody
 import com.khue.joliecafejp.presentation.components.FavoriteItem
-import com.khue.joliecafejp.ui.theme.*
+import com.khue.joliecafejp.ui.theme.EXTRA_LARGE_PADDING
+import com.khue.joliecafejp.ui.theme.darkTextColor
+import com.khue.joliecafejp.ui.theme.ralewayMedium
+import com.khue.joliecafejp.ui.theme.textColor
 
 @Composable
 fun FavoriteBody(
     favoriteProducts: LazyPagingItems<FavoriteProduct>,
     onFavClicked: (String) -> Unit,
-    onItemClicked: (String) -> Unit
+    onItemClicked: (String) -> Unit,
+    showMessage: (String) -> Unit
 ) {
-    val result = handlePagingResult(favoriteProducts = favoriteProducts)
+    println("FavoriteBody recomposed")
+    val result = handlePagingResult(favoriteProducts = favoriteProducts, showMessage = showMessage)
 
-    if(result) {
+    AnimatedVisibility(
+        visible = result,
+        exit = fadeOut(),
+        enter = fadeIn()
+    ) {
         LazyColumn(
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -64,7 +71,8 @@ fun FavoriteBody(
 
 @Composable
 fun handlePagingResult(
-    favoriteProducts: LazyPagingItems<FavoriteProduct>
+    favoriteProducts: LazyPagingItems<FavoriteProduct>,
+    showMessage: (String) -> Unit
 ): Boolean {
     favoriteProducts.apply {
         val error = when {
@@ -80,7 +88,7 @@ fun handlePagingResult(
                 false
             }
             error != null -> {
-                Toast.makeText(LocalContext.current, error.error.message, Toast.LENGTH_SHORT).show()
+                showMessage(error.error.message.orEmpty())
                 false
             }
             favoriteProducts.itemCount < 1 -> {

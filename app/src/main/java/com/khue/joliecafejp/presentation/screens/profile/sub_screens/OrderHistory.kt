@@ -1,5 +1,8 @@
 package com.khue.joliecafejp.presentation.screens.profile.sub_screens
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -126,7 +129,7 @@ fun OrderHistory(
         val result = handleBillPagingResult(bills = bills) { message, type ->
             snackBarData = SnackBarData(
                 iconId = R.drawable.ic_error,
-                message = message,
+                message = "Order history could not be loaded",
                 snackBarState = type
             )
             coroutineScope.launch {
@@ -134,7 +137,11 @@ fun OrderHistory(
             }
         }
 
-        if (result) {
+        AnimatedVisibility (
+            visible = result,
+            exit = fadeOut(),
+            enter = fadeIn()
+        ) {
             LazyColumn(
                 modifier = Modifier
                     .padding(it)

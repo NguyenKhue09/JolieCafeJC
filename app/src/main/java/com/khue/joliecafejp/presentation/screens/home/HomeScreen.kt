@@ -2,6 +2,8 @@ package com.khue.joliecafejp.presentation.screens.home
 
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -255,7 +257,16 @@ fun HomeScreen(
         ) { paddingValues ->
             val padding = paddingValues.calculateBottomPadding()
             val result =
-                handlePagingResult(bestSellerProducts = bestSellerProducts, isLoading = isLoading)
+                handlePagingResult(bestSellerProducts = bestSellerProducts, isLoading = isLoading) { message ->
+                    snackBarData = snackBarData.copy(
+                        message = "Best seller products could not be loaded",
+                        iconId = R.drawable.ic_error,
+                        snackBarState = SNACK_BAR_STATUS_ERROR
+                    )
+                    coroutineScope.launch {
+                        snackbarHostState.showSnackbar("")
+                    }
+                }
 
             Box(modifier = Modifier.fillMaxSize()) {
                 LazyColumn(
@@ -362,7 +373,9 @@ fun HomeScreen(
                 AnimatedVisibility(
                     visible = isLoading.value, modifier = Modifier
                         .align(Alignment.BottomCenter)
-                        .padding(bottom = EXTRA_EXTRA_LARGE_PADDING)
+                        .padding(bottom = EXTRA_EXTRA_LARGE_PADDING),
+                    exit = fadeOut(),
+                    enter = fadeIn()
                 ) {
                     CircularProgressIndicator(
                         color = MaterialTheme.colors.textColor2
@@ -376,7 +389,8 @@ fun HomeScreen(
 @Composable
 fun handlePagingResult(
     bestSellerProducts: LazyPagingItems<Product>,
-    isLoading: MutableState<Boolean>
+    isLoading: MutableState<Boolean>,
+    showMessage: (message: String) -> Unit
 ): Boolean {
     bestSellerProducts.apply {
         val error = when {
@@ -392,7 +406,7 @@ fun handlePagingResult(
                 false
             }
             error != null -> {
-                Toast.makeText(LocalContext.current, error.error.message, Toast.LENGTH_SHORT).show()
+                showMessage(error.error.message.orEmpty())
                 isLoading.value = false
                 false
             }

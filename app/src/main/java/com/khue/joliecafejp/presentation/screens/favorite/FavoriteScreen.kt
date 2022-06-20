@@ -1,21 +1,15 @@
 package com.khue.joliecafejp.presentation.screens.favorite
 
-import android.widget.Toast
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.debugInspectorInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
@@ -30,16 +24,13 @@ import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.rememberPagerState
 import com.khue.joliecafejp.R
 import com.khue.joliecafejp.domain.model.SnackBarData
-import com.khue.joliecafejp.navigation.nav_screen.HomeSubScreen
 import com.khue.joliecafejp.presentation.common.SnackBar
-import com.khue.joliecafejp.presentation.common.TopBar
 import com.khue.joliecafejp.presentation.viewmodels.FavoriteViewModel
 import com.khue.joliecafejp.ui.theme.*
 import com.khue.joliecafejp.utils.ApiResult
 import com.khue.joliecafejp.utils.Constants
 import com.khue.joliecafejp.utils.extensions.customTabIndicatorOffset
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 
@@ -68,7 +59,6 @@ fun FavoriteScreen(
     val favoriteProducts = favoriteViewModel.favoriteProduct.collectAsLazyPagingItems()
 
     val removeUserFavProductResponse = favoriteViewModel.removeUserFavProductResponse
-    val context = LocalContext.current
 
     val snackbarHostState = remember { SnackbarHostState() }
     var snackBarData by remember {
@@ -149,22 +139,36 @@ fun FavoriteScreen(
                 state = pagerState,
             ) {
                 LaunchedEffect(key1 = pagerState.currentPage) {
+                    println("currentPage: ${pagerState.currentPage}")
                     favoriteViewModel.getUserFavoriteProducts(
                         productQuery = mapOf("type" to tabs[pagerState.currentPage]),
                         token = userToken
                     )
                 }
 
+                println("HorizontalPager recomposed")
+
                 FavoriteBody(
                     favoriteProducts = favoriteProducts,
-                    onFavClicked = {
+                    onFavClicked = { id ->
                         favoriteViewModel.removeUserFavoriteProduct(
                             token = userToken,
-                            favoriteProductId = it
+                            favoriteProductId = id
                         )
                     },
-                    onItemClicked = {
-                        navController.navigate("detail/${it}?isFav=${true}")
+                    onItemClicked = { id ->
+                        navController.navigate("detail/${id}?isFav=${true}")
+                    },
+                    showMessage = { message ->
+                        println(message)
+                        snackBarData = snackBarData.copy(
+                            message = "Favorite product could not be loaded",
+                            iconId = R.drawable.ic_error,
+                            snackBarState = Constants.SNACK_BAR_STATUS_ERROR
+                        )
+                        coroutineScope.launch {
+                            snackbarHostState.showSnackbar("")
+                        }
                     }
                 )
             }
