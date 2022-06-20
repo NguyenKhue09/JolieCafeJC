@@ -1,6 +1,6 @@
 package com.khue.joliecafejp.presentation.screens.profile.sub_screens
 
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -240,7 +240,12 @@ fun AddressBook(
                     }
                 }
 
-                androidx.compose.animation.AnimatedVisibility(result) {
+                androidx.compose.animation.AnimatedVisibility(
+                    visible = result,
+                    modifier = Modifier.fillMaxSize(),
+                    enter = fadeIn() + expandVertically(),
+                    exit = fadeOut() + shrinkVertically(),
+                ) {
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxWidth(),

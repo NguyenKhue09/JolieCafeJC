@@ -1,21 +1,24 @@
 package com.khue.joliecafejp.presentation.viewmodels
 
 import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.runtime.toMutableStateList
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import com.khue.joliecafejp.domain.model.ApiResponseMultiData
-import com.khue.joliecafejp.domain.model.ApiResponseSingleData
-import com.khue.joliecafejp.domain.model.Comment
-import com.khue.joliecafejp.domain.model.Product
+import androidx.paging.map
+import com.khue.joliecafejp.domain.model.*
 import com.khue.joliecafejp.domain.use_cases.ApiUseCases
 import com.khue.joliecafejp.domain.use_cases.DataStoreUseCases
+import com.khue.joliecafejp.utils.AddProductToCartEvent
 import com.khue.joliecafejp.utils.ApiResult
 import com.khue.joliecafejp.utils.Constants.Companion.IS_FAV
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import retrofit2.Response
@@ -53,8 +56,53 @@ class ProductDetailViewModel @Inject constructor(
         MutableStateFlow<ApiResult<List<Comment>>>(ApiResult.Idle())
         private set
 
-    var moreProducts = MutableStateFlow<PagingData<Product>>(PagingData.empty())
+    private val _addProductToCartResponse = MutableStateFlow<ApiResult<Unit>>(ApiResult.Idle())
+    val addProductToCartResponse: StateFlow<ApiResult<Unit>> = _addProductToCartResponse
+
+    private var moreProducts = MutableStateFlow<PagingData<Product>>(PagingData.empty())
+
+    private var favProductsId = MutableStateFlow<ApiResult<SnapshotStateList<String>>>(ApiResult.Loading())
+
+    var moreProductsWithFav = MutableStateFlow<PagingData<Product>>(PagingData.empty())
         private set
+
+    val addProductToCartState = MutableStateFlow(AddProductToCartState())
+
+    private val productEventChannel = Channel<ProductEvent>()
+    val productEvent = productEventChannel.receiveAsFlow()
+
+
+    fun addProductToCart(
+        data: Map<String, String>,
+        token: String
+    ) = viewModelScope.launch {
+        try {
+            _addProductToCartResponse.value = ApiResult.Loading()
+            val response = apiUseCases.addProductToCartUseCase(data = data, token = token)
+            _addProductToCartResponse.value = handleNullDataApiResponse(response = response)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            _addProductToCartResponse.value = ApiResult.Error(e.message)
+        }
+    }
+
+    fun combineFavProductsIdWithMoreProducts() = viewModelScope.launch {
+         moreProducts.combine(favProductsId) { products, favs ->
+            products.map { product ->
+                if(favs is ApiResult.Success) {
+                    if(favs.data.isNullOrEmpty()) {
+                        product
+                    } else {
+                        product.copy(isFavorite = favs.data.contains(product.id))
+                    }
+                } else {
+                    product
+                }
+            }
+        }.collect {
+             moreProductsWithFav.value = it
+         }
+    }
 
     fun getProductDetail(token: String, productId: String) {
         viewModelScope.launch {
@@ -129,8 +177,97 @@ class ProductDetailViewModel @Inject constructor(
         }
     }
 
+    fun getUserFavProductsId(
+        token: String
+    )  = viewModelScope.launch {
+        favProductsId.value = ApiResult.Loading()
+        try {
+            val response = apiUseCases.getUserFavoriteProductsIdUseCase(token = token)
+            favProductsId.value = handleGetFavProductIdApiResponse(response = response)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            favProductsId.value = ApiResult.Error(e.message)
+        }
+    }
+
     fun setFavProductState(isFav: Boolean) {
         _isFav.value = isFav
+    }
+
+    fun removeOrAddMoreProductToFav(token: String, productId: String, isFav: Boolean) {
+        if(isFav) {
+            removeUserFavProduct(token = token, productId = productId)
+        } else {
+            addUserFavProduct(token = token, productId = productId)
+        }
+    }
+
+    fun removeOrAddMoreProductToFavList(productId: String, isAdd: Boolean) {
+        if (isAdd) {
+            favProductsId.update { result ->
+                result.data!!.add(productId)
+                ApiResult.Success(result.data)
+            }
+        } else {
+            favProductsId.update { result ->
+                result.data!!.remove(productId)
+                ApiResult.Success(result.data)
+            }
+        }
+    }
+
+    fun onAddProductToCart(event: AddProductToCartEvent) {
+        when(event) {
+            is AddProductToCartEvent.SizeChanged -> {
+                addProductToCartState.value = addProductToCartState.value.copy(size = event.size)
+            }
+            is AddProductToCartEvent.SugarChanged -> {
+                addProductToCartState.value = addProductToCartState.value.copy(sugar = event.sugar)
+            }
+            is AddProductToCartEvent.IceChanged -> {
+                addProductToCartState.value = addProductToCartState.value.copy(ice = event.ice)
+            }
+            is AddProductToCartEvent.AddTopping-> {
+                addProductToCartState.value.addTopping(event.topping)
+            }
+            is AddProductToCartEvent.RemoveTopping-> {
+                addProductToCartState.value.removeTopping(event.topping)
+            }
+            is AddProductToCartEvent.OnNoteChanged -> {
+                addProductToCartState.value = addProductToCartState.value.copy(note = event.note)
+            }
+            is AddProductToCartEvent.AddToCart -> {
+                viewModelScope.launch {
+                    productEventChannel.send(ProductEvent.AddToCart)
+                }
+            }
+            is AddProductToCartEvent.Purchase -> {
+                viewModelScope.launch {
+                    productEventChannel.send(ProductEvent.Purchase)
+                }
+            }
+        }
+    }
+
+    private fun handleGetFavProductIdApiResponse(response: Response<ApiResponseMultiData<FavProductId>>): ApiResult<SnapshotStateList<String>> {
+        val result = response.body()
+        return when {
+            response.message().toString().contains("timeout") -> {
+                ApiResult.Error("Timeout")
+            }
+            response.code() == 500 -> {
+                ApiResult.Error(response.message())
+            }
+            response.isSuccessful -> {
+                val listId = result!!.data?.map {
+                    it.productId
+                }?.toMutableStateList() ?: mutableStateListOf()
+                ApiResult.Success(listId)
+            }
+            else -> {
+                ApiResult.Error(response.message())
+            }
+        }
     }
 
     private fun handleCommentApiMultiResponse(response: Response<ApiResponseMultiData<Comment>>): ApiResult<List<Comment>> {
@@ -191,5 +328,10 @@ class ProductDetailViewModel @Inject constructor(
                 ApiResult.Error(response.message())
             }
         }
+    }
+
+    sealed class ProductEvent {
+        object AddToCart: ProductEvent()
+        object Purchase: ProductEvent()
     }
 }

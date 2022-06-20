@@ -1,6 +1,8 @@
 package com.khue.joliecafejp.presentation.screens.detail
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -10,14 +12,14 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
@@ -42,8 +44,8 @@ import com.khue.joliecafejp.R
 import com.khue.joliecafejp.domain.model.Comment
 import com.khue.joliecafejp.domain.model.Product
 import com.khue.joliecafejp.domain.model.SnackBarData
-import com.khue.joliecafejp.presentation.common.ButtonCustom
 import com.khue.joliecafejp.presentation.common.CommentBottomSheet
+import com.khue.joliecafejp.presentation.common.ProductDetailShopNowBottomSheet
 import com.khue.joliecafejp.presentation.common.SnackBar
 import com.khue.joliecafejp.presentation.common.VerticalProductItem
 import com.khue.joliecafejp.presentation.components.CommentItem
@@ -51,7 +53,6 @@ import com.khue.joliecafejp.presentation.viewmodels.ProductDetailViewModel
 import com.khue.joliecafejp.ui.theme.*
 import com.khue.joliecafejp.utils.ApiResult
 import com.khue.joliecafejp.utils.Constants
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.util.*
@@ -91,7 +92,7 @@ fun DetailScreen(
     val isFav by productDetailViewModel.isFav
     val getProductDetailResponse by productDetailViewModel.getProductDetailResponse.collectAsState()
     val getProductCommentsResponse by productDetailViewModel.getCommentProductResponse.collectAsState()
-    val moreProducts = productDetailViewModel.moreProducts.collectAsLazyPagingItems()
+    val moreProducts = productDetailViewModel.moreProductsWithFav.collectAsLazyPagingItems()
 
     var product by remember {
         mutableStateOf<Product?>(null)
@@ -102,6 +103,10 @@ fun DetailScreen(
     }
 
     var isLoading by remember {
+        mutableStateOf(true)
+    }
+
+    var seeMoreCommentOrNot by remember {
         mutableStateOf(true)
     }
 
@@ -169,6 +174,7 @@ fun DetailScreen(
                 is ApiResult.Error -> {
                     println(result.message)
                     productDetailViewModel.setFavProductState(isFav = true)
+                    productDetailViewModel.removeOrAddMoreProductToFavList(productId = product!!.id, isAdd = true)
                     snackBarData = snackBarData.copy(
                         message = "Remove ${product?.name} from favorite failed!",
                         iconId = R.drawable.ic_error,
@@ -199,6 +205,7 @@ fun DetailScreen(
                 is ApiResult.Error -> {
                     println(result.message)
                     productDetailViewModel.setFavProductState(isFav = false)
+                    productDetailViewModel.removeOrAddMoreProductToFavList(productId = product!!.id, isAdd = false)
                     snackBarData = snackBarData.copy(
                         message = "Add ${product?.name} to favorite failed!",
                         iconId = R.drawable.ic_error,
@@ -213,17 +220,70 @@ fun DetailScreen(
         }
     }
 
+    LaunchedEffect(key1 = Unit) {
+        productDetailViewModel.addProductToCartResponse.collect { result ->
+            println(result)
+            when (result) {
+                is ApiResult.Loading -> {
+
+                }
+                is ApiResult.NullDataSuccess -> {
+                    snackBarData = snackBarData.copy(
+                        message = "Add ${getProductDetailResponse.data!!.name} to cart success",
+                        iconId = R.drawable.ic_success,
+                        snackBarState = Constants.SNACK_BAR_STATUS_SUCCESS
+                    )
+                    coroutineScope.launch {
+                        bottomSheetState.hide()
+                        snackbarHostState.showSnackbar("")
+                    }
+                }
+                is ApiResult.Error -> {
+                    snackBarData = snackBarData.copy(
+                        message = "Add ${getProductDetailResponse.data!!.name} to cart failed",
+                        iconId = R.drawable.ic_error,
+                        snackBarState = Constants.SNACK_BAR_STATUS_ERROR
+                    )
+                    coroutineScope.launch {
+                        bottomSheetState.hide()
+                        snackbarHostState.showSnackbar("")
+                    }
+                }
+                else -> {}
+            }
+        }
+    }
+
     LaunchedEffect(key1 = true) {
         productDetailViewModel.getProductDetail(token = userToken, productId = productId!!)
         productDetailViewModel.getComment(token = userToken, productId = productId)
         productDetailViewModel.getProducts(productQuery = mapOf("type" to "All"), token = userToken)
+        productDetailViewModel.getUserFavProductsId(token = userToken)
+        productDetailViewModel.combineFavProductsIdWithMoreProducts()
     }
 
     ModalBottomSheetLayout(
         sheetState = bottomSheetState,
         modifier = Modifier.fillMaxSize(),
         sheetContent = {
-            CommentBottomSheet(comments = comments)
+            if(seeMoreCommentOrNot) {
+                CommentBottomSheet(comments = comments)
+            } else {
+                ProductDetailShopNowBottomSheet(
+                    productDetailViewModel = productDetailViewModel,
+                    paddingValues = PaddingValues(bottom = EXTRA_LARGE_PADDING),
+                    product = product,
+                    coroutineScope = coroutineScope,
+                    modalBottomSheetState = bottomSheetState,
+                    onAddProductToCart = { data ->
+                        productDetailViewModel.addProductToCart(
+                            data = data,
+                            token = userToken
+                        )
+                    },
+                    onPurchaseProduct = {}
+                )
+            }
         },
         sheetShape = MaterialTheme.shapes.large.copy(
             bottomEnd = CornerSize(0),
@@ -246,8 +306,13 @@ fun DetailScreen(
                     .fillMaxSize(),
             ) {
 
-                AnimatedVisibility(visible = product != null, modifier = Modifier.fillMaxSize()) {
-                    product?.let { productDetail ->
+                AnimatedVisibility(
+                    visible = getProductDetailResponse.data != null,
+                    modifier = Modifier.fillMaxSize(),
+                    enter = fadeIn(),
+                    exit = fadeOut(),
+                ) {
+                    getProductDetailResponse.data?.let { productDetail ->
                         LazyColumn(
                             modifier = Modifier
                                 .fillMaxSize(),
@@ -266,6 +331,7 @@ fun DetailScreen(
                                     name = productDetail.name,
                                     isFav = isFav
                                 ) {
+                                    product = productDetail
                                     if (isFav) {
                                         productDetailViewModel.setFavProductState(isFav = false)
                                         productDetailViewModel.removeUserFavProduct(
@@ -299,9 +365,10 @@ fun DetailScreen(
                                         isSeeMoreComment = comments!!.size > 3,
                                         selectedRating = selectedRating,
                                         onSelectedRating = onSelectedRating,
-                                        coroutineScope = coroutineScope,
-                                        bottomSheetState = bottomSheetState
-                                    )
+                                    ) {
+                                        seeMoreCommentOrNot = true
+                                        coroutineScope.launch { bottomSheetState.show() }
+                                    }
                                 }
 
                                 item {
@@ -323,7 +390,13 @@ fun DetailScreen(
                                     }
                                 }
                                 if(result) {
-                                    MoreProductSection(moreProducts = moreProducts)
+                                    MoreProductSection(
+                                        moreProducts = moreProducts,
+                                        userToken = userToken,
+                                        productDetailViewModel = productDetailViewModel,
+                                    ) { chooseProduct ->
+                                        product = chooseProduct
+                                    }
                                 }
                             }
 
@@ -334,19 +407,25 @@ fun DetailScreen(
                 DetailScreenTopBar(navController = navController)
 
                 AnimatedVisibility(
-                    visible = product != null,
-                    modifier = Modifier.align(Alignment.BottomCenter),
+                    visible = getProductDetailResponse.data != null,
+                    modifier = Modifier.align(Alignment.BottomEnd),
+                    enter = fadeIn(),
+                    exit = fadeOut(),
                 ) {
                     BottomButtonAction(
-                        modifier = Modifier,
-                        onAddToCardClicked = {},
-                        onButNowClicked = {}
+                        modifier = Modifier.padding(end = MEDIUM_PADDING, bottom = MEDIUM_PADDING),
+                        onClicked = {
+                            seeMoreCommentOrNot = false
+                            coroutineScope.launch { bottomSheetState.show() }
+                        }
                     )
                 }
 
                 AnimatedVisibility(
                     visible = isLoading,
-                    modifier = Modifier.align(Alignment.Center)
+                    modifier = Modifier.align(Alignment.Center),
+                    enter = fadeIn(),
+                    exit = fadeOut(),
                 ) {
                     CircularProgressIndicator(
                         color = MaterialTheme.colors.textColor2
@@ -532,7 +611,12 @@ fun DescriptionSection(
 }
 
 @Composable
-fun MoreProductSection(moreProducts: LazyPagingItems<Product>) {
+fun MoreProductSection(
+    moreProducts: LazyPagingItems<Product>,
+    userToken: String,
+    productDetailViewModel: ProductDetailViewModel,
+    updateChooseProduct: (Product) -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth(),
@@ -558,28 +642,33 @@ fun MoreProductSection(moreProducts: LazyPagingItems<Product>) {
             items(moreProducts) { product ->
                 product?.let {
                     VerticalProductItem(
-                        onItemClicked = {},
-                        onFavClicked = {},
+                        onItemClicked = {
+                            productDetailViewModel.getProductDetail(token = userToken, productId = product.id)
+                            updateChooseProduct(product)
+                            productDetailViewModel.getComment(token = userToken, productId = product.id)
+                        },
+                        onFavClicked = {
+                            updateChooseProduct(product)
+                            productDetailViewModel.removeOrAddMoreProductToFav(token = userToken, productId = product.id, isFav = product.isFavorite)
+                            productDetailViewModel.removeOrAddMoreProductToFavList(productId = product.id, isAdd = !product.isFavorite)
+                        },
                         product = product,
-                        isFav = false
+                        isFav = product.isFavorite
                     )
                 }
             }
         }
-        Spacer(modifier = Modifier.height(BOTTOM_NAV_HEIGHT))
         Spacer(modifier = Modifier.height(EXTRA_LARGE_PADDING))
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun RatingSection(
     avgRating: Int = 5,
     isSeeMoreComment: Boolean,
     selectedRating: Int,
-    coroutineScope: CoroutineScope,
-    bottomSheetState: ModalBottomSheetState,
     onSelectedRating: (Int) -> Unit,
+    onSeeMoreComment: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -602,7 +691,7 @@ fun RatingSection(
             if (isSeeMoreComment) {
                 Text(
                     modifier = Modifier.clickable {
-                        coroutineScope.launch { bottomSheetState.show() }
+                        onSeeMoreComment()
                     },
                     text = "Xem chi tiết...",
                     fontFamily = ralewayMedium,
@@ -714,58 +803,74 @@ fun CommentSection(
 @Composable
 fun BottomButtonAction(
     modifier: Modifier,
-    onAddToCardClicked: () -> Unit,
-    onButNowClicked: () -> Unit
+    onClicked: () -> Unit
 ) {
 
-    Row(
+    IconButton(
         modifier = modifier
-            .fillMaxWidth()
-            .background(
-                brush = Brush.verticalGradient(
-                    colors = listOf(
-                        Color.Transparent,
-                        MaterialTheme.colors.greyPrimary,
-                        MaterialTheme.colors.greyPrimary,
-                    ),
-                )
+            .shadow(
+                elevation = 4.dp,
+                shape = CircleShape
             )
-            .padding(vertical = EXTRA_LARGE_PADDING),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceAround
+            .clip(shape = CircleShape)
+            .background(MaterialTheme.colors.textColor2),
+        onClick = onClicked
     ) {
-        Spacer(modifier = Modifier.width(EXTRA_LARGE_PADDING))
-        ButtonCustom(
-            modifier = Modifier.weight(1f),
-            buttonContent = stringResource(id = R.string.add_to_cart),
-            backgroundColor = MaterialTheme.colors.textColor,
-            textColor = MaterialTheme.colors.greyPrimary,
-            onClick = onAddToCardClicked,
-            paddingValues = PaddingValues(ZERO_PADDING),
-            contentPadding = PaddingValues(
-                horizontal = EXTRA_LARGE_PADDING,
-                vertical = MEDIUM_SMALL_PADDING
-            ),
-            buttonElevation = null,
-            shapes = RoundedCornerShape(26.dp)
+        Icon(
+            imageVector = Icons.Default.ShoppingCart,
+            contentDescription = stringResource(R.string.shop_now),
+            tint = MaterialTheme.colors.textColor
         )
-        Spacer(modifier = Modifier.width(EXTRA_LARGE_PADDING))
-        ButtonCustom(
-            modifier = Modifier.weight(1f),
-            buttonContent = stringResource(R.string.buy_now),
-            backgroundColor = MaterialTheme.colors.textColor2,
-            textColor = MaterialTheme.colors.textColor,
-            onClick = onButNowClicked,
-            paddingValues = PaddingValues(ZERO_PADDING),
-            contentPadding = PaddingValues(
-                horizontal = EXTRA_LARGE_PADDING,
-                vertical = MEDIUM_SMALL_PADDING
-            ),
-            buttonElevation = null,
-            shapes = RoundedCornerShape(26.dp)
-        )
-        Spacer(modifier = Modifier.width(EXTRA_LARGE_PADDING))
     }
+
+//    Row(
+//        modifier = modifier
+//            .fillMaxWidth()
+//            .background(
+//                brush = Brush.verticalGradient(
+//                    colors = listOf(
+//                        Color.Transparent,
+//                        MaterialTheme.colors.greyPrimary,
+//                        MaterialTheme.colors.greyPrimary,
+//                    ),
+//                )
+//            )
+//            .padding(vertical = EXTRA_LARGE_PADDING),
+//        verticalAlignment = Alignment.CenterVertically,
+//        horizontalArrangement = Arrangement.SpaceAround
+//    ) {
+//        Spacer(modifier = Modifier.width(EXTRA_LARGE_PADDING))
+//        ButtonCustom(
+//            modifier = Modifier.weight(1f),
+//            buttonContent = stringResource(id = R.string.add_to_cart),
+//            backgroundColor = MaterialTheme.colors.textColor,
+//            textColor = MaterialTheme.colors.greyPrimary,
+//            onClick = onAddToCardClicked,
+//            paddingValues = PaddingValues(ZERO_PADDING),
+//            contentPadding = PaddingValues(
+//                horizontal = EXTRA_LARGE_PADDING,
+//                vertical = MEDIUM_SMALL_PADDING
+//            ),
+//            buttonElevation = null,
+//            shapes = RoundedCornerShape(26.dp)
+//        )
+//        Spacer(modifier = Modifier.width(EXTRA_LARGE_PADDING))
+//        ButtonCustom(
+//            modifier = Modifier.weight(1f),
+//            buttonContent = stringResource(R.string.buy_now),
+//            backgroundColor = MaterialTheme.colors.textColor2,
+//            textColor = MaterialTheme.colors.textColor,
+//            onClick = onButNowClicked,
+//            paddingValues = PaddingValues(ZERO_PADDING),
+//            contentPadding = PaddingValues(
+//                horizontal = EXTRA_LARGE_PADDING,
+//                vertical = MEDIUM_SMALL_PADDING
+//            ),
+//            buttonElevation = null,
+//            shapes = RoundedCornerShape(26.dp)
+//        )
+//        Spacer(modifier = Modifier.width(EXTRA_LARGE_PADDING))
+//    }
 }
 
 @Composable
