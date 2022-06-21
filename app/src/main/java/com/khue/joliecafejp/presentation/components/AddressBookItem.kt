@@ -78,6 +78,15 @@ fun AddressBookItem(
                             showMessage("Update address successfully", SNACK_BAR_STATUS_SUCCESS)
                             isEdit = false
                             startObserverEdit = false
+                            val newAddress = Address(
+                                id = address.id,
+                                userId = address.userId,
+                                userName = userNameTextState,
+                                phone = userPhoneNumberState,
+                                address = userAddressState,
+                                __v = address.__v
+                            )
+                            addressBookViewModel.onAddressBookPagingEvent(events = AddressBookViewModel.AddressBookPagingEvents.Edit(newAddress))
                         }
                         is ApiResult.Error -> {
                             showMessage("Update address failed!", SNACK_BAR_STATUS_ERROR)
