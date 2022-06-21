@@ -29,7 +29,7 @@ import com.khue.joliecafejp.ui.theme.textColor
 @Composable
 fun FavoriteBody(
     favoriteProducts: LazyPagingItems<FavoriteProduct>,
-    onFavClicked: (String) -> Unit,
+    onFavClicked: (FavoriteProduct) -> Unit,
     onItemClicked: (String) -> Unit,
     showMessage: (String) -> Unit
 ) {
@@ -54,7 +54,7 @@ fun FavoriteBody(
                     FavoriteItem(
                         productFav = productFav,
                         onFavClick = {
-                            onFavClicked(product.id)
+                            onFavClicked(product)
                         }
                     ) {
                         onItemClicked(product.product.id)
