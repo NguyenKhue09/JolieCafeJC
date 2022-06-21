@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import androidx.paging.filter
 import com.google.android.gms.common.api.Api
 import com.khue.joliecafejp.domain.model.ApiResponseSingleData
 import com.khue.joliecafejp.domain.model.FavoriteProduct
@@ -32,7 +33,8 @@ class FavoriteViewModel @Inject constructor(
     private val _removeUserFavProductResponse = MutableStateFlow<ApiResult<Unit>>(ApiResult.Loading())
     val removeUserFavProductResponse: StateFlow<ApiResult<Unit>> = _removeUserFavProductResponse
 
-
+    var removeFavProduct = MutableStateFlow<FavoriteProduct?>(null)
+        private set
 
     fun getUserFavoriteProducts(
         productQuery: Map<String, String>,
@@ -54,7 +56,15 @@ class FavoriteViewModel @Inject constructor(
         }
 
 
+    fun removeUserFavoriteProductFromList(favoriteProductId: String) = viewModelScope.launch {
+        _favoriteProduct.value = _favoriteProduct.value.filter {
+            it.id != favoriteProductId
+        }
+    }
 
+    fun setRemoveFavProduct(favoriteProduct: FavoriteProduct) {
+        removeFavProduct.value = favoriteProduct
+    }
 
     fun removeUserFavoriteProduct(token: String, favoriteProductId: String) =
         viewModelScope.launch {

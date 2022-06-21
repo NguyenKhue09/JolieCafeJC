@@ -71,25 +71,32 @@ fun FavoriteScreen(
     }
 
 
+    val removeFavProduct by favoriteViewModel.removeFavProduct.collectAsState()
+
     LaunchedEffect(key1 = true) {
         removeUserFavProductResponse.collectLatest { result ->
             when (result) {
                 is ApiResult.NullDataSuccess -> {
-                    favoriteProducts.refresh()
-                    snackBarData = snackBarData.copy(
-                        message = "Remove favorite product success!",
-                        iconId = R.drawable.ic_success,
-                        snackBarState = Constants.SNACK_BAR_STATUS_SUCCESS
-                    )
-                    snackbarHostState.showSnackbar("")
+                    removeFavProduct?.let {
+                        favoriteViewModel.removeUserFavoriteProductFromList(favoriteProductId = it.id)
+                        snackBarData = snackBarData.copy(
+                            message = "Remove ${it.product.name} from favorite success!",
+                            iconId = R.drawable.ic_success,
+                            snackBarState = Constants.SNACK_BAR_STATUS_SUCCESS
+                        )
+                        snackbarHostState.showSnackbar("")
+                    }
+
                 }
                 is ApiResult.Error -> {
-                    snackBarData = snackBarData.copy(
-                        message = result.message!!,
-                        iconId = R.drawable.ic_error,
-                        snackBarState = Constants.SNACK_BAR_STATUS_ERROR
-                    )
-                    snackbarHostState.showSnackbar("")
+                    removeFavProduct?.let {
+                        snackBarData = snackBarData.copy(
+                            message = "Remove ${it.product.name} from favorite failed!",
+                            iconId = R.drawable.ic_error,
+                            snackBarState = Constants.SNACK_BAR_STATUS_ERROR
+                        )
+                        snackbarHostState.showSnackbar("")
+                    }
                 }
                 else -> {
                 }
@@ -150,10 +157,11 @@ fun FavoriteScreen(
 
                 FavoriteBody(
                     favoriteProducts = favoriteProducts,
-                    onFavClicked = { id ->
+                    onFavClicked = { product ->
+                        favoriteViewModel.setRemoveFavProduct(product)
                         favoriteViewModel.removeUserFavoriteProduct(
                             token = userToken,
-                            favoriteProductId = id
+                            favoriteProductId = product.id
                         )
                     },
                     onItemClicked = { id ->
