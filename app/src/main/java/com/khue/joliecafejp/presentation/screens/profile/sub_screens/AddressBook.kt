@@ -114,7 +114,10 @@ fun AddressBook(
                 when (result) {
                     is ApiResult.Success -> {
                         isAddNewAddress = false
-                        addressBooks.refresh()
+                        //addressBooks.refresh()
+                        result.data?.let {
+                            addressBookViewModel.onAddressBookPagingEvent(events = AddressBookViewModel.AddressBookPagingEvents.InsertItemFooter(result.data))
+                        }
                         snackBarData = snackBarData.copy(
                             message = "Add new address successfully",
                             iconId = R.drawable.ic_success,
@@ -139,9 +142,18 @@ fun AddressBook(
                 when (result) {
                     is ApiResult.Success -> {
                         isAddNewAddress = false
-                        addressBooks.refresh()
+                        //addressBooks.refresh()
 
                         result.data?.let {
+                            val address = Address(
+                                id = it.defaultAddress!!,
+                                phone = addNewAddressFormState.phone,
+                                userName = addNewAddressFormState.userName,
+                                address = addNewAddressFormState.address,
+                                userId = it.id,
+                                __v = 0,
+                            )
+                            addressBookViewModel.onAddressBookPagingEvent(events = AddressBookViewModel.AddressBookPagingEvents.InsertItemFooter(address))
                             userSharedViewModel.updateUserResponse(user = it)
                         }
 
@@ -169,13 +181,16 @@ fun AddressBook(
             addressBookViewModel.deleteAddressResponse.collect { result ->
                 when (result) {
                     is ApiResult.Success -> {
+                        result.data?.let {
+                            addressBookViewModel.onAddressBookPagingEvent(events = AddressBookViewModel.AddressBookPagingEvents.Remove(result.data.id))
+                        }
                         snackBarData = snackBarData.copy(
                             message = "Delete address successfully",
                             iconId = R.drawable.ic_success,
                             snackBarState = Constants.SNACK_BAR_STATUS_SUCCESS
                         )
                         snackbarHostState.showSnackbar("")
-                        addressBooks.refresh()
+                        //addressBooks.refresh()
                     }
                     is ApiResult.Error -> {
                         snackBarData = snackBarData.copy(

@@ -25,12 +25,13 @@ class FavoriteViewModel @Inject constructor(
     dataStoreUseCases: DataStoreUseCases
 ) : ViewModel() {
 
-    val userToken  = dataStoreUseCases.readUserTokenUseCase()
+    val userToken = dataStoreUseCases.readUserTokenUseCase()
 
     private val _favoriteProduct = MutableStateFlow<PagingData<FavoriteProduct>>(PagingData.empty())
     val favoriteProduct: StateFlow<PagingData<FavoriteProduct>> = _favoriteProduct
 
-    private val _removeUserFavProductResponse = MutableStateFlow<ApiResult<Unit>>(ApiResult.Loading())
+    private val _removeUserFavProductResponse =
+        MutableStateFlow<ApiResult<Unit>>(ApiResult.Loading())
     val removeUserFavProductResponse: StateFlow<ApiResult<Unit>> = _removeUserFavProductResponse
 
     var removeFavProduct = MutableStateFlow<FavoriteProduct?>(null)
@@ -40,19 +41,26 @@ class FavoriteViewModel @Inject constructor(
         productQuery: Map<String, String>,
         token: String
     ) =
-         try {
-             println("call api")
-             viewModelScope.launch {
-                 apiUseCases.getUserFavoriteProductsUseCase(
-                     productQuery = productQuery,
-                     token = token
-                 ).cachedIn(viewModelScope).collectLatest {
-                    _favoriteProduct.value = it
-                 }
-             }
+        try {
+            println("call api")
+            viewModelScope.launch {
+                apiUseCases.getUserFavoriteProductsUseCase(
+                    productQuery = productQuery,
+                    token = token
+                )
+                    .cachedIn(viewModelScope)
+//                    .combine(removeFavProduct) { data, favProduct ->
+//                        data.filter {
+//                            it.id != favProduct?.id
+//                        }
+//                    }
+                    .collectLatest {
+                        _favoriteProduct.value = it
+                    }
+            }
         } catch (e: Exception) {
             e.printStackTrace()
-             _favoriteProduct.value = PagingData.empty()
+            _favoriteProduct.value = PagingData.empty()
         }
 
 
@@ -91,7 +99,7 @@ class FavoriteViewModel @Inject constructor(
                 ApiResult.Error(response.message())
             }
             response.isSuccessful -> {
-                    ApiResult.NullDataSuccess()
+                ApiResult.NullDataSuccess()
             }
             else -> {
                 ApiResult.Error(response.message())
