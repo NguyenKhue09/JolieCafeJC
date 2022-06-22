@@ -459,7 +459,6 @@ fun ImageSlider(
         ) { page ->
             Image(
                 modifier = Modifier
-                    .clip(MaterialTheme.shapes.medium)
                     .fillMaxWidth()
                     .height(139.dp)
                     .graphicsLayer {
@@ -477,7 +476,8 @@ fun ImageSlider(
                             stop = 1f,
                             fraction = 1f - pageOffset.coerceIn(0f, 1f)
                         )
-                    },
+                    }
+                    .clip(MaterialTheme.shapes.medium),
                 painter = painterResource(id = images[page]),
                 contentDescription = "Image slider",
                 contentScale = ContentScale.Crop,

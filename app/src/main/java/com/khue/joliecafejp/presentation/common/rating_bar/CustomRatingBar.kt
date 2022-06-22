@@ -60,7 +60,7 @@ fun CustomRatingBar(
                 onHorizontalDrag = { change, _ ->
                     if (config.isIndicator || config.hideInactiveStars)
                         return@detectHorizontalDragGestures
-                    change.consumeAllChanges()
+                    change.consume()
                     val x1 = change.position.x.coerceIn(0f, rowSize.width)
                     val calculatedStars =
                         RatingBarUtils.calculateStars(

@@ -5,6 +5,7 @@ plugins {
     id 'com.google.gms.google-services'
     id 'kotlin-kapt'
     id 'kotlinx-serialization'
+    id 'com.google.firebase.crashlytics'
 }
 
 android {
@@ -112,6 +113,9 @@ dependencies {
 
     // Flow layout
     implementation 'com.google.accompanist:accompanist-flowlayout:0.24.10-beta'
+    implementation 'com.google.firebase:firebase-crashlytics-ktx:18.2.11'
+    implementation 'com.google.firebase:firebase-analytics-ktx:21.0.0'
+    implementation 'com.google.firebase:firebase-messaging-ktx:23.0.5'
 
     // Room component
     def room_version = "2.4.2"

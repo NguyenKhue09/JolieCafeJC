@@ -9,11 +9,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.khue.joliecafejp.R
 import com.khue.joliecafejp.domain.model.CartItem
 import com.khue.joliecafejp.domain.model.OrderHistoryProduct
@@ -60,12 +63,17 @@ fun ProductOrderHistoryItem(
         verticalAlignment = Alignment.CenterVertically
     ) {
 
-        Image(
-            modifier = Modifier
+        AsyncImage(
+            model = ImageRequest.Builder(LocalContext.current)
+                .placeholder(R.drawable.image_logo)
+                .error(R.drawable.image_logo)
+                .data(item.product.thumbnail)
+                .crossfade(200)
+                .build(),
+            modifier = modifier
                 .height(IMAGE_PRODUCT_SIZE)
                 .width(IMAGE_PRODUCT_SIZE)
                 .clip(MaterialTheme.shapes.medium),
-            painter = painterResource(id = R.drawable.image_logo),
             contentDescription = stringResource(R.string.profile_logo),
             contentScale = ContentScale.Crop,
         )
