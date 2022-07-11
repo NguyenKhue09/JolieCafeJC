@@ -1,6 +1,5 @@
 package com.khue.joliecafejp.presentation.screens.home
 
-import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -15,7 +14,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -40,15 +38,14 @@ import com.khue.joliecafejp.navigation.nav_screen.HomeSubScreen
 import com.khue.joliecafejp.presentation.common.*
 import com.khue.joliecafejp.presentation.components.HomeTopBar
 import com.khue.joliecafejp.presentation.components.HorizontalProductItem
-import com.khue.joliecafejp.presentation.viewmodels.UserSharedViewModel
 import com.khue.joliecafejp.presentation.viewmodels.HomeViewModel
+import com.khue.joliecafejp.presentation.viewmodels.UserSharedViewModel
 import com.khue.joliecafejp.ui.theme.*
 import com.khue.joliecafejp.utils.ApiResult
 import com.khue.joliecafejp.utils.Constants
 import com.khue.joliecafejp.utils.Constants.Companion.SNACK_BAR_STATUS_ERROR
 import com.khue.joliecafejp.utils.Constants.Companion.SNACK_BAR_STATUS_SUCCESS
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.yield
