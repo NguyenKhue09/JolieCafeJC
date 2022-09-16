@@ -1,15 +1,15 @@
 package com.khue.joliecafejp.presentation.screens.home.sub_screens
 
-import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.material.*
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
+import androidx.compose.material.SnackbarHostState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.paging.LoadState
@@ -22,13 +22,14 @@ import com.khue.joliecafejp.domain.model.SnackBarData
 import com.khue.joliecafejp.navigation.nav_screen.HomeSubScreen
 import com.khue.joliecafejp.presentation.common.*
 import com.khue.joliecafejp.presentation.viewmodels.CategoryViewModel
-import com.khue.joliecafejp.ui.theme.*
+import com.khue.joliecafejp.ui.theme.EXTRA_LARGE_PADDING
+import com.khue.joliecafejp.ui.theme.MEDIUM_PADDING
+import com.khue.joliecafejp.ui.theme.greyPrimary
 import com.khue.joliecafejp.utils.ApiResult
 import com.khue.joliecafejp.utils.Constants.Companion.SNACK_BAR_STATUS_ERROR
 import com.khue.joliecafejp.utils.Constants.Companion.SNACK_BAR_STATUS_SUCCESS
 import com.khue.joliecafejp.utils.extensions.items
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 @Composable
